@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding:utf-8
+# coding=utf-8
 import time
 import traceback
 from toughradius.toughlib.btforms import dataform

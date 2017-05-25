@@ -8,6 +8,7 @@ import urllib
 import traceback
 import functools
 import cyclone.web
+from hashlib import md5
 from mako.template import Template
 from cyclone.util import ObjectDict
 from twisted.internet import defer
@@ -18,8 +19,8 @@ from toughradius.modules import models
 from toughradius.toughlib import db_session as session
 from toughradius.modules import settings
 
-
 class BaseHandler(cyclone.web.RequestHandler):
+
     def __init__(self, *argc, **argkw):
         super(BaseHandler, self).__init__(*argc, **argkw)
         self.cache = self.application.mcache
@@ -36,7 +37,7 @@ class BaseHandler(cyclone.web.RequestHandler):
     def on_finish(self):
         self.db.close()
 
-    def get_error_html(self, status_code=500, **kwargs):
+    def get_error_html(self, status_code = 500, **kwargs):
         logger.info('http error : [status_code:{0}], {1}'.format(status_code, utils.safestr(kwargs)))
         if status_code == 404:
             return self.render_string('error.html', msg=u'404:页面不存在')
@@ -98,31 +99,44 @@ class BaseHandler(cyclone.web.RequestHandler):
         self.session.save()
         self.clear_all_cookies()
 
+    def set_remerber_user(self, user, pwd):
+        user_skey = md5('toughee_wlan_user').hexdigest()
+        pwd_skey = md5('toughee_wlan_pwd').hexdigest()
+        self.set_secure_cookie(user_skey, user, expires_days=31)
+        self.set_secure_cookie(pwd_skey, pwd, expires_days=31)
+
+    def get_remember_user(self):
+        user_skey = md5('toughee_wlan_user').hexdigest()
+        pwd_skey = md5('toughee_wlan_pwd').hexdigest()
+        user = self.get_secure_cookie(user_skey)
+        pwd = self.get_secure_cookie(pwd_skey)
+        return (user, pwd)
+
     def get_current_user(self):
         return self.session.get('wlan_session_user')
 
     def get_wlan_params(self, query_str):
         query_str = urllib.unquote(query_str)
         params = urlparse.parse_qs(query_str)
-        param_dict = {k: params[k][0] for k in params}
+        param_dict = {k:params[k][0] for k in params}
         return param_dict
 
     def get_portal_name(self):
         return self.get_param_value('wlan_portal_name', u'硬派无线认证')
 
-    def get_login_template(self, tpl_name=None):
+    def get_login_template(self, tpl_name = None):
         if tpl_name:
             return '%s/login.html' % tpl_name
         else:
             return 'default/login.html'
 
-    def get_error_template(self, tpl_name=None):
+    def get_error_template(self, tpl_name = None):
         if tpl_name:
             return '%s/error.html' % tpl_name
         else:
             return 'default/error.html'
 
-    def get_index_template(self, tpl_name=None):
+    def get_index_template(self, tpl_name = None):
         if tpl_name:
             return '%s/index.html' % tpl_name
         else:
@@ -146,7 +160,7 @@ class BaseHandler(cyclone.web.RequestHandler):
 
         return fetch_result()
 
-    def get_nas(self, ipaddr, nasid=None):
+    def get_nas(self, ipaddr, nasid = None):
         """ 获取AC接入设备信息，支持缓存
         """
 
@@ -154,7 +168,7 @@ class BaseHandler(cyclone.web.RequestHandler):
             nas = self.db.query(models.TrBas).filter_by(ip_addr=ipaddr).first()
             if not nas:
                 nas = self.db.query(models.TrBas).filter_by(nas_id=nasid).first()
-            return nas and {c.name: getattr(nas, c.name) for c in nas.__table__.columns} or {}
+            return nas and {c.name:getattr(nas, c.name) for c in nas.__table__.columns} or {}
 
         return self.cache.aget(settings.bas_cache_ipkey(ipaddr), fetch_result, expire=600)
 
@@ -167,6 +181,6 @@ class BaseHandler(cyclone.web.RequestHandler):
 
         return self.cache.aget(settings.wlan_domain_cache_key(ssid), fetch_result, expire=600)
 
-    def get_param_value(self, name, defval=None):
+    def get_param_value(self, name, defval = None):
         val = self.db.query(models.TrParam.param_value).filter_by(param_name=name).scalar()
         return val or defval

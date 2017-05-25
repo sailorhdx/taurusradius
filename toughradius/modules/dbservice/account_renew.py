@@ -10,8 +10,13 @@ from toughradius.modules.dbservice import BaseService
 from toughradius.modules.dbservice import logparams
 from toughradius.common import tools
 from toughradius.toughlib.btforms import rules
+from toughradius.modules.events import settings as evset
 
 class AccountRenew(BaseService):
+
+    def update_routeros_sync_event(self, name, pwd, profile, node_id):
+        dispatch.pub(evset.ROSSYNC_SET_PPPOE_USER, name, pwd, profile, node_id=node_id, async=True)
+        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_USER, name, pwd, profile, node_id=node_id, async=True)
 
     def check_vcard(self, vcard, vcard_pwd, product):
         if not vcard:
@@ -47,9 +52,9 @@ class AccountRenew(BaseService):
 
         :param formdata:   用户续费参数表
         :type formdata:    dict
-
+        
         formdata params:
-
+        
         :param account_number:   用户账号
         :type account_number:    string
         :param operate_desc:    操作描述
@@ -67,9 +72,11 @@ class AccountRenew(BaseService):
         """
         try:
             account_number = self.parse_arg(formdata, 'account_number', rule=rules.not_null)
+            product_id = self.parse_arg(formdata, 'product_id', rule=rules.not_null)
             operate_desc = self.parse_arg(formdata, 'operate_desc', defval='')
             fee_value = self.parse_arg(formdata, 'fee_value', rule=rules.is_rmb)
             months = self.parse_arg(formdata, 'months', rule=rules.is_number)
+            days = self.parse_arg(formdata, 'days', rule=rules.is_number)
             giftdays = self.parse_arg(formdata, 'giftdays', rule=rules.is_number)
             expire_date = self.parse_arg(formdata, 'expire_date', rule=rules.is_date)
             order_id = self.parse_arg(formdata, 'order_id', defval=utils.gen_order_id(), rule=rules.not_null)
@@ -78,6 +85,7 @@ class AccountRenew(BaseService):
             account = self.db.query(models.TrAccount).get(account_number)
             if account.status in (3, 4, 5):
                 raise ValueError(u'无效用户状态')
+            node_id = self.db.query(models.TrCustomer.node_id).filter(models.TrCustomer.customer_id == models.TrAccount.customer_id, models.TrAccount.account_number == account_number).scalar()
             product = self.db.query(models.TrProduct).get(account.product_id)
             vcard = None
             if vcard_code and vcard_pwd:
@@ -101,13 +109,16 @@ class AccountRenew(BaseService):
             if product.product_policy == PPMonth:
                 order_fee = decimal.Decimal(product.fee_price) * decimal.Decimal(months)
                 order_fee = int(order_fee.to_integral_value())
+            if product.product_policy == PPDay:
+                order_fee = decimal.Decimal(product.fee_price) * decimal.Decimal(days)
+                order_fee = int(order_fee.to_integral_value())
             elif product.product_policy in (BOMonth, BOTimes, BOFlows):
                 order_fee = int(product.fee_price)
             order = models.TrCustomerOrder()
             order.id = utils.get_uuid()
             order.order_id = order_id
             order.customer_id = account.customer_id
-            order.product_id = account.product_id
+            order.product_id = product_id
             order.account_number = account_number
             order.order_fee = order_fee
             order.actual_fee = utils.yuan2fen(fee_value)
@@ -161,6 +172,8 @@ class AccountRenew(BaseService):
                 aorder2.create_time = agency_share.create_time
                 aorder2.sync_ver = tools.gen_sync_ver()
                 self.db.add(aorder2)
+            if product_id != account.product_id:
+                account.product_id = product_id
             old_expire_date = account.expire_date
             account.status = 1
             account.expire_date = expire_date
@@ -175,11 +188,12 @@ class AccountRenew(BaseService):
             self.db.commit()
             dispatch.pub(ACCOUNT_NEXT_EVENT, order.account_number, async=True)
             dispatch.pub(redis_cache.CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
+            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_renew_error')
             self.last_error = u'用户续费失败:%s' % utils.safeunicode(err)
+            logger.error(self.last_error, tag='account_renew_error', username=formdata.get('account_number'))
             return False
 
         return

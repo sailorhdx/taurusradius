@@ -134,9 +134,9 @@ function do_delete(customer_id)
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <button type="button" onclick="do_submit();" class="btn btn-sm bg-navy">查询</button>
+                    <button type="button" onclick="do_submit();" class="btn btn-sm">查询</button>
                     % if permit.match(current_user.username,'/admin/customer/export'):
-                    <a href="javascript:do_export();" class="btn btn-sm bg-navy">
+                    <a href="javascript:do_export();" class="btn btn-sm">
                     <i class="fa fa-sign-out"></i> 导出用户信息</a>
                     % endif
                 </div>
@@ -172,7 +172,11 @@ function do_delete(customer_id)
                     % if account.status == 0:
                         <span class="label label-info">未激活</span>
                     % elif account.status == 1:
+                        % if utils.is_expire(account.expire_date):
+                        <span class="label label-warning">到期</span>
+                        % else:
                         <span class="label label-success">正常</span>
+                        % endif
                     % elif account.status == 2:
                         <span class="label label-default">停机</span>
                     % elif account.status == 3:
@@ -191,13 +195,13 @@ function do_delete(customer_id)
                     % endif
                 </td>
                 <td>
-                    <a class="opt-btn btn-default" href="/admin/customer/detail?account_number=${account.account_number}">
+                    <a class="btn btn-xs" href="/admin/customer/detail?account_number=${account.account_number}">
                         <i class="fa fa-smile-o"></i> 用户受理</a>
                     % if online:
-                    <a class="opt-btn btn-default" href="/admin/customer/online?account_number=${account.account_number}">
+                    <a class="btn btn-xs" href="/admin/customer/online?account_number=${account.account_number}">
                         <i class="fa fa-ticket"></i> 在线记录</a>
                     % endif
-                    <a class="opt-btn btn-default" href="/admin/customer/ticket?account_number=${account.account_number}">
+                    <a class="btn btn-xs" href="/admin/customer/ticket?account_number=${account.account_number}">
                         <i class="fa fa-ticket"></i> 上网记录</a>
 
                 </td>

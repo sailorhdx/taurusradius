@@ -3,6 +3,7 @@
 from toughradius.modules import models
 from toughradius.toughlib import utils, logger
 from toughradius.toughlib.storage import Storage
+from toughradius.common import tools
 import functools
 import json
 
@@ -34,6 +35,8 @@ class BaseService(object):
 
     def parse_arg(self, formdata, name, defval = None, rule = None):
         value = formdata.get(name, defval)
+        value = formdata.get(name)
+        value = value if value is not None else defval
         if rule is None:
             return value
         else:

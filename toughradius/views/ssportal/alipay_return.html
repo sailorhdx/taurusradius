@@ -13,6 +13,11 @@
     <div class="panel panel-default">
         <div class="panel-heading">订单支付结果</div>
         <div class="panel-body">
+           % if handler.get_param_value("ssportal_paydone_text",""):
+             <div class="alert alert-info">
+             ${ handler.get_param_value("ssportal_paydone_text","") | n}
+             </div>
+           % endif
             <div class="row itlist">
                 <div class="col-md-6 itbox">订单号: ${order.order_id}</div>
                 <div class="col-md-6 itbox">支付时间: ${order.create_time}</div>

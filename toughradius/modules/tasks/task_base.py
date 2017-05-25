@@ -13,9 +13,7 @@ class TaseBasic:
         self.time_count = 1
 
     def logtimes(self):
-        if self.config.system.debug:
-            logger.debug(u'%s task execute times : %s' % (self.__name__, self.time_count))
-            self.time_count += 1
+        pass
 
     def first_delay(self):
         return 120.0

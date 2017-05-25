@@ -9,11 +9,13 @@
 function productCalc(){
     param = {
         'months': $("#months").val() || 0,
+        'days': $("#days").val() || 0,
         'product_id':$("#product_id").val(),
         'charge_code':$("#charge_code").val(),
         'giftdays':$("#giftdays").val(),
         '_xsrf': '${handler.xsrf_token}'
     }
+
     $.post("/admin/account/opencalc", param, function (ev) {
         console.log(ev);
         if(ev.code==0){
@@ -23,18 +25,32 @@ function productCalc(){
 
             //预付费包月
             if(ev.data.policy == 0){
+               $("#days").val(0);
                $("#months").parent().parent().show();
+               $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().show();
                $("#giftflows").parent().parent().hide();
                $("#billing_type").parent().parent().show();
                $("#charge_code").parent().parent().show();
                return;
             }
-          
+
+            //预付费包日
+            if(ev.data.policy == 9){
+               $("#month").val(0);
+               $("#months").parent().parent().hide();
+               $("#days").parent().parent().show();
+               $("#giftdays").parent().parent().hide();
+               $("#giftflows").parent().parent().hide();
+               $("#billing_type").parent().parent().show();
+               $("#charge_code").parent().parent().show();
+               return;
+            }
+
             //预付费时长
             if(ev.data.policy == 1){
-                $("#months").val(0);
                $("#months").parent().parent().hide();
+               $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().hide();
                $("#giftflows").parent().parent().hide();
                $("#billing_type").parent().parent().hide();
@@ -44,7 +60,22 @@ function productCalc(){
 
             //买断包月
             if(ev.data.policy == 2){
-               $("#months").val(0);
+               $("#days").val(0);
+               $("#month").val(0);
+               $("#months").parent().parent().hide();
+               $("#days").parent().parent().hide();
+               $("#giftdays").parent().parent().show();
+               $("#giftflows").parent().parent().hide();
+               $("#billing_type").parent().parent().show();
+               $("#charge_code").parent().parent().show();
+               return;
+            }
+
+            //买断包日
+            if(ev.data.policy == 10){
+               $("#days").val(0);
+               $("#month").val(0);
+               $("#days").parent().parent().hide();
                $("#months").parent().parent().hide();
                $("#giftdays").parent().parent().show();
                $("#giftflows").parent().parent().hide();
@@ -52,57 +83,68 @@ function productCalc(){
                $("#charge_code").parent().parent().show();
                return;
             }
-          
+
             //买断时长
             if(ev.data.policy == 3){
-                $("#months").val(0);
+               $("#days").val(0);
+               $("#month").val(0);
                $("#months").parent().parent().hide();
+               $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().hide();
                $("#giftflows").parent().parent().hide();
                $("#billing_type").parent().parent().hide();
                $("#charge_code").parent().parent().show();
                return;
             }
-            
+
             //预付费流量
             if(ev.data.policy == 4){
-               $("#months").val(0);
+               $("#days").val(0);
+               $("#month").val(0);
                $("#months").parent().parent().hide();
+               $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().hide();
                $("#giftflows").parent().parent().hide();
                $("#billing_type").parent().parent().hide();
                $("#charge_code").parent().parent().show();
                return;
             }
-          
+
             //买断流量
             if(ev.data.policy == 5){
+               $("#days").val(0);
+               $("#month").val(0);
                $("#months").parent().parent().hide();
+               $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().hide();
                $("#giftflows").parent().parent().show();
                $("#billing_type").parent().parent().hide();
                $("#charge_code").parent().parent().show();
                return;
-            }    
+            }
 
             //包月流量
             if(ev.data.policy == 7){
+               $("#days").val(0);
                $("#months").parent().parent().show();
+               $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().hide();
                $("#giftflows").parent().parent().show();
                $("#billing_type").parent().parent().hide();
                $("#charge_code").parent().parent().show();
                return;
             }
-          
+
 
             //后付费包月
             if(ev.data.policy == 8){
+               $("#days").val(0);
+               $("#month").val(0);
                 $("#giftdays").parent().parent().hide();
                 $("#giftflows").parent().parent().hide();
                 $("#charge_code").parent().parent().show();
-                $("#months").val(0);
                 $("#months").parent().parent().hide();
+                $("#days").parent().parent().hide();
                 $("#billing_type").parent().parent().hide();
             }
         }
@@ -239,13 +281,16 @@ $(document).ready(function (){
     $('#months').blur(function() {
         productCalc();
     }); 
+    $('#days').blur(function() {
+        productCalc();
+    });
     $('#giftdays').blur(function() {
         productCalc();
     }); 
     updateRule();
     updateArea();
-    productCalc();
     updateCharges();
+    productCalc();
 });
 </script>
 
@@ -266,7 +311,7 @@ $(document).ready(function (){
             % if msg:
             <div class="alert alert-warning">${msg}</div>
             % endif
-            <form id="customer_form" class="form-horizontal form-well" role="form" action="${form.action}" method="post">
+            <form id="customer_form" class="form-horizontal form-well" role="form" action="${form.action}" method="post" novalidate>
             ${xsrf_form_html()|n}
             ${form.render_css()|n}
         </form>

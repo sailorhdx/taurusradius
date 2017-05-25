@@ -6,7 +6,7 @@ from toughradius.toughlib.dbengine import get_engine
 from toughradius.toughlib import config as iconfig
 from toughradius.toughlib.storage import Storage
 from sqlalchemy.orm import scoped_session, sessionmaker
-from toughradius.modules.settings import redis_conf
+from toughradius.toughlib.config import redis_conf
 from toughradius.toughlib.redis_cache import CacheManager
 from toughradius.toughlib import utils, logger
 import os

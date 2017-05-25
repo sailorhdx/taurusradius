@@ -19,6 +19,7 @@ from toughradius.toughlib import logger, utils, dispatch, storage
 from toughradius.modules import models
 from toughradius.modules import base
 from toughradius.toughlib.dbengine import get_engine
+from toughradius.toughlib.config import redis_conf
 from toughradius.toughlib.permit import permit, load_events, load_handlers
 from toughradius.modules.settings import *
 from toughradius.toughlib.redis_cache import CacheManager
@@ -39,8 +40,8 @@ class HttpServer(cyclone.web.Application):
     def __init__(self, config = None, dbengine = None, **kwargs):
         self.config = config
         settings = dict(cookie_secret='12oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=', login_url='/admin/login', template_path=os.path.join(os.path.dirname(toughradius.__file__), 'views'), static_path=os.path.join(os.path.dirname(toughradius.__file__), 'static'), xsrf_cookies=True, config=self.config, debug=self.config.system.debug, xheaders=True)
-        self.tp_lookup = TemplateLookup(directories=[settings['template_path']], default_filters=['decode.utf8', 'h'], input_encoding='utf-8', output_encoding='utf-8', encoding_errors='ignore', module_directory='/tmp/toughee.{}'.format(int(time.time())))
-        self.license = storage.Storage(dict(sid=tools.get_sys_uuid(), type='stoughee', create_at='2017-01-01', expire='3000-12-31'))
+        self.tp_lookup = TemplateLookup(directories=[settings['template_path']], default_filters=['decode.utf8', 'h'], input_encoding='utf-8', output_encoding='utf-8', encoding_errors='ignore', module_directory='/var/toughee/free_module_manage')
+        self.license = storage.Storage(dict(sid=tools.get_sys_uuid(), type='stoughee', create_at='2017-01-01', expire='3000-12-30'))
         os.environ['LICENSE_TYPE'] = 'stoughee'
         self.db_engine = dbengine or get_engine(config)
         self.db = scoped_session(sessionmaker(bind=self.db_engine, autocommit=False, autoflush=False))
@@ -92,7 +93,7 @@ class HttpServer(cyclone.web.Application):
          'wechat',
          'wlanportal',
          'hgboss',
-         'agency',
+        # 'agency',
         # 'busstat',
          'wlan']
         load_handlers(handler_path=handler_path, pkg_prefix='toughradius.modules', excludes=excludes)

@@ -10,8 +10,7 @@ from twisted.internet import defer
 from toughradius.modules import models
 from urllib import urlencode
 from toughradius.common import tools
-from toughradius.modules.events.settings import SERVICE_INSTALL_EVENT
-from toughradius.modules.events.settings import SERVICE_MAINTAIN_EVENT
+from toughradius.modules.events.settings import ISSUES_ASSIGN_EVENT
 from twisted.internet.threads import deferToThread
 import base64
 
@@ -39,10 +38,8 @@ class MpsIssuesAddHandler(BaseHandler):
 
     def notify_builder(self, issues):
         builder_phone = self.get_builder_phone(issues.builder_name)
-        if int(issues.issues_type) == 0:
-            dispatch.pub(SERVICE_INSTALL_EVENT, issues.account_number, builder_phone)
-        elif int(issues.issues_type) == 1:
-            dispatch.pub(SERVICE_MAINTAIN_EVENT, issues.account_number, builder_phone)
+        if builder_phone:
+            dispatch.pub(ISSUES_ASSIGN_EVENT, issues.account_number, builder_phone, async=True)
 
     def notify_user(self, oid, content):
         func = lambda : self.wechat.send_text_message(oid, content)

@@ -10,6 +10,7 @@ from toughradius.toughlib import utils
 from toughradius.modules import models
 from toughradius.toughlib.dbengine import get_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+from toughradius.toughlib.db_backup import DBBackup
 from sqlalchemy.sql import text as _sql
 from toughradius.modules.settings import *
 from toughradius.common import tools
@@ -20,8 +21,8 @@ def init_db(db):
     arule = models.TrAccountRule()
     arule.id = 1
     arule.rule_name = u'默认账号生成规则'
-    arule.user_prefix = 'ua'
-    arule.user_suffix_len = 8
+    arule.user_prefix = 'user'
+    arule.user_suffix_len = 6
     arule.user_sn = 1
     arule.sync_ver = tools.gen_sync_ver()
     db.add(arule)
@@ -41,11 +42,12 @@ def init_db(db):
     area.addr_desc = u'默认小区地址'
     area.sync_ver = tools.gen_sync_ver()
     db.add(area)
-    params = [('system_name', u'管理系统名称', u'硬派计费管理控制台'),
-     ('login_logo', u'登录页面Logo', u'/static/img/toughee_logo.png'),
-     ('index_logo', u'管理页面Logo', u'/static/img/toughradius-logo.png'),
-     ('login_bgimg', u'登录页面背景图', u'/static/img/toughee_bg.jpg'),
-     ('ssportal_title', u'网上营业厅名称', u'硬派计费网上营业厅'),
+    params = [('system_name', u'管理系统名称', u'计费管理控制台'),
+     ('system_theme', u'系统风格样式', u'skin-blue'),
+     ('login_logo', u'登录页面Logo', u'/static/img/manage_login_logo200X120.png'),
+     ('index_logo', u'管理页面Logo', u'/static/img/manage_logo200X38.png'),
+     ('login_bgimg', u'登录页面背景图', u'/static/img/manage_login_bg.jpg'),
+     ('ssportal_title', u'网上营业厅名称', u'计费网上营业厅'),
      ('ssportal_banner_bg', u'网上营业厅背景图', u'/static/img/ssportal-banner-bg.jpg'),
      ('system_ticket_expire_days', u'上网日志保留天数', '60'),
      ('is_debug', u'DEBUG模式', u'0'),
@@ -62,9 +64,6 @@ def init_db(db):
      ('mail_notify_enable', u'启动邮件到期提醒', u'0'),
      ('mail_notify_interval', u'邮件到期提醒提前间隔(分钟)', u'1440'),
      ('mail_notify_time', u'邮件到期提醒时间(hh:mm)', u'09:00'),
-     ('sms_api_user', u'短信网关API用户', u'none'),
-     ('sms_api_pwd', u'短信网关API用户密码', u'none'),
-     ('sms_api_url', u'短信网关API地址', u'http://api.sms.cn/mt'),
      ('sms_notify_enable', u'启动短信到期提醒', u'0'),
      ('sms_notify_interval', u'短信到期提醒提前间隔(分钟)', u'1440'),
      ('sms_notify_time', u'短信到期提醒时间(hh:mm)', u'09:00'),
@@ -87,7 +86,7 @@ def init_db(db):
     opr.id = utils.get_uuid()
     opr.operator_name = u'admin'
     opr.operator_type = 0
-    opr.operator_pass = md5('root').hexdigest()
+    opr.operator_pass = md5('admin').hexdigest()
     opr.operator_desc = u'系统管理员'
     opr.operator_status = 0
     opr.sync_ver = tools.gen_sync_ver()
@@ -112,33 +111,33 @@ def init_db(db):
     ctpl1 = models.TrContentTemplate()
     ctpl1.id = 1
     ctpl1.tpl_type = OpenNotify
-    ctpl1.tpl_content = u'尊敬的{customer_name}您好，    欢迎使用我公司的{product_name}     您的账号是{username}，密码是{password}，套餐使用至{expire_date}'
+    ctpl1.tpl_content = u'尊敬的 {customer} 您好：您已订购产品 {product} 账号是 {username} 截止日期 {expire}'
     ctpl1.sync_ver = tools.gen_sync_ver()
     db.add(ctpl1)
     ctpl2 = models.TrContentTemplate()
     ctpl2.id = 2
     ctpl2.tpl_type = NextNotify
-    ctpl2.tpl_content = u'尊敬的{customer_name}您好，您已成功续费{product_name}，您的账号到期时间为{expire_date}。'
+    ctpl2.tpl_content = u'尊敬的 {customer} 您好：您已成功续费 {product} 套餐截止日期 {expire}。'
     ctpl2.sync_ver = tools.gen_sync_ver()
     db.add(ctpl2)
     ctpl3 = models.TrContentTemplate()
     ctpl3.id = 3
     ctpl3.tpl_type = ExpireNotify
-    ctpl3.tpl_content = u'尊敬的{customer_name}您好，您的{username}即将于{expire_date}到期，请您及时续费'
+    ctpl3.tpl_content = u'尊敬的 {customer} 您好：您的账号 {username} 即将于 {expire} 到期，请您及时续费'
     ctpl3.sync_ver = tools.gen_sync_ver()
     db.add(ctpl3)
     ctpl4 = models.TrContentTemplate()
     ctpl4.id = 4
-    ctpl4.tpl_type = InstallNotify
-    ctpl4.tpl_content = u'装机工单：用户：{customer_name}，地址： {install_address} 联系电话：{mobile}'
+    ctpl4.tpl_type = IssuesNotify
+    ctpl4.tpl_content = u'你有工单要处理，用户：{customer}，地址： {address} 联系电话：{mobile} 描述：{content}'
     ctpl4.sync_ver = tools.gen_sync_ver()
     db.add(ctpl4)
-    ctpl5 = models.TrContentTemplate()
-    ctpl5.id = 5
-    ctpl5.tpl_type = MaintainNotify
-    ctpl5.tpl_content = u'维修工单：用户：{customer_name} ，地址： {install_address}  发生故障，请前往维修, 联系电话：{mobile}'
-    ctpl5.sync_ver = tools.gen_sync_ver()
-    db.add(ctpl5)
+    ctpl6 = models.TrContentTemplate()
+    ctpl6.id = 6
+    ctpl6.tpl_type = VcodeNotify
+    ctpl6.tpl_content = u'您本次的验证码是：{vcode}'
+    ctpl6.sync_ver = tools.gen_sync_ver()
+    db.add(ctpl6)
     ptpl = models.TrPrintTemplate()
     ptpl.id = 1
     ptpl.tpl_name = u'默认票据模板'
@@ -168,6 +167,55 @@ def update(config, force = False):
             print 'update database done'
             db = scoped_session(sessionmaker(bind=db_engine, autocommit=False, autoflush=True))()
             init_db(db)
+    except:
+        import traceback
+        traceback.print_exc()
+
+def backup(config):
+    try:
+        db_engine = get_engine(config)
+        metadata = models.get_metadata(db_engine)
+        batchsize = 32 if config.database.dbtype == 'sqlite' else 500
+        db_backup = DBBackup(metadata, excludes=['tr_online',
+                                                 'system_session',
+                                                 'system_cache',
+                                                 'tr_ticket',
+                                                 'tr_billing'], batchsize=batchsize)
+        print 'start backup database...'
+        backup_path = config.database.backup_path
+        backup_file = 'toughee_upgrade_%s.json.gz' % utils.get_currdate()
+        backupfs = os.path.join(backup_path, backup_file)
+        db_backup.dumpdb(backupfs)
+        print 'backup database %s done' % backupfs
+    except:
+        import traceback
+        traceback.print_exc()
+
+def upgrade(config):
+    """ 数据库升级，保留日志数据
+    """
+    try:
+        db_engine = get_engine(config)
+        metadata = models.get_metadata(db_engine)
+        batchsize = 32 if config.database.dbtype == 'sqlite' else 500
+        db_backup = DBBackup(metadata, excludes=['tr_online',
+                                                 'system_session',
+                                                 'system_cache',
+                                                 'tr_ticket',
+                                                 'tr_billing'], batchsize=batchsize)
+        backup_path = config.database.backup_path
+        backup_file = 'toughee_upgrade_%s.json.gz' % utils.get_currdate()
+        backupfs = os.path.join(backup_path, backup_file)
+        if not os.path.exists(backupfs):
+            raise RuntimeError('please backup old database first!')
+        print 'starting upgrade database...'
+        tables = [v for k, v in metadata.tables.iteritems() if k not in ('tr_ticket', 'tr_billing')]
+        metadata.drop_all(db_engine, tables=tables)
+        metadata.create_all(db_engine, tables=tables)
+        print 'upgrade database done'
+        print 'start restore database from %s...' % backupfs
+        db_backup.restoredb(backupfs)
+        print 'restore database done'
     except:
         import traceback
         traceback.print_exc()

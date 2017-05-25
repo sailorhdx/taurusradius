@@ -22,15 +22,15 @@ class ToughCloudPingTask(TaseBasic):
     def __init__(self, taskd, **kwargs):
         TaseBasic.__init__(self, taskd, **kwargs)
 
-    def get_notify_interval(self):
+    def get_next_interval(self):
         return 300
 
     def first_delay(self):
-        return self.get_notify_interval()
+        return self.get_next_interval()
 
     @defer.inlineCallbacks
     def process(self, *args, **kwargs):
-        next_interval = self.get_notify_interval()
+        next_interval = self.get_next_interval()
         user_total = 0
         online_total = 0
         with make_db(self.db) as db:

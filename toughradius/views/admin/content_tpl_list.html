@@ -26,7 +26,7 @@
      <div class="container">
         <div class="pull-left bottom10">
             % if permit.match(current_user.username,'/admin/contenttpl/add'):
-             <a href="/admin/contenttpl/add" class="btn btn-sm bg-navy">
+             <a href="/admin/contenttpl/add" class="btn btn-sm">
                   <i class="fa fa-plus-circle"></i> 创建模板</a>
             % endif
         </div>
@@ -40,14 +40,14 @@
             <tbody>
             % for tpl in tpls:
             <tr>
-                <td>${tpl_types[tpl.tpl_type]} - ${tpl.tpl_type}</td>
+                <td>${tpl_types.get(tpl.tpl_type)} - ${tpl.tpl_type}</td>
                 <td>
                     % if permit.match(current_user.username,'/admin/contenttpl/update'):
-                    <a class="opt-btn btn-default" href="/admin/contenttpl/update?tpl_id=${tpl.id}">
+                    <a class="btn btn-xs" href="/admin/contenttpl/update?tpl_id=${tpl.id}">
                     <i class="fa fa-edit"></i> 修改</a>
                     % endif
                     % if permit.match(current_user.username,'/admin/contenttpl/delete'):
-                    <a class="opt-btn btn-default" href="javascript:deleteTpl('${tpl.id}')">
+                    <a class="btn btn-xs" href="javascript:deleteTpl('${tpl.id}')">
                     <i class="fa fa-times"></i> 删除</a>
                     % endif
                 </td>

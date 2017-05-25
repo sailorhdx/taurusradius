@@ -13,7 +13,7 @@ a img, ul, form, p{border:0;margin:0;padding:0;}
 .login{float:left;width:350px;height:500px; margin-top:50px;display:inline;}
 .footer{float:left;width:350px; height:40px; line-height:20px; margin-top:60px;display:inline; text-align:center;}
 
-.logo{float:left;width:200px;height:120px; margin:0 75px;display:inline-block;}
+.logo{float:left;width:200px;height:120px; margin:0 75px;display:inline-block; font-size:  24px; color:#FFF; text-align: center;}
 .main{float:left;width:350px; margin-top:30px;}
 .main p{float:left;height:60px; line-height:60px;width:350px; position:relative;}
 .main .tl{float:left;width:70px;font-size:18px;color:#ddd; position:absolute; left:60px;top:1px;}
@@ -27,7 +27,7 @@ input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0px 1000px white inset;
 }
 </style>
-<script src="/static/plugins/jQuery/jQuery-2.2.0.min.js"></script>
+<script src="/static/plugins/jQuery/jquery-2.2.3.min.js"></script>
     <script>
         function dokey(e) {
             var keynum;
@@ -59,7 +59,12 @@ input:-webkit-autofill {
 <body>
 <div class="container">
     <div class="login">
-        <div class="logo"><img src="${handler.get_param_value('login_logo','/static/img/toughee_logo.png')}" width="200" height="120" /></div>
+        <div class="logo">
+            <img src="${handler.get_param_value('login_logo','/static/img/toughee_logo.png')}" />
+            <div class="clearfix"></div>
+            <span class="logo-tile">${handler.get_param_value('system_name','OPENRADIUS')}</span>
+        </div>
+
         <div class="main">
             <p>
                 <img src="/static/img/toughee_icon01.png" width="50" height="50" class="icon01" />

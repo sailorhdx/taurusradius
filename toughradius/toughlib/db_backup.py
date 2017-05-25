@@ -22,12 +22,19 @@ class DBBackup:
             dumpfs.write(json.dumps(table_headers, ensure_ascii=False).encode('utf-8'))
             dumpfs.write('\n')
             for _name, _table in tables.iteritems():
-                with self.dbengine.begin() as db:
-                    rows = db.execute(select([_table]))
-                    for row in rows:
-                        obj = (_name, dict(row.items()))
-                        dumpfs.write(json.dumps(obj, ensure_ascii=False).encode('utf-8'))
-                        dumpfs.write('\n')
+                if not self.dbengine.dialect.has_table(self.dbengine, _name):
+                    continue
+                try:
+                    with self.dbengine.begin() as db:
+                        rows = db.execute(select([_table]))
+                        for row in rows:
+                            obj = (_name, dict(row.items()))
+                            dumpfs.write(json.dumps(obj, ensure_ascii=False).encode('utf-8'))
+                            dumpfs.write('\n')
+
+                except Exception as err:
+                    print 'backup table %s error: %s' % (_table, repr(err))
+
 
     def restoredb(self, restorefs):
         if not os.path.exists(restorefs):
@@ -39,10 +46,20 @@ class DBBackup:
                 try:
                     with self.dbengine.begin() as db:
                         tabname, rdata = json.loads(line)
+                        if tabname != 'table_names' and not self.dbengine.dialect.has_table(self.dbengine, tabname):
+                            try:
+                                self.metadata.tables[tabname].create(self.dbengine)
+                                print 'create table %s done' % tabname
+                            except:
+                                print 'create table %s error' % tabname
+
                         if tabname == 'table_names' and rdata:
                             for table_name in rdata:
                                 print 'clean table %s' % table_name
-                                db.execute('delete from %s;' % table_name)
+                                try:
+                                    db.execute('delete from %s;' % table_name)
+                                except:
+                                    print 'clean table %s fail' % table_name
 
                             continue
                         cache_datas.setdefault(tabname, []).append(rdata)

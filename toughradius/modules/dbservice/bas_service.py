@@ -12,6 +12,7 @@ from toughradius.common import tools
 from toughradius.modules.dbservice import BaseService
 from toughradius.modules.dbservice import logparams
 from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
+from toughradius.modules.events.settings import CACHE_DELETE_EVENT
 
 class BasService(BaseService):
 
@@ -33,6 +34,8 @@ class BasService(BaseService):
             bas.vendor_id = formdata.vendor_id
             bas.bas_secret = formdata.bas_secret
             bas.coa_port = formdata.coa_port
+            bas.portal_vendor = formdata.portal_vendor
+            bas.ac_port = formdata.ac_port
             bas.time_type = formdata.get('time_type', 0)
             bas.sync_ver = tools.gen_sync_ver()
             self.db.add(bas)
@@ -69,6 +72,10 @@ class BasService(BaseService):
                 bas.bas_secret = formdata.bas_secret
             if 'coa_port' in formdata:
                 bas.coa_port = formdata.coa_port
+            if 'portal_vendor' in formdata:
+                bas.portal_vendor = formdata.portal_vendor
+            if 'ac_port' in formdata:
+                bas.ac_port = formdata.ac_port
             bas.sync_ver = tools.gen_sync_ver()
             self.db.query(models.TrBasNode).filter_by(bas_id=bas.id).delete()
             for node_id in nodes:
@@ -80,6 +87,8 @@ class BasService(BaseService):
 
             self.add_oplog(u'修改接入设备信息:%s' % bas.ip_addr)
             self.db.commit()
+            dispatch.pub(CACHE_DELETE_EVENT, bas_cache_key(bas.id), async=True)
+            dispatch.pub(CACHE_DELETE_EVENT, bas_cache_ipkey(bas.ip_addr), async=True)
             return bas
         except Exception as err:
             self.db.rollback()

@@ -1,19 +1,27 @@
 <%def name="page_nav()">
-<a href="/" class="logo"><img src="${handler.get_param_value('index_logo','/static/img/toughradius-logo.png')}"></a>
-<!-- Header Navbar: style can be found in header.less -->
-<nav class="navbar navbar-static-top" role="navigation">
-    <!-- Sidebar toggle button-->
-    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+    <!-- Logo -->
+
+    <a href="/" class="logo">
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><img src="${handler.get_param_value('index_logo_mini','/static/img/logo_white_45X45.png')}"></span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg"><img src="${handler.get_param_value('index_logo','/static/img/logo_white_38X38.png')}">${handler.get_param_value('system_name','OPENRADIUS')}</span>
+    </a>
+
+    <!-- Header Navbar: style can be found in header.less -->
+    <nav class="navbar navbar-static-top">
+      <!-- Sidebar toggle button-->
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
-    </a>
+      </a>
 
-    <div class="navbar-custom-menu">
-        <ul class="nav navbar-nav navbar-right">
-
-            % if permit.match(current_user.username,'/admin/stat/buiness'):
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+          <!-- Messages: style can be found in dropdown.less-->
+          % if permit.match(current_user.username,'/admin/stat/buiness'):
                 % if handler.get_param_value('style_nav_busstat_link','1') == '1':
                 <li><a href="/admin/stat/buiness"><i class="fa fa-bar-chart-o"></i> 运营分析</a></li>
                 % endif
@@ -29,8 +37,8 @@
             <li><a href="/admin/password"><i class="fa fa-key"></i> 修改密码</a></li>
             <li><a href="/admin/logout"> ${current_user.username}  <i class="fa fa-sign-out"></i> 退出</a></li>
         </ul>
-    </div>
-</nav>
+      </div>
+    </nav>
 </%def>
 
 
@@ -51,25 +59,28 @@ def aclass(req,path):
 <!-- sidebar: style can be found in sidebar.less -->
 <section class="sidebar">
     <!-- Sidebar user panel -->
+    <!-- search form -->
+    <form action="/admin/customer" method="get" class="sidebar-form">
+    <div class="input-group">
+      <input type="text" name="user_name" class="form-control" placeholder="快速查找用户"/>
+      <span class="input-group-btn">
+        <button type='submit' name='search' id='search-btn' class="btn btn-flat"><i class="fa fa-search"></i></button>
+      </span>
+    </div>
+    </form>
     <!-- sidebar menu: : style can be found in sidebar.less -->
     <ul class="sidebar-menu">
 
-        <form action="/admin/customer" method="get" class="sidebar-form">
-        <div class="input-group">
-          <input type="text" name="user_name" class="form-control" placeholder="快速查找用户"/>
-          <span class="input-group-btn">
-            <button type='submit' name='search' id='search-btn' class="btn btn-flat"><i class="fa fa-search"></i></button>
-          </span>
-        </div>
-        </form>
         <li class="header">功能导航</li>
 
         % for menu in all_menus:
         % if permit.check_opr_category(current_user.username,menu['category']):
         <li class="treeview ${inactive(request,menu)}">
             <a href="#">
-                <i class="${menu_icons.get(menu['category'])}"></i> <span>${menu['category']}</span> <i
-                    class="fa fa-angle-left pull-right"></i>
+                <i class="${menu_icons.get(menu['category'])}"></i> <span>${menu['category']}</span>
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
             </a>
             <ul class="treeview-menu">
                 % for item in sorted(menu['items'],key=lambda r:r['order']):
@@ -90,7 +101,12 @@ def aclass(req,path):
 
 
 <%def name="page_footer()">
-
+    <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      <b>Version</b> 4.0.0.3
+    </div>
+    <strong>Copyright &copy; 2014-2017 <a href="#">Doubao Studio</a>.</strong> All rights reserved.
+    </footer>
 </%def>
 
 

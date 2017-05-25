@@ -26,6 +26,7 @@ class OpencalcHandler(AccountHandler):
     @authenticated
     def post(self):
         months = int(self.get_argument('months', 0))
+        days = int(self.get_argument('days', 0))
         product_id = self.get_argument('product_id', '')
         old_expire = self.get_argument('old_expire', '')
         giftdays = int(self.get_argument('giftdays', 0))
@@ -49,6 +50,15 @@ class OpencalcHandler(AccountHandler):
             expire_date = utils.add_months(start_expire, int(months), days=giftdays)
             expire_date = expire_date.strftime('%Y-%m-%d')
             return self.render_json(code=0, data=dict(policy=product.product_policy, fee_value=fee_value, expire_date=expire_date))
+        if product.product_policy == PPDay:
+            fee = decimal.Decimal(days) * decimal.Decimal(product.fee_price)
+            fee_value = utils.fen2yuan(int(fee.to_integral_value()) + charge_value)
+            start_expire = datetime.datetime.now()
+            if old_expire:
+                start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
+            expire_date = start_expire + datetime.timedelta(days=days)
+            expire_date = expire_date.strftime('%Y-%m-%d')
+            return self.render_json(code=0, data=dict(policy=product.product_policy, fee_value=fee_value, expire_date=expire_date))
         if product.product_policy == APMonth:
             fee = decimal.Decimal(months) * decimal.Decimal(product.fee_price)
             fee_value = utils.fen2yuan(charge_value)
@@ -59,6 +69,14 @@ class OpencalcHandler(AccountHandler):
                 start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
             fee_value = utils.fen2yuan(product.fee_price + charge_value)
             expire_date = utils.add_months(start_expire, product.fee_months, days=giftdays)
+            expire_date = expire_date.strftime('%Y-%m-%d')
+            return self.render_json(code=0, data=dict(policy=product.product_policy, fee_value=fee_value, expire_date=expire_date))
+        if product.product_policy == BODay:
+            start_expire = datetime.datetime.now()
+            if old_expire:
+                start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
+            fee_value = utils.fen2yuan(product.fee_price + charge_value)
+            expire_date = start_expire + datetime.timedelta(days=product.fee_days + giftdays)
             expire_date = expire_date.strftime('%Y-%m-%d')
             return self.render_json(code=0, data=dict(policy=product.product_policy, fee_value=fee_value, expire_date=expire_date))
         if product.product_policy == PPMFlows:

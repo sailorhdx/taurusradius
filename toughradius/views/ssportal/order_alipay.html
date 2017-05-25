@@ -1,9 +1,14 @@
 <%inherit file="base.html"/>
 <%def name="head()">
 <script>
-$(function () {
-        $('[data-toggle="popover"]').popover()
-    })
+
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();
+    $("#paypost").click(function(){
+        $("#payform").submit();
+    });
+});
+
 </script>
 </%def>
 <%def name="body()">
@@ -27,10 +32,11 @@ $(function () {
                 <div class="col-md-6 itbox">交易金额: ${formdata.fee_value}</div>
                 <div class="col-md-12 itbox text-info">提示：请记住您的账号和密码，必须完成支付才能正常登陆使用服务。</div>
             </div>
-            <form class="form-horizontal form-well" role="form" action="/ssportal/product/order/alipay" method="post">
+            <form class="form-horizontal form-well" id="payform" role="form" 
+                    action="/ssportal/product/order/alipay" method="post">
                 ${xsrf_form_html()|n}
                 <input type="hidden" name="order_id" value="${formdata.order_id}">
-                <button name="submit" placeholder="submit" id="submit" type="submit" class="btn btn-primary"><b> 支付宝支付</b></button>
+                <button name="button" placeholder="button" id="paypost" type="button" class="btn btn-primary"><b> 支付宝支付</b></button>
             </form>
         </div>
         </div>

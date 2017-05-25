@@ -10,7 +10,7 @@ from toughradius.modules.settings import *
 from toughradius.common import tools, safefile
 import toughradius
 
-@permit.route('/admin/pics', u'图片文件管理', MenuRes, order=9.0, is_menu=True)
+@permit.suproute('/admin/pics', u'图片文件管理', MenuRes, order=9.0, is_menu=True)
 
 class PicListHandler(BaseHandler):
 
@@ -28,7 +28,7 @@ class PicListHandler(BaseHandler):
         self.render('pics.html', pic_path=pic_path, flist=flist)
 
 
-@permit.route('/admin/pic/upload', u'上传图片', MenuRes, order=9.0004)
+@permit.suproute('/admin/pic/upload', u'上传图片', MenuRes, order=9.0004)
 
 class PicsUploadHandler(BaseHandler):
 
@@ -42,8 +42,8 @@ class PicsUploadHandler(BaseHandler):
                 pass
 
             f = self.request.files['Filedata'][0]
-            filename = os.path.basename(f['filename'])
-            savename = 'pic{0}_{1}'.format(tools.gen_num_id(13), filename.encode('utf-8'))
+            filename = os.path.basename(utils.safestr(f['filename']))
+            savename = 'pic{0}_{1}'.format(tools.gen_num_id(13), filename)
             save_path = os.path.join(pic_path, savename)
             tf = open(save_path, 'wb')
             tf.write(f['body'])
@@ -60,7 +60,7 @@ class PicsUploadHandler(BaseHandler):
             self.write(u'上传失败 %s' % utils.safeunicode(err))
 
 
-@permit.route('/admin/pic/delete', u'删除图片', MenuRes, order=9.0004)
+@permit.suproute('/admin/pic/delete', u'删除图片', MenuRes, order=9.0004)
 
 class PicDeleteHandler(BaseHandler):
 

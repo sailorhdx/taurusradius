@@ -26,7 +26,7 @@
      <div class="container">
         <div class="pull-left bottom10">
             % if permit.match(current_user.username,'/admin/charge/add'):
-            <a href="/admin/charge/add" class="btn btn-sm bg-navy"><i class="fa fa-plus-circle"></i> 创建收费项</a>
+            <a href="/admin/charge/add" class="btn btn-sm"><i class="fa fa-plus-circle"></i> 创建收费项</a>
             % endif
         </div>
         <table class="table">
@@ -48,11 +48,11 @@
                 <td>${charge.charge_desc|h}</td>
                 <td>
                     % if permit.match(current_user.username,'/admin/charge/update'):
-                    <a class="opt-btn btn-default" href="/admin/charge/update?charge_code=${charge.charge_code}">
+                    <a class="btn btn-xs" href="/admin/charge/update?charge_code=${charge.charge_code}">
                     <i class="fa fa-edit"></i> 修改</a>
                     % endif
                     % if permit.match(current_user.username,'/admin/charge/delete'):
-                    <a class="opt-btn btn-default" href="javascript:deleteCharge('${charge.charge_code}')">
+                    <a class="btn btn-xs" href="javascript:deleteCharge('${charge.charge_code}')">
                     <i class="fa fa-times"></i> 删除</a>
                     % endif
                 </td>

@@ -5,7 +5,7 @@ from toughradius.toughlib.btforms import dataform
 from toughradius.toughlib.btforms import rules
 from toughradius.toughlib.btforms.rules import button_style, input_style
 from toughradius.modules.settings import *
-button_style = {'class': 'btn btn-sm bg-navy'}
+button_style = {'class': 'btn btn-sm'}
 boolean = {0: u'否',
  1: u'是'}
 product_status_dict = {0: u'正常',

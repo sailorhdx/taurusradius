@@ -10,10 +10,10 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from toughradius.toughlib import logger, utils, dispatch
 from toughradius.modules import models
 from toughradius.toughlib.dbengine import get_engine
+from toughradius.toughlib.config import redis_conf
 from toughradius.toughlib.redis_cache import CacheManager
 from toughradius.modules import tasks
 from toughradius.modules import settings
-from toughradius.modules.settings import redis_conf
 from toughradius.modules import events
 from toughradius.common import log_trace
 from toughradius.common import eslogapi

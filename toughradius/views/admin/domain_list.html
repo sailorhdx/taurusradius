@@ -35,7 +35,7 @@
             <div class="container">
                 % if permit.match(current_user.username,'/admin/wlan/domain/add'):
                 <div class="pull-left bottom10">
-                     <a href="/admin/wlan/domain/add" class="btn btn-sm bg-navy">
+                     <a href="/admin/wlan/domain/add" class="btn btn-sm">
                      <i class="fa fa-plus-circle"></i> 创建认证域</a>
                 </div>
                 % endif
@@ -56,14 +56,14 @@
                                 <td>${domain.tpl_name}</td>
                                 <td>${domain.domain_desc}</td>
                                 <td>
-                                    <a class="opt-btn btn-default" href="/admin/wlan/domain/detail?domain_id=${domain.id}">
+                                    <a class="btn btn-xs" href="/admin/wlan/domain/detail?domain_id=${domain.id}">
                                     <i class="fa fa-cogs"></i> 设置</a>
                                     % if permit.match(current_user.username,'/admin/wlan/domain/update'):
-                                    <a class="opt-btn btn-default" href="/admin/wlan/domain/update?domain_id=${domain.id}">
+                                    <a class="btn btn-xs" href="/admin/wlan/domain/update?domain_id=${domain.id}">
                                     <i class="fa fa-edit"></i> 修改</a>
                                     % endif
                                     % if permit.match(current_user.username,'/admin/wlan/domain/delete'):
-                                    <a class="opt-btn btn-default" href="javascript:deleteDomain('${domain.id}')">
+                                    <a class="btn btn-xs btn-default" href="javascript:deleteDomain('${domain.id}')">
                                     <i class="fa fa-times"></i> 删除</a>
                                     % endif
                                 </td>

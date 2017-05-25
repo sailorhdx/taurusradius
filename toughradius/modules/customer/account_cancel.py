@@ -12,7 +12,7 @@ from toughradius.toughlib import utils, dispatch, db_cache, logger
 from toughradius.modules.settings import *
 from toughradius.modules.dbservice.account_cancel import AccountCancel
 
-@permit.suproute('/admin/account/cancel', u'用户销户', MenuUser, order=2.7)
+@permit.route('/admin/account/cancel', u'用户销户', MenuUser, order=2.7)
 
 class AccountCanceltHandler(account.AccountHandler):
 

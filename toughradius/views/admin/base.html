@@ -6,24 +6,18 @@
     <title>${handler.get_param_value("system_name",u"OpenRADIUS 管理控制台")}</title>
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
     <link rel="shortcut icon" href="/static/favicon.ico"/>
+    <link href="/static/css/bootstrap.css" rel="stylesheet" type="text/css"/>
     <link href="/static/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
     <link href="/static/css/ionicons.min.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="/static/plugins/jvectormap/jquery-jvectormap-1.2.2.css">
     <link href="/static/css/AdminLTE.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/static/css/skins/_all-skins.min.css" rel="stylesheet" type="text/css"/>
-    % if handler.get_param_value("system_theme",'default') == 'darkly':
-    <link href="/static/css/bootstrap.darkly.css" rel="stylesheet" type="text/css"/>
-    <link href="/static/css/manage.darkly.css" rel="stylesheet" type="text/css"/>
-    % elif handler.get_param_value("system_theme",'default') == 'slate':
-    <link href="/static/css/bootstrap.slate.css" rel="stylesheet" type="text/css"/>
-    <link href="/static/css/manage.slate.css" rel="stylesheet" type="text/css"/>
-    % elif handler.get_param_value("system_theme",'default') == 'default':
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
-    <link href="/static/css/manage.css" rel="stylesheet" type="text/css"/>
-    % endif
+    <link href="/static/css/skins/_all-skins.css" rel="stylesheet" type="text/css"/>
 
-    <!-- jQuery 2.1.3 -->
-    <script src="/static/plugins/jQuery/jQuery-2.2.0.min.js"></script>
+    <link href="/static/css/manage-${handler.get_param_value('system_theme','skin-blue')}.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/css/manage-skin.css" rel="stylesheet" type="text/css"/>
+
+    <!-- jQuery 2.2.3 -->
+    <script src="/static/plugins/jQuery/jquery-2.2.3.min.js"></script>
     <script>
         function showhelp(topic) {
             $.get("/admin/help",{topic:topic}, function(data) {
@@ -44,7 +38,7 @@
 <%
     is_fixed = handler.get_param_value('style_nav_fixed','0') == '1'
 %>
-<body class="hold-transition  skin-blue ${'fixed' if is_fixed else ''} sidebar-mini">
+<body class="hold-transition  ${handler.get_param_value('system_theme','skin-blue')} ${'fixed' if is_fixed else ''} sidebar-mini">
 <!-- Site wrapper -->
 <div class="wrapper">
 
@@ -53,14 +47,12 @@
     </header>
     <!-- =============================================== -->
 
-    <!-- Left side column. contains the sidebar -->
+    <!-- Left side column. contains the logo and sidebar -->
     <aside class="main-sidebar">
         ${base_ui.page_sidebar()}
     </aside>
 
-    <!-- =============================================== -->
-
-    <!-- Right side column. Contains the navbar and content of the page -->
+    <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
         ${self.body()}
     </div>

@@ -4,68 +4,20 @@
 <script src="/static/js/bootstrap-multiselect.js"></script>
 <script>
 
-prices = {
-    "0":"每月单价(元)",
-    "1":"每小时单价(元)",
-    "2":"买断包月总价(元)",
-    "3":"买断时长总价(元)",
-    "4":"每G流量单价(元)",
-    "5":"买断流量总价(元)",
-    "8":"每月单价(元)"
-}
-//根据资费调整界面
-function updateUI(){
-    var policy = $("#product_policy").val();
-    $("#lab_fee_price").html(prices[policy]);
-    if(policy=="0"||policy=="1"||policy=="4"){
-        // $("#fee_months").val(0);
-        // $("#fee_times").val(0);
-        // $("#fee_flows").val(0);
-        $("#fee_months").parent().parent().hide();
-        $("#fee_times").parent().parent().hide();
-        $("#fee_flows").parent().parent().hide();
-    }else if(policy=="2"){
-        // $("#fee_times").val(0);
-        // $("#fee_flows").val(0);
-        $("#fee_months").parent().parent().show();
-        $("#fee_times").parent().parent().hide();
-        $("#fee_flows").parent().hide();
-    }else if(policy=="3"){
-        // $("#fee_months").val(0);
-        // $("#fee_flows").val(0);
-        $("#fee_months").parent().parent().hide();
-        $("#fee_times").parent().parent().show();
-        $("#fee_flows").parent().parent().hide();
-    }else if(policy=="5"){
-        // $("#fee_months").val(0);
-        // $("#fee_flows").val(0);
-        $("#fee_months").parent().parent().hide();
-        $("#fee_times").parent().parent().hide();
-        $("#fee_flows").parent().parent().show();
-    }else if(policy=="8"){
-        // $("#fee_months").val(0);
-        // $("#fee_flows").val(0);
-        $("#fee_months").parent().parent().hide();
-        $("#fee_times").parent().parent().hide();
-        $("#fee_flows").parent().parent().hide();
-    }
-
-}
 //页面初始化
 $(document).ready(function (){
-    updateUI();
-    $('#product_policy').change(function() {
-        updateUI();
-    });  
     $('[data-toggle="popover"]').popover()
     $("select[multiple='multiple']").multiselect({
       buttonWidth: "100%",
       includeSelectAllOption: true,
       enableCaseInsensitiveFiltering: true,
       maxHeight: 320
-    });    
+    });
 });
 </script>
+<style type="text/css">
+.well{padding:10px;}
+</style>
 </%def>
 <%def name="body()">
 <section class="content">

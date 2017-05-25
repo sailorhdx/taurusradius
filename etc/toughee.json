@@ -7,8 +7,8 @@
     "conf_file": "etc/toughee.json", 
     "database": {
         "backup_path": "/var/toughee/data", 
-        "dbtype": "sqlite", 
-        "dburl": "sqlite:////var/toughee/toughee.sqlite3", 
+        "dbtype": "mysql",
+        "dburl": "mysql://raduser:radpwd@127.0.0.1:3306/toughee?charset=utf8",
         "echo": 0, 
         "pool_recycle": 300, 
         "pool_size": 120

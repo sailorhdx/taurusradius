@@ -53,7 +53,7 @@ function unbind(builder_id)
      <div class="container">
         <div class="pull-left bottom10">
             % if permit.match(current_user.username,'/admin/builder/add'):
-             <a href="/admin/builder/add" class="btn btn-sm bg-navy">
+             <a href="/admin/builder/add" class="btn btn-sm">
                   <i class="fa fa-plus-circle"></i> 创建服务人员</a>
             % endif
         </div>
@@ -74,25 +74,25 @@ function unbind(builder_id)
                 <td>${builder.wechat_oid and u'已绑定' or '未绑定'}</td>
                 <td>
                     % if permit.match(current_user.username,'/admin/builder/update'):
-                    <a class="opt-btn btn-default" href="/admin/builder/update?builder_id=${builder.id}">
+                    <a class="btn btn-xs" href="/admin/builder/update?builder_id=${builder.id}">
                     <i class="fa fa-edit"></i> 修改</a>
                     % endif
                     
                     % if permit.match(current_user.username,'/admin/builder/delete'):
-                    <a class="opt-btn btn-default" href="javascript:deleteBuilder('${builder.id}')">
+                    <a class="btn btn-xs" href="javascript:deleteBuilder('${builder.id}')">
                     <i class="fa fa-times"></i> 删除</a>
                     % endif
 
                     % if builder.wechat_oid:
-                        <a href="javascript:unbind('${builder.id}');">
+                        <a class="btn btn-xs" href="javascript:unbind('${builder.id}');">
                         <i class="fa fa-unlock"></i> 解除绑定</a>
                     % endif
 
                     % if builder.mp_qrcode:
-                        <a href="${builder.mp_qrcode}"><i class="fa fa-qrcode"></i> 二维码</a>
+                        <a class="btn btn-xs" href="${builder.mp_qrcode}"><i class="fa fa-qrcode"></i> 二维码</a>
                     % else:
                         % if permit.match(current_user.username,'/admin/builder/qrcode/new'):
-                        <a href="javascript:create_qrcode('${builder.id}','std');">
+                        <a class="btn btn-xs" href="javascript:create_qrcode('${builder.id}','std');">
                         <i class="fa fa-qrcode"></i> 生成二维码</a>
                         % endif
                     % endif                    

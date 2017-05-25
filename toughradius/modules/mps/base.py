@@ -133,6 +133,9 @@ class BaseHandler(cyclone.web.RequestHandler):
         val = self.db.query(models.TrParam.param_value).filter_by(param_name=name).scalar()
         return val or defval
 
+    def get_tpl_id(self, tpl_type):
+        return self.db.query(models.TrContentTemplate.tpl_id).filter_by(tpl_type=tpl_type).scalar()
+
     def send_notify(self, oid, content):
         if not oid or not content:
             return

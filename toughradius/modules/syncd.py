@@ -16,6 +16,7 @@ from toughradius.toughlib import mcache
 from toughradius.toughlib import logger, dispatch
 from toughradius.toughlib.storage import Storage
 from toughradius.toughlib.dbengine import get_engine
+from toughradius.toughlib.config import redis_conf
 from toughradius.toughlib.utils import timecast
 from toughradius.modules import models
 from toughradius.modules.settings import *
@@ -173,7 +174,7 @@ class HaSyncTask(object):
             with self.db_engine.begin() as db:
                 table = models.TrRepliSyncStatus.__table__
                 stmt = table.update().where(table.c.id == sync_id).values(last_sync=utils.get_currtime(), sync_times=table.c.sync_times + 1, sync_status=2, error=utils.safeunicode(msg)[:2000])
-                conn.execute(stmt)
+                db.execute(stmt)
         except Exception as err:
             logger.error(traceback.format_exc())
 

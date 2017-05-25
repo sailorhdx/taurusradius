@@ -9,7 +9,9 @@ from toughradius.toughlib import utils, dispatch, logger
 from toughradius.modules.dbservice import BaseService
 from toughradius.modules.dbservice import logparams
 from toughradius.common import tools
+from toughradius.toughlib.btforms import rules
 from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
+from toughradius.modules.events import settings as evset
 
 class ProductService(BaseService):
 
@@ -24,9 +26,26 @@ class ProductService(BaseService):
         attr.sync_ver = tools.gen_sync_ver()
         self.db.add(attr)
 
-    def update_attr(self, pid, attr_name, attr_value, attr_type = 0):
-        self.db.query(models.TrProductAttr).filter_by(product_id=pid, attr_name=attr_name).update({'attr_value': attr_value,
-         'attr_type': attr_type})
+    def update_attr(self, pid, attr_name, attr_value, attr_desc = '', attr_type = 0):
+        query = self.db.query(models.TrProductAttr).filter_by(product_id=pid, attr_name=attr_name)
+        if query.count() > 0:
+            query.update({'attr_value': attr_value,
+             'attr_type': attr_type})
+        else:
+            self.add_attr(pid, attr_name, attr_value, attr_desc=attr_desc, attr_type=attr_type)
+
+    def update_routeros_sync_event(self, product, addr_pool):
+        rate_limit = '%sk/%sk' % (product.input_max_limit / 1024, product.output_max_limit / 1024)
+        dispatch.pub(evset.ROSSYNC_SET_PPPOE_PROFILE, product.id, addr_pool or 'default', rate_limit, async=True)
+        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_PROFILE, product.id, addr_pool or 'default', rate_limit, async=True)
+
+    def update_routeros_del_event(self, pid):
+        dispatch.pub(evset.ROSSYNC_DEL_PPPOE_PROFILE, pid, async=True)
+        dispatch.pub(evset.ROSSYNC_DEL_HOTSPOT_PROFILE, pid, async=True)
+
+    def update_cache_event(self, pid):
+        dispatch.pub(redis_cache.CACHE_DELETE_EVENT, product_cache_key(pid), async=True)
+        dispatch.pub(redis_cache.CACHE_DELETE_EVENT, product_attrs_cache_key(pid), async=True)
 
     @logparams
     def add_ppmf(self, formdata, **kwargs):
@@ -39,6 +58,7 @@ class ProductService(BaseService):
             product.ispub = formdata.get('ispub', 0)
             product.product_policy = PPMFlows
             product.product_status = 0
+            product.fee_days = 0
             product.fee_months = 1
             product.fee_times = 0
             product.fee_flows = utils.gb2kb(formdata.get('fee_flows', 0))
@@ -59,7 +79,9 @@ class ProductService(BaseService):
             self.db.add(product)
             opsdesc = u'新增资费信息:%s' % utils.safeunicode(product.product_name)
             self.add_oplog(opsdesc)
-            self.add_attr(product.id, 'flow_price', formdata.get('flow_price', 0), u'流量充值单价(元)')
+            self.add_attr(product.id, 'flow_price', formdata.get('flow_price', 0), u'流量充值单价(元)(流量套餐)')
+            self.add_attr(product.id, 'month_price', formdata.get('month_price', 0), u'按月续费单价(元)(买断包月套餐)')
+            self.add_attr(product.id, 'day_price', formdata.get('day_price', 0), u'按日续费单价(元)(买断包日套餐)')
             self.add_attr(product.id, 'max_giftflows', formdata.get('max_giftflows', 0), u'最大赠送流量值(G)')
             self.add_attr(product.id, 'max_giftdays', formdata.get('max_giftdays', 0), u'最大赠送天数')
             self.db.commit()
@@ -95,11 +117,12 @@ class ProductService(BaseService):
             opsdesc = u'修改资费信息:%s' % utils.safeunicode(product.product_name)
             self.add_oplog(opsdesc)
             self.update_attr(product.id, 'flow_price', formdata.get('flow_price', 0))
+            self.update_attr(product.id, 'month_price', formdata.get('month_price', 0))
+            self.update_attr(product.id, 'day_price', formdata.get('day_price', 0))
             self.update_attr(product.id, 'max_giftflows', formdata.get('max_giftflows', 0))
             self.update_attr(product.id, 'max_giftdays', formdata.get('max_giftdays', 0))
             self.db.commit()
-            dispatch.pub(redis_cache.CACHE_DELETE_EVENT, product_cache_key(product.id), async=True)
-            dispatch.pub(redis_cache.CACHE_DELETE_EVENT, product_attrs_cache_key(product.id), async=True)
+            self.update_cache_event(product.id)
             return product
         except Exception as err:
             self.db.rollback()
@@ -110,15 +133,22 @@ class ProductService(BaseService):
     @logparams
     def add(self, formdata, **kwargs):
         try:
+            product_id = self.parse_arg(formdata, 'product_id', rule=rules.not_null)
+            fee_months = self.parse_arg(formdata, 'fee_months', defval='0')
+            fee_days = self.parse_arg(formdata, 'fee_days', defval='0')
+            fee_times = self.parse_arg(formdata, 'fee_times', defval='0')
+            fee_flows = self.parse_arg(formdata, 'fee_flows', defval='0')
+            addr_pool = self.parse_arg(formdata, 'addr_pool', defval='')
             product = models.TrProduct()
-            product.id = formdata.product_id if 'product_id' in formdata else utils.get_uuid()
+            product.id = product_id
             product.product_name = formdata.product_name
             product.ispub = formdata.get('ispub', 0)
             product.product_policy = formdata.product_policy
             product.product_status = 0
-            product.fee_months = int(formdata.get('fee_months', 0))
-            product.fee_times = utils.hour2sec(formdata.get('fee_times', 0))
-            product.fee_flows = utils.gb2kb(formdata.get('fee_flows', 0))
+            product.fee_days = fee_days
+            product.fee_months = fee_months
+            product.fee_times = utils.hour2sec(fee_times)
+            product.fee_flows = utils.gb2kb(fee_flows)
             product.bind_mac = formdata.bind_mac
             product.bind_vlan = formdata.bind_vlan
             product.concur_number = formdata.concur_number
@@ -144,11 +174,16 @@ class ProductService(BaseService):
                 self.db.add(pcharges)
 
             self.add_attr(product.id, 'flow_price', formdata.get('flow_price', 0), u'流量充值单价(元)')
+            self.add_attr(product.id, 'month_price', formdata.get('month_price', 0), u'按月续费单价(元)(买断包月套餐)')
+            self.add_attr(product.id, 'day_price', formdata.get('day_price', 0), u'按日续费单价(元)(买断包日套餐)')
             self.add_attr(product.id, 'max_giftflows', formdata.get('max_giftflows', 0), u'最大赠送流量值(G)')
             self.add_attr(product.id, 'max_giftdays', formdata.get('max_giftdays', 0), u'最大赠送天数')
+            if addr_pool:
+                self.add_attr(product.id, 'Framed-Pool', addr_pool, u'地址池', attr_type=1)
             if 'bandwidthCode' in formdata:
                 self.add_attr(product.id, 'limit_rate_code', formdata.get('bandwidthCode'), '资费扩展限速标识')
             self.db.commit()
+            self.update_routeros_sync_event(product, addr_pool)
             return product
         except Exception as err:
             self.db.rollback()
@@ -159,13 +194,19 @@ class ProductService(BaseService):
     @logparams
     def update(self, formdata, **kwargs):
         try:
+            fee_months = self.parse_arg(formdata, 'fee_months', defval='0')
+            fee_days = self.parse_arg(formdata, 'fee_days', defval='0')
+            fee_times = self.parse_arg(formdata, 'fee_times', defval='0')
+            fee_flows = self.parse_arg(formdata, 'fee_flows', defval='0')
+            addr_pool = self.parse_arg(formdata, 'addr_pool', defval='')
             product = self.db.query(models.TrProduct).get(formdata.id)
             product.product_name = formdata.product_name
             product.ispub = formdata.get('ispub', 0)
             product.product_status = formdata.product_status
-            product.fee_months = int(formdata.get('fee_months', 0))
-            product.fee_times = utils.hour2sec(formdata.get('fee_times', 0))
-            product.fee_flows = utils.gb2kb(formdata.get('fee_flows', 0))
+            product.fee_days = fee_days
+            product.fee_months = fee_months
+            product.fee_times = utils.hour2sec(fee_times)
+            product.fee_flows = utils.gb2kb(fee_flows)
             product.bind_mac = formdata.bind_mac
             product.bind_vlan = formdata.bind_vlan
             product.concur_number = formdata.concur_number
@@ -188,14 +229,18 @@ class ProductService(BaseService):
                 pcharges.sync_ver = tools.gen_sync_ver()
                 self.db.add(pcharges)
 
-            self.update_attr(product.id, 'flow_price', formdata.get('flow_price', 0))
-            self.update_attr(product.id, 'max_giftflows', formdata.get('max_giftflows', 0))
-            self.update_attr(product.id, 'max_giftdays', formdata.get('max_giftdays', 0))
+            self.update_attr(product.id, 'flow_price', formdata.get('flow_price', 0), attr_desc=u'流量充值单价(元)(流量套餐)', attr_type=0)
+            self.update_attr(product.id, 'month_price', formdata.get('month_price', 0), attr_desc=u'按月续费单价(元)(买断包月套餐)', attr_type=0)
+            self.update_attr(product.id, 'day_price', formdata.get('day_price', 0), attr_desc=u'按日续费单价(元)(买断包日套餐)', attr_type=0)
+            self.update_attr(product.id, 'max_giftflows', formdata.get('max_giftflows', 0), attr_desc=u'最大赠送流量值(G)', attr_type=0)
+            self.update_attr(product.id, 'max_giftdays', formdata.get('max_giftdays', 0), attr_desc=u'最大赠送天数', attr_type=0)
+            if addr_pool:
+                self.update_attr(product.id, 'Framed-Pool', addr_pool, attr_desc=u'地址池', attr_type=1)
             if 'bandwidthCode' in formdata:
-                self.update_attr(product.id, 'limit_rate_code', formdata.get('bandwidthCode'))
+                self.update_attr(product.id, 'limit_rate_code', formdata.get('bandwidthCode'), attr_desc=u'资费扩展限速标识', attr_type=0)
             self.db.commit()
-            dispatch.pub(redis_cache.CACHE_DELETE_EVENT, product_cache_key(product.id), async=True)
-            dispatch.pub(redis_cache.CACHE_DELETE_EVENT, product_attrs_cache_key(product.id), async=True)
+            self.update_cache_event(product.id)
+            self.update_routeros_sync_event(product, addr_pool)
             return product
         except Exception as err:
             self.db.rollback()
@@ -217,8 +262,8 @@ class ProductService(BaseService):
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrProduct.__tablename__, dict(id=product_id)), async=True)
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrProductCharges.__tablename__, dict(product_id=product_id)), async=True)
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrProductAttr.__tablename__, dict(product_id=product_id)), async=True)
-            dispatch.pub(redis_cache.CACHE_DELETE_EVENT, product_cache_key(product_id), async=True)
-            dispatch.pub(redis_cache.CACHE_DELETE_EVENT, product_attrs_cache_key(product_id), async=True)
+            self.update_cache_event(product_id)
+            self.update_routeros_del_event(product_id)
             return True
         except Exception as err:
             self.db.rollback()

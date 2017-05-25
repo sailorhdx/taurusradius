@@ -19,7 +19,7 @@ import decimal
 import datetime
 import os
 
-@permit.route('/mps/wxorder/pay/(\w+)')
+@permit.route('/mps/wxorder/pay/(\\w+)')
 
 class WxpayOrderPayHandler(BaseHandler):
 
@@ -39,48 +39,7 @@ class WxpayOrderPayHandler(BaseHandler):
              'out_trade_no': order_data.order_id,
              'total_fee': float(order_data.fee_value)}
             ret_dict = self.wxpay.generate_jsapi(order_product, openid)
-            ret_str = u'
-            <html>
-            <head></head>
-            <body>
-            <script type="text/javascript">
-            function callpay()
-            {
-                if (typeof WeixinJSBridge == "undefined"){
-                    if( document.addEventListener ){
-                        document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
-                    }else if (document.attachEvent){
-                        document.attachEvent('WeixinJSBridgeReady', jsApiCall);
-                        document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
-                    }
-                }else{
-                    jsApiCall();
-                }
-            }
-            //alert("ddd");
-            function jsApiCall(){
-                //alert("in");
-                WeixinJSBridge.invoke(
-                    'getBrandWCPayRequest',
-                    %s,
-                    function(res){
-                        //alert(JSON.stringify(res));
-                        if(res.err_msg == "get_brand_wcpay_request:ok" ) {
-                            window.location.href = "/mps/userinfo";
-                        } else if(res.err_msg == "get_brand_wcpay_request:cancel"){
-                            window.location.href = "/mps/products";
-                        }else{
-                            alert("交易失败，请联系客服")
-                            window.location.href = "/mps/products";
-                        }
-                    }
-                );
-            }
-            callpay();
-            </script>
-            </body>
-            </html>
-            ' % json.dumps(ret_dict)
+            ret_str = u'\n            <html>\n            <head></head>\n            <body>\n            <script type="text/javascript">\n            function callpay()\n            {\n                if (typeof WeixinJSBridge == "undefined"){\n                    if( document.addEventListener ){\n                        document.addEventListener(\'WeixinJSBridgeReady\', jsApiCall, false);\n                    }else if (document.attachEvent){\n                        document.attachEvent(\'WeixinJSBridgeReady\', jsApiCall); \n                        document.attachEvent(\'onWeixinJSBridgeReady\', jsApiCall);\n                    }\n                }else{\n                    jsApiCall();\n                }\n            }\n            //alert("ddd");\n            function jsApiCall(){\n                //alert("in");\n                WeixinJSBridge.invoke(\n                    \'getBrandWCPayRequest\',\n                    %s,\n                    function(res){\n                        //alert(JSON.stringify(res));\n                        if(res.err_msg == "get_brand_wcpay_request:ok" ) {\n                            window.location.href = "/mps/userinfo";\n                        } else if(res.err_msg == "get_brand_wcpay_request:cancel"){\n                            window.location.href = "/mps/products";\n                        }else{\n                            alert("交易失败，请联系客服")\n                            window.location.href = "/mps/products";\n                        }\n                    }\n                );\n            }\n            callpay();\n            </script>\n            </body>\n            </html>\n            ' % json.dumps(ret_dict)
             self.write(ret_str)
         except Exception as err:
             logger.exception(err)
@@ -103,16 +62,7 @@ class WxpayCallbackHandler(BaseHandler):
     def send_user_paynotify(self, formdata):
         try:
             openid = formdata.get('openid')
-            wmsg = u'尊敬的用户:
-
-您好，您的交易处理成功
-
-商品: {0}
-账号: {1}
-订单号: {2}
-金额: {3} 元
-
-如有疑问，请联系客服。'
+            wmsg = u'尊敬的用户::\n\n您好，您的交易处理成功:\n\n商品: {0}\n账号: {1}\n订单号: {2}\n金额: {3} 元\n\n如有疑问，请联系客服。'
             self.send_notify(openid, wmsg.format(formdata.wxpay_body, formdata.account_number, formdata.order_id, formdata.fee_value))
         except Exception as err:
             logger.exception(err)

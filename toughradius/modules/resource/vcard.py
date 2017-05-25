@@ -16,7 +16,7 @@ from toughradius.modules.settings import *
 from toughradius.modules.dbservice.vcard_service import VcardService
 if os.environ.get('LICENSE_TYPE') != 'community':
 
-    @permit.route('/admin/vcard', u'充值卡管理', MenuRes, order=4.0, is_menu=True)
+    @permit.suproute('/admin/vcard', u'充值卡管理', MenuRes, order=4.0, is_menu=True)
 
     class VcardListHandler(BaseHandler):
 
@@ -109,7 +109,7 @@ if os.environ.get('LICENSE_TYPE') != 'community':
             self.redirect('/admin/vcard', permanent=False)
 
 
-    @permit.route('/admin/vcard/active', u'批量激活充值卡', MenuRes, order=4.0002)
+    @permit.suproute('/admin/vcard/active', u'批量激活充值卡', MenuRes, order=4.0002)
 
     class VcardActiveHandler(BaseHandler):
 
@@ -123,7 +123,7 @@ if os.environ.get('LICENSE_TYPE') != 'community':
             self.render_json(code=0, msg=u'批量卡激活完成 (只有初始化状态的卡才会被激活)')
 
 
-    @permit.route('/admin/vcard/deactive', u'批量取消激活充值卡', MenuRes, order=4.0002)
+    @permit.suproute('/admin/vcard/deactive', u'批量取消激活充值卡', MenuRes, order=4.0002)
 
     class VcardDeActiveHandler(BaseHandler):
 
@@ -137,7 +137,7 @@ if os.environ.get('LICENSE_TYPE') != 'community':
             self.render_json(code=0, msg=u'批量卡取消激活完成 (只有激活的卡才会被操作)')
 
 
-    @permit.route('/admin/vcard/delete', u'批量删除充值卡', MenuRes, order=4.0003)
+    @permit.suproute('/admin/vcard/delete', u'批量删除充值卡', MenuRes, order=4.0003)
 
     class VcardDeleteHandler(BaseHandler):
 

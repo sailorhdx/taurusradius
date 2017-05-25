@@ -12,7 +12,7 @@ from toughradius.modules.settings import *
 from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
 from toughradius.common import tools
 
-@permit.suproute('/admin/area', u'社区节点管理', MenuNode, order=1.00001, is_menu=True)
+@permit.route('/admin/area', u'社区节点管理', MenuNode, order=1.00001, is_menu=True)
 
 class NodeListHandler(BaseHandler):
 

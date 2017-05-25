@@ -75,8 +75,8 @@ function taillog(name){
             <div class="container">
                 % if current_user.opr_type == 0:
                 <div class="pull-left bottom10">
-                     <a href="javascript:reloadconfig();" class="btn btn-sm bg-navy"><i class="fa fa-refresh"></i>  重载系统配置</a>
-                     <a href="javascript:restartall();" class="btn btn-sm bg-navy"><i class="fa fa-play-circle"></i>  重启所有服务</a>
+                     <a href="javascript:reloadconfig();" class="btn btn-sm"><i class="fa fa-refresh"></i>  重载系统配置</a>
+                     <a href="javascript:restartall();" class="btn btn-sm"><i class="fa fa-play-circle"></i>  重启所有服务</a>
                 </div>
                 % endif            
                 <table class="table">
@@ -99,15 +99,15 @@ function taillog(name){
                                 <td>
                                 % if current_user.opr_type == 0:
                                     % if proc.get('name') != 'manage':
-                                    <a class="opt-btn btn-default" href="javascript:restart('${proc["name"]}')">
+                                    <a class="btn btn-xs" href="javascript:restart('${proc["name"]}')">
                                     <i class="fa fa-play"></i> 重启</a>
-                                    <a class="opt-btn btn-default" href="javascript:stop('${proc["name"]}')">
+                                    <a class="btn btn-xs" href="javascript:stop('${proc["name"]}')">
                                     <i class="fa fa-pause"></i> 停止</a>
                                     % endif
                                 % endif
-                                <a class="opt-btn btn-default" href="javascript:taillog('${proc["name"]}')">
+                                <a class="btn btn-xs" href="javascript:taillog('${proc["name"]}')">
                                 <i class="fa fa-hdd-o"></i> 日志</a>
-                                <a class="opt-btn btn-default" href="/admin/superrpc/logdownload?name=${proc['name']}">
+                                <a class="btn btn-xs" href="/admin/superrpc/logdownload?name=${proc['name']}">
                                 <i class="fa fa-hdd-o"></i> 日志下载</a>                                
                                 </td>
                             </tr>

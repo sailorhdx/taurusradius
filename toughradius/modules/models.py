@@ -2,7 +2,6 @@
 # coding=utf-8
 import sqlalchemy
 import warnings
-
 warnings.simplefilter('ignore', sqlalchemy.exc.SAWarning)
 from sqlalchemy import *
 from sqlalchemy import event
@@ -16,9 +15,7 @@ import functools
 import json
 import time
 import os
-
 DeclarativeBase = declarative_base()
-
 
 def get_metadata(db_engine):
     global DeclarativeBase
@@ -51,9 +48,23 @@ class TrNode(DeclarativeBase):
     __table_args__ = {}
     id = Column(u'id', Unicode(length=32), primary_key=True, nullable=False, doc=u'区域编号')
     node_name = Column(u'node_name', Unicode(length=32), nullable=False, doc=u'区域名')
+    node_type = Column(u'node_type', Unicode(length=32), nullable=True, doc=u'区域名')
     node_desc = Column(u'node_desc', Unicode(length=255), nullable=False, doc=u'区域描述')
     rule_id = Column(u'rule_id', Unicode(length=32), nullable=True, doc=u'规则id')
     sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
+
+
+class TrNodeAttr(DeclarativeBase):
+    """区域扩展属性表"""
+    __tablename__ = 'tr_node_attr'
+    __table_args__ = {}
+    id = Column(u'id', Unicode(length=32), primary_key=True, nullable=False, doc=u'属性id')
+    node_id = Column('node_id', Unicode(length=32), nullable=False, doc=u'区域id')
+    attr_name = Column(u'attr_name', Unicode(length=255), nullable=False, doc=u'属性名')
+    attr_value = Column(u'attr_value', Unicode(length=255), nullable=False, doc=u'属性值')
+    attr_desc = Column(u'attr_desc', Unicode(length=255), doc=u'属性描述')
+    sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
+    UniqueConstraint('node_id', 'attr_name', name='tr_node_attr_idx')
 
 
 class TrArea(DeclarativeBase):
@@ -139,12 +150,37 @@ class TrBas(DeclarativeBase):
     sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
 
 
+class TrBasAttr(DeclarativeBase):
+    """区域扩展属性表"""
+    __tablename__ = 'tr_bas_attr'
+    __table_args__ = {}
+    id = Column(u'id', Unicode(length=32), primary_key=True, nullable=False, doc=u'属性id')
+    bas_id = Column('bas_id', Unicode(length=32), nullable=False, doc=u'bas id')
+    attr_name = Column(u'attr_name', Unicode(length=255), nullable=False, doc=u'属性名')
+    attr_value = Column(u'attr_value', Unicode(length=255), nullable=False, doc=u'属性值')
+    attr_desc = Column(u'attr_desc', Unicode(length=255), doc=u'属性描述')
+    sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
+    UniqueConstraint('bas_id', 'attr_name', name='tr_bas_attr_idx')
+
+
 class TrBasNode(DeclarativeBase):
     """BAS设备关联区域"""
     __tablename__ = 'tr_bas_node'
     __table_args__ = {}
     bas_id = Column(u'bas_id', Unicode(length=32), primary_key=True, nullable=False, doc=u'设备id')
     node_id = Column(u'node_id', Unicode(length=32), primary_key=True, nullable=False, doc=u'区域id')
+    sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
+
+
+class TrAddrPool(DeclarativeBase):
+    """地址池"""
+    __tablename__ = 'tr_addr_pool'
+    __table_args__ = {}
+    id = Column(u'id', Unicode(length=32), primary_key=True, nullable=False, doc=u'地址池 id')
+    pool_name = Column(u'pool_name', Unicode(length=64), nullable=False, doc=u'地址池名称')
+    start_ip = Column(u'start_ip', Unicode(length=18), nullable=False, doc=u'起始IP')
+    end_ip = Column(u'end_ip', Unicode(length=18), nullable=False, doc=u'结束IP')
+    next_pool = Column(u'next_pool', Unicode(length=64), nullable=False, doc=u'下一个地址池')
     sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
 
 
@@ -301,6 +337,7 @@ class TrProduct(DeclarativeBase):
     bind_vlan = Column('bind_vlan', SMALLINT(), nullable=False, doc=u'是否绑定vlan')
     concur_number = Column('concur_number', INTEGER(), nullable=False, doc=u'并发数')
     fee_period = Column('fee_period', Unicode(length=11), doc=u'开放认证时段')
+    fee_days = Column('fee_days', INTEGER(), doc=u'授权天数')
     fee_months = Column('fee_months', INTEGER(), doc=u'授权月数')
     fee_times = Column('fee_times', INTEGER(), doc=u'授权时长(秒)')
     fee_flows = Column('fee_flows', INTEGER(), doc=u'授权流量(kb)')
@@ -409,6 +446,7 @@ class TrOnline(DeclarativeBase):
     start_source = Column(u'start_source', SMALLINT(), nullable=False, doc=u'记账开始来源')
     sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
     UniqueConstraint('nas_addr', 'acct_session_id', name='unique_nas_session')
+
 
 class TrAcceptLog(DeclarativeBase):
     """
@@ -521,6 +559,7 @@ class TrContentTemplate(DeclarativeBase):
     __table_args__ = {}
     id = Column(u'id', Unicode(length=32), primary_key=True, nullable=False, doc=u'id')
     tpl_type = Column(u'tpl_type', Unicode(32), nullable=False, doc=u'模板类型')
+    tpl_id = Column(u'tpl_id', Unicode(32), nullable=True, doc=u'模板id')
     tpl_content = Column(u'tpl_content', Unicode(length=1024), doc=u'模板内容')
     sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
 
@@ -722,6 +761,7 @@ class TrValCard(DeclarativeBase):
     use_time = Column('use_time', Unicode(length=19), nullable=True, doc=u'使用时间')
     expire_date = Column('expire_date', Unicode(length=19), nullable=False, doc=u'过期时间')
     create_time = Column('create_time', Unicode(length=19), nullable=False, doc=u'创建时间')
+    sync_ver = Column('sync_ver', Unicode(length=16), nullable=True, doc=u'同步版本时间戳')
 
 
 class TrRepliSyncStatus(DeclarativeBase):
@@ -755,7 +795,7 @@ def warp_sobj(action, obj):
     sobj = storage.Storage()
     sobj.table_name = obj.__tablename__
     sobj.action = action
-    sobj.pkeys = obj2json({i.name: getattr(obj, i.name) for i in obj.__table__.primary_key.columns})
+    sobj.pkeys = obj2json({i.name:getattr(obj, i.name) for i in obj.__table__.primary_key.columns})
     sobj.content = obj2json(obj)
     sobj.sync_ver = obj.sync_ver
     return sobj
@@ -772,43 +812,48 @@ def warp_sdel_obj(table_name, pkeys):
 
 
 SYNC_TABLES = [TrNode,
-               TrArea,
-               TrOperator,
-               TrOperatorNodes,
-               TrOperatorProducts,
-               TrOperatorRule,
-               TrParam,
-               TrBas,
-               TrBasNode,
-               TrRoster,
-               TrCustomer,
-               TrCustomerOrder,
-               TrAccount,
-               TrAccountAttr,
-               TrProduct,
-               TrProductAttr,
-               TrAcceptLog,
-               TrOperateLog,
-               TrAccountRule,
-               TrCharges,
-               TrProductCharges,
-               TrChargeLog,
-               TrCustomerNote,
-               TrContentTemplate,
-               TrPrintTemplate,
-               TrPrintTemplateTypes,
-               TrIssues,
-               TrIssuesAppend,
-               TrIssuesFlow,
-               TrBuilder,
-               TrAreaBuilder,
-               TrAgency,
-               TrAgencyShare,
-               TrAgencyOrder,
-               TrDomain,
-               TrDomainAttr,
-               TrDomainAp]
+ TrNodeAttr,
+ TrArea,
+ TrOperator,
+ TrOperatorNodes,
+ TrOperatorProducts,
+ TrOperatorRule,
+ TrParam,
+ TrBas,
+ TrBasAttr,
+ TrBasNode,
+ TrAddrPool,
+ TrRoster,
+ TrCustomer,
+ TrCustomerOrder,
+ TrAccount,
+ TrAccountAttr,
+ TrProduct,
+ TrProductAttr,
+ TrAcceptLog,
+ TrOperateLog,
+ TrAccountRule,
+ TrCharges,
+ TrProductCharges,
+ TrChargeLog,
+ TrCustomerNote,
+ TrContentTemplate,
+ TrPrintTemplate,
+ TrPrintTemplateTypes,
+ TrIssues,
+ TrIssuesAppend,
+ TrIssuesFlow,
+ TrBuilder,
+ TrAreaBuilder,
+ TrAgency,
+ TrAgencyShare,
+ TrAgencyOrder,
+ TrDomain,
+ TrDomainAttr,
+ TrDomainAp,
+ TrValCard]
 for tabcls in SYNC_TABLES:
+
     @event.listens_for(tabcls, 'after_delete', raw=True)
     def add_delete_sync_status(mapper, connection, target):
         print 'delete mobj'

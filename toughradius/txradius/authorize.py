@@ -9,7 +9,7 @@ from toughradius.txradius.radius import packet
 from toughradius.txradius.ext import ikuai
 from toughradius.txradius import message
 from toughradius.txradius.radius import dictionary
-import txradius
+from toughradius import txradius
 RADIUS_DICT = dictionary.Dictionary(os.path.join(os.path.dirname(txradius.__file__), 'dictionary/dictionary'))
 
 def get_dm_packet(vendor_id, nas_secret, nas_addr, coa_port = 3799, **kwargs):

@@ -10,7 +10,6 @@ from toughradius.modules.base import BaseHandler, authenticated
 from toughradius.toughlib.permit import permit
 from toughradius.modules import models
 from toughradius.modules.settings import *
-import psutil
 
 @permit.route('/admin')
 

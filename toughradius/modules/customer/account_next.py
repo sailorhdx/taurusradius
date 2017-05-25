@@ -10,6 +10,26 @@ from toughradius.toughlib import utils, dispatch, db_cache
 from toughradius.modules.settings import *
 from toughradius.modules.dbservice.account_renew import AccountRenew
 
+@permit.route('/admin/account/renew', u'用户续费或充值', MenuUser, order=2.3)
+
+class AccountRenewHandler(account.AccountHandler):
+
+    @authenticated
+    def get(self):
+        account_number = self.get_argument('account_number')
+        policy = self.db.query(models.TrProduct.product_policy).filter(models.TrProduct.id == models.TrAccount.product_id, models.TrAccount.account_number == account_number).scalar()
+        if policy in (PPMonth,
+         PPDay,
+         BOMonth,
+         BODay,
+         BOFlows,
+         BOTimes):
+            self.redirect('/admin/account/next?account_number=%s' % account_number)
+        elif policy in (PPTimes, PPFlow, PPMFlows):
+            self.redirect('/admin/account/charge?account_number=%s' % account_number)
+        else:
+            self.render_error(msg=u'该用户资费不支持续费')
+
 @permit.route('/admin/account/next/uptime', u'用户续费调整时间', MenuUser, order=2.3001)
 
 class AccountNextUptimeHandler(account.AccountHandler):

@@ -18,7 +18,7 @@ from toughradius.toughlib import utils, dispatch, logger
 from toughradius.modules.settings import *
 from toughradius.common import tools
 from toughradius.modules.events.settings import ACCOUNT_OPEN_EVENT
-from toughradius.modules.events.settings import SERVICE_INSTALL_EVENT
+from toughradius.modules.events.settings import ISSUES_ASSIGN_EVENT
 from toughradius.modules.dbservice.customer_add import CustomerAdd
 
 @permit.route('/admin/customer/fastopen', u'用户快速开户', MenuUser, order=1.10002, is_menu=True)

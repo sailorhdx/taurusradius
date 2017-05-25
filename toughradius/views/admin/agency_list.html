@@ -26,7 +26,7 @@
             <div class="container">
                 % if current_user.opr_type == 0:
                 <div class="pull-left bottom10">
-                     <a href="/admin/agency/add" class="btn btn-sm bg-navy"><i class="fa fa-plus-circle"></i> 代理商开户</a>
+                     <a href="/admin/agency/add" class="btn btn-sm"><i class="fa fa-plus-circle"></i> 代理商开户</a>
                 </div>
                 % endif
 
@@ -55,14 +55,14 @@
                                 <td>${agency.agency_desc or ''}</td>
                                 % if current_user.opr_type == 0:
                                 <td>
-                                <a class="opt-btn btn-default" href="/admin/agency/update?agency_id=${agency.id}"><i class="fa fa-edit"></i>  修改</a>
+                                <a class="btn btn-xs" href="/admin/agency/update?agency_id=${agency.id}"><i class="fa fa-edit"></i>  修改</a>
 
                                 % if current_user.opr_type == 0:
-                                <a class="opt-btn btn-default" href="/admin/agency/recharge?agency_id=${agency.id}">
+                                <a class="btn btn-xs" href="/admin/agency/recharge?agency_id=${agency.id}">
                                 <i class="fa fa-cny"></i> 充值</a>
                                 % endif
 
-                                <a class="opt-btn btn-default" href="javascript:deleteAgency('${agency.id}')"><i class="fa fa-times"></i>  删除</a>
+                                <a class="btn btn-xs" href="javascript:deleteAgency('${agency.id}')"><i class="fa fa-times"></i>  删除</a>
                                
                                 </td>
                                 % endif

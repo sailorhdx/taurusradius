@@ -34,6 +34,7 @@
             <thead>
             <tr>
                 <th>区域名称</th>
+                <th>区域类型</th>
                 <th>区域描述</th>
                 <th>操作</th>
             </tr>
@@ -42,6 +43,7 @@
             % for node in nodes:
             <tr>
                 <td>${node.node_name|h}</td>
+                <td>${node.node_type or ''|h}</td>
                 <td>${node.node_desc|h}</td>
                 <td>
                     % if permit.match(current_user.username,'/admin/node/update'):

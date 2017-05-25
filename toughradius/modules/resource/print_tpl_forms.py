@@ -4,7 +4,7 @@ from toughradius.toughlib import btforms
 from toughradius.toughlib.btforms import dataform
 from toughradius.toughlib.btforms import rules
 from toughradius.toughlib.btforms.rules import button_style, input_style
-button_style = {'class': 'btn btn-sm bg-navy'}
+button_style = {'class': 'btn btn-sm'}
 tpl_types = {'open': u'开户',
  'next': u'续费',
  'change': u'变更',

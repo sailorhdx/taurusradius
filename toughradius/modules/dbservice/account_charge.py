@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+import traceback
 from toughradius.modules.settings import *
 from hashlib import md5
 from toughradius.modules import models
@@ -10,8 +11,13 @@ from toughradius.modules.dbservice import BaseService
 from toughradius.modules.dbservice import logparams
 from toughradius.common import tools
 from toughradius.toughlib.btforms import rules
+from toughradius.modules.events import settings as evset
 
 class AccountCharge(BaseService):
+
+    def update_routeros_sync_event(self, name, pwd, profile, node_id):
+        dispatch.pub(evset.ROSSYNC_SET_PPPOE_USER, name, pwd, profile, node_id=node_id, async=True)
+        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_USER, name, pwd, profile, node_id=node_id, async=True)
 
     def check_vcard(self, vcard, vcard_pwd, product):
         if not vcard:
@@ -49,7 +55,7 @@ class AccountCharge(BaseService):
 
         :param formdata:   用户充值参数表
         :type formdata:    dict
-
+        
         formdata params:
 
         :param account_number:   用户账号
@@ -71,6 +77,7 @@ class AccountCharge(BaseService):
             account = self.db.query(models.TrAccount).get(account_number)
             if account.status in (3, 4, 5):
                 raise ValueError(u'无效用户状态')
+            node_id = self.db.query(models.TrCustomer.node_id).filter(models.TrCustomer.customer_id == models.TrAccount.customer_id, models.TrAccount.account_number == account_number).scalar()
             charge_timelen = 0
             charge_flowlen = 0
             product = self.db.query(models.TrProduct).get(account.product_id)
@@ -113,7 +120,7 @@ class AccountCharge(BaseService):
             order.accept_id = accept_log.id
             order.order_source = 'console'
             order.create_time = utils.get_currtime()
-            order.order_desc = accept_log.accept_desc
+            order.order_desc = accept_log.accept_desc or ''
             order.stat_year = order.create_time[0:4]
             order.stat_month = order.create_time[0:7]
             order.stat_day = order.create_time[0:10]
@@ -137,11 +144,13 @@ class AccountCharge(BaseService):
             self.db.commit()
             dispatch.pub(ACCOUNT_NEXT_EVENT, order.account_number, async=True)
             dispatch.pub(redis_cache.CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
+            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_renew_error')
             self.last_error = u'用户充值失败:%s' % utils.safeunicode(err)
+            logger.error(self.last_error, tag='account_charge_error', username=formdata.get('account_number'))
+            traceback.print_exc()
             return False
 
         return

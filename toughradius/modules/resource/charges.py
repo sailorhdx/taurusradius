@@ -13,7 +13,7 @@ from toughradius.modules.settings import *
 from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
 from toughradius.common import tools
 
-@permit.suproute('/admin/charge', u'收费项目管理', MenuRes, order=7.0, is_menu=True)
+@permit.route('/admin/charge', u'收费项目管理', MenuRes, order=7.0, is_menu=True)
 
 class ChargeListHandler(BaseHandler):
 

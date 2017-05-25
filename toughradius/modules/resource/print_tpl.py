@@ -15,7 +15,7 @@ from toughradius.modules.settings import *
 from toughradius.common import tools
 if os.environ.get('LICENSE_TYPE') != 'community':
 
-    @permit.suproute('/admin/printtpl', u'票据模板管理', MenuRes, order=5.0, is_menu=True)
+    @permit.route('/admin/printtpl', u'票据模板管理', MenuRes, order=5.0, is_menu=True)
 
     class ContentTplListHandler(BaseHandler):
 

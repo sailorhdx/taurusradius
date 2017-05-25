@@ -222,7 +222,7 @@ class WXpay(object):
         raise TokenAuthorizationError(u'签名验证失败')
 
     def generate_notify_resp(self, resp_dict):
-        raise set(resp_dict.keys()) == set(['return_code', 'return_msg']) or AssertionError
+        #raise set(resp_dict.keys()) == set(['return_code', 'return_msg']) or AssertionError
         xml_str = dict2xml(resp_dict, wrap='xml')
         return xml_str
 

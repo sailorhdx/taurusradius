@@ -11,6 +11,7 @@ from toughradius.toughlib.permit import permit
 from toughradius.toughlib import utils, dispatch, db_cache
 from toughradius.modules.settings import *
 from toughradius.common import tools
+from toughradius.modules.dbservice.account_service import AccountService
 
 @permit.route('/admin/account/update', u'用户策略修改', MenuUser, order=2.2)
 
@@ -30,18 +31,7 @@ class AccountUpdatetHandler(account.AccountHandler):
         form = account_forms.account_update_form()
         if not form.validates(source=self.get_params()):
             return self.render('base_form.html', form=form)
-        account = self.db.query(models.TrAccount).get(form.d.account_number)
-        account.ip_address = form.d.ip_address
-        account.install_address = form.d.install_address
-        account.user_concur_number = form.d.user_concur_number
-        account.bind_mac = form.d.bind_mac
-        account.bind_vlan = form.d.bind_vlan
-        account.domain = form.d.domain
-        account.account_desc = form.d.account_desc
-        account.sync_ver = tools.gen_sync_ver()
-        if form.d.new_password:
-            account.password = self.aes.encrypt(form.d.new_password)
-        self.add_oplog(u'修改上网账号信息:%s' % account.account_number)
-        self.db.commit()
-        dispatch.pub(db_cache.CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
-        self.redirect(self.detail_url_fmt(account.account_number))
+        manager = AccountService(self.db, self.aes)
+        if not manager.update(form.d):
+            return self.render_error(msg=manager.last_error)
+        self.redirect(self.detail_url_fmt(form.d.account_number))

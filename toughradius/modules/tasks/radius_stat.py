@@ -17,6 +17,9 @@ from toughradius.modules import taskd
 class RadiusStatTask(TaseBasic):
     __name__ = 'radius-stat'
 
+    def get_next_interval(self):
+        return 5
+
     def first_delay(self):
         return 5
 
@@ -24,7 +27,7 @@ class RadiusStatTask(TaseBasic):
         TaseBasic.__init__(self, taskd, **kwargs)
         self.flow_stat = {}
         self.statdata = self.cache.get(radius_statcache_key) or statistics.MessageStat(quemax=180)
-        self.puller = ZmqPullConnection(ZmqFactory(), ZmqEndpoint('bind', self.config.mqproxy.task_bind))
+        self.puller = ZmqPullConnection(ZmqFactory(), ZmqEndpoint('bind', self.config.mqproxy['task_bind']))
         self.puller.onPull = self.update_stat
         logger.info('start stat mq %s' % self.puller)
 

@@ -27,7 +27,7 @@
             <div class="container">
                 % if current_user.opr_type == 0:
                 <div class="pull-left bottom10">
-                     <a href="/admin/operator/add" class="btn btn-sm bg-navy"><i class="fa fa-plus-circle"></i>  创建操作员信息</a>
+                     <a href="/admin/operator/add" class="btn btn-sm"><i class="fa fa-plus-circle"></i>  创建操作员信息</a>
                 </div>
                 % endif
 
@@ -51,9 +51,9 @@
                                  % if current_user.opr_type == 0:
                                 <td>
                                 % if operator.operator_type > 0:
-                                <a class="opt-btn btn-default" href="/admin/operator/update?operator_id=${operator.id}">
+                                <a class="btn btn-xs" href="/admin/operator/update?operator_id=${operator.id}">
                                 <i class="fa fa-edit"></i> 修改</a>
-                                <a class="opt-btn btn-default" href="javascript:deleteOperator('${operator.id}')">
+                                <a class="btn btn-xs" href="javascript:deleteOperator('${operator.id}')">
                                 <i class="fa fa-times"></i> 删除</a>
                                 % endif
                                 </td>

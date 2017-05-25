@@ -14,8 +14,17 @@ from toughradius.modules.dbservice import logparams
 from toughradius.modules.events.settings import ACCOUNT_DELETE_EVENT
 from toughradius.modules.events.settings import CACHE_DELETE_EVENT
 from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
+from toughradius.modules.events import settings as evset
 
 class AccountService(BaseService):
+
+    def update_routeros_del_event(self, name, node_id):
+        dispatch.pub(evset.ROSSYNC_DEL_PPPOE_USER, name, node_id=node_id, async=True)
+        dispatch.pub(evset.ROSSYNC_DEL_HOTSPOT_USER, name, node_id=node_id, async=True)
+
+    def update_routeros_sync_event(self, name, pwd, profile, node_id):
+        dispatch.pub(evset.ROSSYNC_SET_PPPOE_USER, name, pwd, profile, node_id=node_id, async=True)
+        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_USER, name, pwd, profile, node_id=node_id, async=True)
 
     @logparams
     def delete(self, account_number, **kwargs):
@@ -44,19 +53,22 @@ class AccountService(BaseService):
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrOnline.__tablename__, dict(account_number=account.account_number)), async=True)
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrAccount.__tablename__, dict(account_number=account.account_number)), async=True)
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrCustomerOrder.__tablename__, dict(account_number=account.account_number)), async=True)
+            self.update_routeros_del_event(account_number, None)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_delete_error')
             self.last_error = u'用户删除失败:%s' % utils.safeunicode(err.message)
+            logger.error(self.last_error, tag='account_delete_error', username=account_number)
             return False
+
+        return
 
     def password(self, formdata, **kwargs):
         """用户密码修改
 
         :param formdata:   密码修改参数表
         :type formdata:    dict
-
+        
         formdata params:
 
         :param account_number:   用户账号
@@ -71,14 +83,16 @@ class AccountService(BaseService):
             account = self.db.query(models.TrAccount).get(account_number)
             account.password = self.aes.encrypt(password)
             account.sync_ver = tools.gen_sync_ver()
+            node_id = self.db.query(models.TrCustomer.node_id).filter(models.TrCustomer.customer_id == models.TrAccount.customer_id, models.TrAccount.account_number == account_number).scalar()
             self.add_oplog(u'修改用户%s密码 ' % account_number)
             self.db.commit()
             dispatch.pub(CACHE_DELETE_EVENT, account_cache_key(account_number), async=True)
+            self.update_routeros_sync_event(account_number, password, account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_uppwd_error')
             self.last_error = u'用户修改密码失败:%s' % utils.safeunicode(err.message)
+            logger.error(self.last_error, tag='account_uppwd_error', username=formdata.get('account_number'))
             return False
 
     @logparams
@@ -111,12 +125,20 @@ class AccountService(BaseService):
             accept_log.stat_day = accept_log.accept_time[0:10]
             self.db.add(accept_log)
             self.db.commit()
+            self.update_routeros_del_event(account_number, None)
+            dispatch.pub(evset.ACCOUNT_PAUSE_EVENT, account.account_number, async=True)
+            dispatch.pub(evset.CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
+            for online in self.db.query(models.TrOnline).filter_by(account_number=account_number):
+                dispatch.pub(evset.UNLOCK_ONLINE_EVENT, account_number, online.nas_addr, online.acct_session_id, async=True)
+
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_pause_error')
             self.last_error = u'用户停机失败:%s' % utils.safeunicode(err.message)
+            logger.error(self.last_error, tag='account_pause_error', username=account_number)
             return False
+
+        return
 
     @logparams
     def resume(self, account_number, **kwargs):
@@ -129,6 +151,7 @@ class AccountService(BaseService):
             if not account_number:
                 raise ValueError(u'账号不能为空')
             account = self.db.query(models.TrAccount).get(account_number)
+            node_id = self.db.query(models.TrCustomer.node_id).filter(models.TrCustomer.customer_id == models.TrAccount.customer_id, models.TrAccount.account_number == account_number).scalar()
             if account.status != 2:
                 return self.render_json(code=1, msg=u'用户当前状态不允许复机')
             account.status = 1
@@ -152,11 +175,12 @@ class AccountService(BaseService):
             accept_log.stat_day = accept_log.accept_time[0:10]
             self.db.add(accept_log)
             self.db.commit()
+            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_resume_error')
             self.last_error = u'用户停机失败:%s' % utils.safeunicode(err.message)
+            logger.error(self.last_error, tag='account_resume_error', username=account_number)
             return False
 
     @logparams
@@ -165,9 +189,9 @@ class AccountService(BaseService):
 
         :param formdata:   密码修改参数表
         :type formdata:    dict
-
+        
         formdata params:
-
+        
         :param account_number:   用户账号
         :type account_number:    string
         :param ip_address:    用户IP地址
@@ -195,6 +219,7 @@ class AccountService(BaseService):
             domain = self.parse_arg(formdata, 'domain')
             account_desc = self.parse_arg(formdata, 'account_desc')
             account = self.db.query(models.TrAccount).get(account_number)
+            node_id = self.db.query(models.TrCustomer.node_id).filter(models.TrCustomer.customer_id == models.TrAccount.customer_id, models.TrAccount.account_number == account_number).scalar()
             if ip_address is not None:
                 account.ip_address = ip_address
             if install_address is not None:
@@ -210,11 +235,12 @@ class AccountService(BaseService):
             self.add_oplog(u'修改上网账号信息:%s' % account.account_number)
             self.db.commit()
             dispatch.pub(CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
+            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_update_error')
             self.last_error = u'用户修改失败:%s' % utils.safeunicode(err.message)
+            logger.error(self.last_error, tag='account_update_error', username=formdata.get('account_number'))
             return False
 
         return
@@ -230,6 +256,7 @@ class AccountService(BaseService):
             if not account_number:
                 raise ValueError(u'账号不能为空')
             account = self.db.query(models.TrAccount).get(account_number)
+            node_id = self.db.query(models.TrCustomer.node_id).filter(models.TrCustomer.customer_id == models.TrAccount.customer_id, models.TrAccount.account_number == account_number).scalar()
             account.mac_addr = ''
             account.vlan_id1 = 0
             account.vlan_id2 = 0
@@ -237,9 +264,10 @@ class AccountService(BaseService):
             self.add_oplog(u'释放用户账号（%s）绑定信息' % account_number)
             self.db.commit()
             dispatch.pub(CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
+            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_release_error')
             self.last_error = u'用户解绑失败:%s' % utils.safeunicode(err.message)
+            logger.error(self.last_error, tag='account_release_error', username=account_number)
             return False

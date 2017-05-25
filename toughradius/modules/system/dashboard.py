@@ -19,7 +19,11 @@ from collections import deque
 from toughradius.modules import models
 from toughradius.modules.settings import *
 from toughradius.common import tools
-import psutil
+try:
+    import psutil
+except:
+    import traceback
+    traceback.print_exc()
 
 @permit.route('/admin/cache/clean')
 
@@ -62,8 +66,11 @@ class DashboardHandler(BaseHandler):
         return str(rate.quantize(decimal.Decimal('1.00')))
 
     def get_disk_use(self):
-        disks = [ (p, psutil.disk_usage(p)) for p in [ a.mountpoint for a in psutil.disk_partitions() ] ]
-        return disks
+        try:
+            disks = [ (p, psutil.disk_usage(p)) for p in [ a.mountpoint for a in psutil.disk_partitions() ] ]
+            return disks
+        except:
+            return []
 
     @authenticated
     def get(self):

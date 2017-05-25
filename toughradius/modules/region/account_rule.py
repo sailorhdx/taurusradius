@@ -13,7 +13,7 @@ from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
 from toughradius.modules.settings import *
 from toughradius.common import tools
 
-@permit.suproute('/admin/account_rule', u'账号生成规则', MenuNode, order=6.0, is_menu=True)
+@permit.route('/admin/account_rule', u'账号生成规则', MenuNode, order=6.0, is_menu=True)
 
 class AccountRuleListHandler(BaseHandler):
 

@@ -12,7 +12,7 @@ from toughradius.modules.customer import customer_forms
 from toughradius.modules.base import authenticated
 from toughradius.modules.customer.customer import CustomerHandler
 from toughradius.toughlib.permit import permit
-from toughradius.toughlib import utils
+from toughradius.toughlib import utils, logger
 from toughradius.modules.settings import *
 from toughradius.common import tools
 
@@ -28,17 +28,17 @@ class CustomerImportHandler(CustomerHandler):
     def get_node_id(self, node_name, ncache = {}):
         if node_name in ncache:
             return ncache[node_name]
-        return self.db.query(models.TrNode.id).filter_by(node_name=node_name).scalar()
+        return self.db.query(models.TrNode.id).filter_by(node_name=node_name).limit(1).scalar()
 
     def get_area_id(self, area_name, acache = {}):
         if area_name in acache:
             return acache[area_name]
-        return self.db.query(models.TrArea.id).filter_by(area_name=area_name).scalar()
+        return self.db.query(models.TrArea.id).filter_by(area_name=area_name).limit(1).scalar()
 
     def get_product_id(self, product_name, pcache = {}):
         if product_name in pcache:
             return pcache[product_name]
-        return self.db.query(models.TrProduct.id).filter_by(product_name=product_name).scalar()
+        return self.db.query(models.TrProduct.id).filter_by(product_name=product_name).limit(1).scalar()
 
     @authenticated
     def post(self):
@@ -51,6 +51,7 @@ class CustomerImportHandler(CustomerHandler):
         try:
             impctx = utils.safeunicode(f['body'])
         except Exception as err:
+            logger.exception(err)
             self.render_error(msg=u'文件格式错误： %s' % utils.safeunicode(err))
             return
 
@@ -70,7 +71,7 @@ class CustomerImportHandler(CustomerHandler):
             if attr_array[7] in accounts:
                 continue
             vform = customer_forms.customer_import_vform()
-            vform.fill(**dict(realname=utils.safeunicode(attr_array[0]), node=attr_array[1], area=attr_array[2], product=attr_array[3], idcard=attr_array[4], mobile=attr_array[5], address=utils.safeunicode(attr_array[6]), account_number=attr_array[7], password=attr_array[8], begin_date=attr_array[9], expire_date=attr_array[10], balance=attr_array[11], time_length=utils.hour2sec(attr_array[12]), flow_length=utils.mb2kb(attr_array[13])))
+            vform.fill(**dict(realname=utils.safeunicode(attr_array[0]), node=utils.safeunicode(attr_array[1]), area=utils.safeunicode(attr_array[2]), product=utils.safeunicode(attr_array[3]), idcard=attr_array[4], mobile=attr_array[5], address=utils.safeunicode(attr_array[6]), account_number=attr_array[7], password=attr_array[8], begin_date=attr_array[9], expire_date=attr_array[10], balance=attr_array[11], time_length=utils.hour2sec(attr_array[12]), flow_length=utils.mb2kb(attr_array[13])))
             impusers.append(vform)
 
         _unums = 0
@@ -78,13 +79,13 @@ class CustomerImportHandler(CustomerHandler):
             try:
                 node_id = self.get_node_id(form.d.node, node_cache)
                 if not node_id:
-                    raise ValueError(u'区域:%s不存在' % form.d.node)
+                    raise ValueError(u'区域:%s不存在' % utils.safeunicode(form.d.node))
                 area_id = self.get_area_id(form.d.area, area_cache)
                 if not area_id:
-                    raise ValueError(u'社区:%s不存在' % form.d.area)
+                    raise ValueError(u'社区:%s不存在' % utils.safeunicode(form.d.area))
                 product_id = self.get_product_id(form.d.product, product_cache)
                 if not product_id:
-                    raise ValueError(u'资费:%s不存在' % form.d.product)
+                    raise ValueError(u'资费:%s不存在' % utils.safeunicode(form.d.product))
                 customer = models.TrCustomer()
                 customer.customer_id = utils.get_uuid()
                 customer.node_id = node_id
@@ -179,6 +180,7 @@ class CustomerImportHandler(CustomerHandler):
                 _unums += 1
             except Exception as e:
                 self.db.rollback()
+                logger.exception(e)
                 return self.render('customer_import_form.html', form=iform, msg=u'导入数据错误 : %s' % utils.safeunicode(e))
 
         self.add_oplog(u'导入开户，用户数：%s' % _unums)

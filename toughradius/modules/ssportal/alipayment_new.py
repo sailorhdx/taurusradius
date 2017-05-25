@@ -6,6 +6,8 @@ import os
 import json
 import decimal
 import string
+import urllib
+import base64
 from hashlib import md5
 from toughradius.toughlib import utils, logger
 from toughradius.common import safefile
@@ -20,7 +22,7 @@ from toughradius.toughlib.storage import Storage
 from toughradius.modules import models
 from toughradius.modules.dbservice.customer_add import CustomerAdd
 from toughradius.modules.settings import order_paycaache_key
-from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, APMonth, MAX_EXPIRE_DATE
+from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, APMonth, PPDay, BODay, MAX_EXPIRE_DATE, VcodeNotify
 product_policys = {PPMonth: u'预付费包月',
  APMonth: u'后付费包月',
  PPTimes: u'预付费时长',
@@ -34,12 +36,15 @@ product_policys = {PPMonth: u'预付费包月',
 class SSportalProductHandler(BaseHandler):
 
     def get(self):
-        products = self.db.query(models.TrProduct).filter(models.TrProduct.product_policy.in_([BOMonth,
+        types = [BOMonth,
          BOFlows,
          BOTimes,
          PPMonth,
          PPTimes,
-         PPFlow]), models.TrProduct.ispub == 1)
+         PPFlow,
+         PPDay,
+         BODay]
+        products = self.db.query(models.TrProduct).filter(models.TrProduct.product_policy.in_(types), models.TrProduct.ispub == 1)
         self.render('product.html', products=products, policys=product_policys)
 
 
@@ -56,6 +61,7 @@ class BasicOrderHandler(BaseHandler):
 
     def order_calc(self, product_id, old_expire = None, charge_fee = 100):
         months = int(self.get_argument('months', 0))
+        days = int(self.get_argument('days', 0))
         product = self.db.query(models.TrProduct).get(product_id)
         self_recharge_minfee = utils.yuan2fen(self.get_param_value('self_recharge_minfee', 100))
         fee_value, expire_date = (None, None)
@@ -73,13 +79,51 @@ class BasicOrderHandler(BaseHandler):
                 start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
             expire_date = utils.add_months(start_expire, int(months), days=0)
             expire_date = expire_date.strftime('%Y-%m-%d')
+        elif product.product_policy == PPDay:
+            fee = decimal.Decimal(days) * decimal.Decimal(product.fee_price)
+            fee_value = utils.fen2yuan(int(fee.to_integral_value()))
+            start_expire = datetime.datetime.now()
+            if old_expire:
+                start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
+            expire_date = start_expire + datetime.timedelta(days=days)
+            expire_date = expire_date.strftime('%Y-%m-%d')
         elif product.product_policy == BOMonth:
             start_expire = datetime.datetime.now()
             if old_expire:
                 start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
-            fee_value = utils.fen2yuan(product.fee_price)
-            expire_date = utils.add_months(start_expire, product.fee_months, days=0)
-            expire_date = expire_date.strftime('%Y-%m-%d')
+            if months > 0:
+                mprice = self.get_product_attr(product.id, 'month_price')
+                if mprice:
+                    mpricefee = decimal.Decimal(mprice.attr_value)
+                else:
+                    mpricefee = decimal.Decimal(product.fee_price) / decimal.Decimal(product.fee_months)
+                fee = decimal.Decimal(months) * mpricefee
+                fee_value = utils.fen2yuan(int(fee.to_integral_value()))
+                expire_date = utils.add_months(start_expire, int(months), days=0)
+                expire_date = expire_date.strftime('%Y-%m-%d')
+            else:
+                fee_value = utils.fen2yuan(product.fee_price)
+                expire_date = utils.add_months(start_expire, product.fee_months, days=0)
+                expire_date = expire_date.strftime('%Y-%m-%d')
+        elif product.product_policy == BODay:
+            start_expire = datetime.datetime.now()
+            if old_expire:
+                start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
+            if days > 0:
+                dprice = self.get_product_attr(product.id, 'day_price')
+                if dprice:
+                    dpricefee = decimal.Decimal(dprice.attr_value)
+                else:
+                    dpricefee = decimal.Decimal(product.fee_price) / decimal.Decimal(product.fee_days)
+                print 'dprice=', dpricefee
+                fee = decimal.Decimal(days) * dpricefee
+                fee_value = utils.fen2yuan(int(fee.to_integral_value()))
+                expire_date = start_expire + datetime.timedelta(days=days)
+                expire_date = expire_date.strftime('%Y-%m-%d')
+            else:
+                fee_value = utils.fen2yuan(product.fee_price)
+                expire_date = start_expire + datetime.timedelta(days=product.fee_days)
+                expire_date = expire_date.strftime('%Y-%m-%d')
         elif product.product_policy == PPMFlows:
             fee = decimal.Decimal(months) * decimal.Decimal(product.fee_price)
             fee_value = utils.fen2yuan(int(fee.to_integral_value()))
@@ -285,7 +329,11 @@ class SendSmsVcodeHandler(BaseHandler):
             gateway = self.get_param_value('sms_gateway')
             apikey = self.get_param_value('sms_api_user')
             apisecret = self.get_param_value('sms_api_pwd')
-            resp = yield smsapi.send_vcode(gateway, apikey, apisecret, phone, vcode)
+            tplid = self.get_tpl_id(VcodeNotify)
+            if not tplid:
+                self.render_json(code=1, msg=u'没有对应的短信模版')
+                return
+            resp = yield smsapi.send_sms(gateway, apikey, apisecret, phone, tplid, args=[vcode], kwargs=dict(vcode=vcode))
             self.render_json(code=0, msg='ok')
         except Exception as err:
             logger.exception(err)

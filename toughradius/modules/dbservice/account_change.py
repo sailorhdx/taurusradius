@@ -10,8 +10,13 @@ from toughradius.modules.dbservice import BaseService
 from toughradius.modules.dbservice import logparams
 from toughradius.common import tools
 from toughradius.toughlib.btforms import rules
+from toughradius.modules.events import settings as evset
 
 class AccountChange(BaseService):
+
+    def update_routeros_sync_event(self, name, pwd, profile, node_id):
+        dispatch.pub(evset.ROSSYNC_SET_PPPOE_USER, name, pwd, profile, node_id=node_id, async=True)
+        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_USER, name, pwd, profile, node_id=node_id, async=True)
 
     @logparams
     def change(self, formdata, **kwargs):
@@ -19,9 +24,9 @@ class AccountChange(BaseService):
 
         :param formdata:   用户续费参数表
         :type formdata:    dict
-
+        
         formdata params:
-
+        
         :param account_number:   用户账号
         :type account_number:    string
         :param product_id:   变更后的资费ID
@@ -51,7 +56,8 @@ class AccountChange(BaseService):
             account = self.db.query(models.TrAccount).get(account_number)
             if account.status not in (1, 4):
                 raise ValueError(u'无效用户状态')
-            product = self.db.query(models.TrProduct).get(account.product_id)
+            node_id = self.db.query(models.TrCustomer.node_id).filter(models.TrCustomer.customer_id == models.TrAccount.customer_id, models.TrAccount.account_number == account_number).scalar()
+            product = self.db.query(models.TrProduct).get(product_id)
             accept_log = models.TrAcceptLog()
             accept_log.id = utils.get_uuid()
             accept_log.accept_type = 'change'
@@ -67,7 +73,10 @@ class AccountChange(BaseService):
             self.db.add(accept_log)
             old_exoire_date = account.expire_date
             account.product_id = product.id
-            if product.product_policy in (PPMonth, BOMonth):
+            if product.product_policy in (PPMonth,
+             BOMonth,
+             PPDay,
+             BODay):
                 account.expire_date = expire_date
                 account.balance = 0
                 account.time_length = 0
@@ -147,9 +156,10 @@ class AccountChange(BaseService):
             self.add_oplog(accept_log.accept_desc)
             self.db.commit()
             dispatch.pub(redis_cache.CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
+            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='account_change_error')
             self.last_error = u'用户资费变更失败:%s' % utils.safeunicode(err)
+            logger.error(self.last_error, tag='account_change_error', username=formdata.get('account_number'))
             return False

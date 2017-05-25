@@ -2,8 +2,44 @@
 <%def name="head()">
 <script>
 $(function () {
-        $('[data-toggle="popover"]').popover()
-    })
+    
+    $('[data-toggle="popover"]').popover();
+
+    % if ac_temp_auth_url:
+    //需要临时授权
+    $("#paypost").click(function(){
+        $.ajax({
+             type: "get",
+             url: "${ac_temp_auth_url|n}",
+             dataType: "jsonp",
+             jsonp: "callback",
+             jsonpCallback:"gw_authUrl_callback",
+             success: function(json){
+                if(typeof(json) == "object"){
+                    if(json.code == 100){
+                        auth_result=true;
+                        $("#payform").submit();
+                    }else{
+                        alert(json.msg);
+                    }
+                }else{
+                    alert("临时授权失败，请刷新重试");
+                }
+             },
+             error: function(){
+                 alert("连接授权服务器失败，请先检查网络");
+             },
+             complete:function(){
+             }
+        });
+    });
+    % else:
+    $("#paypost").click(function(){
+        $("#payform").submit();
+    });
+    % endif
+ 
+});
 </script>
 </%def>
 <%def name="body()">
@@ -25,11 +61,11 @@ $(function () {
                 <div class="col-md-6 itbox">交易金额: ${formdata.fee_value}</div>
             </div>
         </div>
-        <form class="form-horizontal form-well" role="form" 
+        <form id="payform" class="form-horizontal form-well" role="form" 
             action="/ssportal/product/charge/alipay" method="post">
             ${xsrf_form_html()|n}
             <input type="hidden" name="order_id" value="${formdata.order_id}">
-            <button name="submit" placeholder="submit" id="submit" type="submit" class="btn btn-primary"><b> 支付宝支付</b></button>
+            <button name="button" placeholder="" id="paypost" type="button" class="btn btn-primary"><b> 支付宝支付</b></button>
         </form>
     </div>
 

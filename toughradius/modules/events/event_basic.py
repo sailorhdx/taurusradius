@@ -3,6 +3,7 @@
 from sqlalchemy.orm import scoped_session, sessionmaker
 from toughradius.modules import models
 from toughradius.toughlib.dbutils import make_db
+from toughradius.modules.settings import tplid_cache_key
 from toughradius.modules.settings import param_cache_key
 
 class BasicEvent:
@@ -22,6 +23,13 @@ class BasicEvent:
                 return conn.execute(table.select().with_only_columns([table.c.param_value]).where(table.c.param_name == name)).scalar()
 
         return self.mcache.aget(param_cache_key(name), fetch_result, expire=300) or defval
+
+    def get_tpl_id(self, tpl_type):
+
+        def fetch_result():
+            return self.db.query(models.TrContentTemplate.tpl_id).filter_by(tpl_type=tpl_type).scalar()
+
+        return self.mcache.aget(tplid_cache_key(tpl_type), fetch_result, expire=300)
 
     def get_customer_info(self, account_number):
         with make_db(self.db) as db:

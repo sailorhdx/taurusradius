@@ -209,9 +209,24 @@ $(document).ready(function () {
 
 </script>
 <style type="text/css">
-    .break-all {
-        word-break: break-all; /*必須*/
-    }
+.break-all {
+    word-break: break-all; /*必須*/
+}
+.progress.vertical {
+    position: relative;
+    width: 15px;
+    height: 150px;
+    display: inline-block;
+    margin-right: 10px;
+}  
+.progress {
+    height: 20px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}  
 </style>
 </%def>
 
@@ -261,44 +276,44 @@ $(document).ready(function () {
                 <tr>
                     <td>授权类型</td>
                     <td>${handler.license.type}</td>
+                    <td>授权用户数(最大在线)</td>
+                    <td>${handler.get_license_ulimit(handler.license.get('ulimit'))}</td>
+                </tr>
+                <tr>
+                    <td>授权开始时间</td>
+                    <td>${handler.license.create_at}</td>
                     <td>授权到期时间</td>
                     <td>${handler.license.expire}</td>
                 </tr>
                 % endif
                 <tr>
                     <th width=15% >cpu使用率</th>
-                    <td colspan="3" class="break-all">${'; '.join([ 'cpu%s: %s/%%'%(cpuuse.index(c),c)  for c in cpuuse])}</td>              
-                </tr>
-                <tr>
-                    <th width=15% >内存使用率</th>
-                    <td colspan="3" >
-                    <div>
-                    <div class="col-md-6">
+                    <td class="break-all" colspan=2>
+                    % for c in cpuuse:
+                    <div class="progress vertical">
+                        <div class="progress-bar progress-bar-striped progress-bar-${handler.bar_style(c)}" role="progressbar" aria-valuenow="${c}" aria-valuemin="0" aria-valuemax="100" style="height: ${c}%">
+                          <span class="sr-only">'cpu%s: %s/%%'%(cpuuse.index(c),c) </span>
+                        </div>
+                    </div>
+                    % endfor
+                    </td>              
+                    <td>
+                    <b>内存使用率</b>
+                    <div class="progress">
+                      <div class="progress-bar progress-bar-${handler.bar_style(memuse.percent)}" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: ${memuse.percent}% ">
+                        <span>${int((memuse.total-memuse.available)/1024.0/1024.0)}MB / ${int(memuse.total/1024.0/1024.0)}MB, ${memuse.percent}% </span>
+                      </div>
+                    </div>
+                    <br>
+                    <b>磁盘使用率</b>
+                    % for part, d in diskuse:
                         <div class="progress">
-                          <div class="progress-bar progress-bar-${handler.bar_style(memuse.percent)}" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: ${memuse.percent}% ">
-                            <span>${int((memuse.total-memuse.available)/1024.0/1024.0)}MB / ${int(memuse.total/1024.0/1024.0)}MB, ${memuse.percent}% </span>
+                          <div class="progress-bar progress-bar-${handler.bar_style(d.percent)}" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: ${d.percent}% ">
+                            <span>${"%s %sG/%sG, used %s%%"%(part,handler.bb2gb(d.used),handler.bb2gb(d.total),d.percent)}</span>
                           </div>
                         </div>
-                    </div>
-                  </div>
-                  </td>      
-                </tr>
-                <tr>
-                    <th>磁盘使用率</th>
-                    <td colspan="3">
-                    % for part, d in diskuse:
-                    <div>
-                        <div class="col-md-6">
-                            <div class="progress">
-                              <div class="progress-bar progress-bar-${handler.bar_style(d.percent)}" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: ${d.percent}% ">
-                                <span>${"%s %sG/%sG, used %s%%"%(part,handler.bb2gb(d.used),handler.bb2gb(d.total),d.percent)}</span>
-                              </div>
-                            </div>
-                        </div>
-                    </div>
-
                     % endfor
-                    </td>
+                  </td>      
                 </tr>
                 <tr>
                     <td>主备同步状态</td>

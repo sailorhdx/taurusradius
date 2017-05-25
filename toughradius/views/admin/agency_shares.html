@@ -110,10 +110,10 @@
             </div>    
              <div class="form-group">         
                 <div class="col-md-7 col-md-offset-5">
-                    <button type="button" onclick="do_submit();" class="btn btn-sm bg-navy">查询</button>
-                    <button type="button" onclick="$('input').val('');" class="btn btn-sm bg-navy">重置</button>
+                    <button type="button" onclick="do_submit();" class="btn btn-sm">查询</button>
+                    <button type="button" onclick="$('input').val('');" class="btn btn-sm">重置</button>
                     % if permit.match(current_user.username,'/admin/agency/shares/export'):
-                    <a href="javascript:do_export();" class="btn btn-sm bg-navy">
+                    <a href="javascript:do_export();" class="btn btn-sm">
                     <i class="fa fa-sign-out"></i> 导出数据</a>
                     % endif
                 </div>

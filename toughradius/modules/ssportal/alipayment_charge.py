@@ -5,6 +5,7 @@ import time
 import json
 import decimal
 import string
+import base64
 from hashlib import md5
 from toughradius.toughlib import utils, logger
 from toughradius.modules.ssportal.base import BaseHandler, authenticated
@@ -18,8 +19,8 @@ from toughradius.modules.dbservice.account_charge import AccountCharge
 from toughradius.modules.settings import order_paycaache_key
 from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, MAX_EXPIRE_DATE
 
-
 @permit.route('/ssportal/product/charge')
+
 class SSportalChargeOrderHandler(alipayment_new.BasicOrderHandler):
     """ 发起续费支付
     """
@@ -68,6 +69,7 @@ class SSportalChargeOrderHandler(alipayment_new.BasicOrderHandler):
 
 
 @permit.route('/ssportal/product/charge/alipay')
+
 class SSportalProductRenewHandler(BaseHandler):
     """ 支付信息确认，跳转支付宝
     """
@@ -85,7 +87,24 @@ class SSportalProductRenewHandler(BaseHandler):
             return self.render_error(code=1, msg=u'订单已过期')
         try:
             formdata.order_id = order_id
-            self.render('charge_alipay.html', formdata=formdata)
+            temp_acurl = self.session.get('temp_acurl', '')
+            acip = self.session.get('temp_acip', '')
+            userip = self.session.get('temp_userip', '')
+            nas = self.db.query(models.TrBas).filter_by(ip_addr=acip).first()
+            ac_temp_auth_url = ''
+            if temp_acurl and nas:
+                _user = formdata.account_number
+                _timestemp = str(int(time.time()))
+                _action = 'temp'
+                _userip = base64.b64encode(userip)
+                _acip = base64.b64encode(acip)
+                signstr = _user + _userip + _timestemp + _action + str(nas.bas_secret) + _acip
+                logger.debug('signstr = ' + signstr)
+                _sign = md5(signstr).hexdigest()
+                logger.info('sign = ' + _sign)
+                url_param = 'user={1}&ip={2}&timestemp={3}&action=temp&acip={4}&sign={5}'.format(temp_acurl, _user, _userip, _timestemp, _acip, _sign)
+                ac_temp_auth_url = temp_acurl + '?' + url_param
+            self.render('charge_alipay.html', formdata=formdata, ac_temp_auth_url=ac_temp_auth_url)
         except Exception as err:
             self.db.rollback()
             logger.exception(err)
@@ -96,7 +115,4 @@ class SSportalProductRenewHandler(BaseHandler):
         order_id = self.get_argument('order_id')
         formdata = self.paycache.get(order_paycaache_key(order_id))
         product_name = self.get_product_name(formdata.product_id)
-        self.redirect(
-            self.alipay.create_direct_pay_by_user(order_id, u'账号充值：%s' % product_name, product_name, formdata.fee_value,
-                                                  notify_path='/ssportal/alipay/verify/charge',
-                                                  return_path='/ssportal/alipay/verify/charge'))
+        self.redirect(self.alipay.create_direct_pay_by_user(order_id, u'账号充值：%s' % product_name, product_name, formdata.fee_value, notify_path='/ssportal/alipay/verify/charge', return_path='/ssportal/alipay/verify/charge'))

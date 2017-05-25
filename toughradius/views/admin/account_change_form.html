@@ -11,7 +11,7 @@ function update_ui(){
         if(ev.code==0){
             console.log(ev.data);
         }
-        if(ev.data.policy == 0 || ev.data.policy == 2){
+        if(ev.data.policy == 0 || ev.data.policy == 2||ev.data.policy == 9||ev.data.policy == 10){
             $("#expire_date").parent().parent().show();
             $("#balance").parent().parent().hide();
             $("#time_length").parent().parent().hide();

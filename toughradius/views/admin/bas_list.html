@@ -28,7 +28,7 @@
             <div class="container">
                 % if permit.match(current_user.username,'/admin/bas/add'):
                 <div class="pull-left bottom10">
-                     <a href="/admin/bas/add" class="btn btn-sm bg-navy">
+                     <a href="/admin/bas/add" class="btn btn-sm">
                      <i class="fa fa-plus-circle"></i> 创建接入设备</a>
                 </div>
                 % endif
@@ -48,7 +48,8 @@
                     <tbody>
                         % for bas in bas_list:
                             <tr>
-                                <td>${bas.bas_name|h}</td>
+                                <td><a href="/admin/bas/detail?bas_id=${bas.id}">
+                                ${bas.bas_name}</a></td>
                                 <td>${bas.ip_addr}</td>
                                 <td>${bas.bas_secret|h}</td>
                                 <td>${bastype.get(str(bas.vendor_id))}</td>
@@ -56,11 +57,11 @@
                                 <td>${bas.coa_port}</td>
                                 <td>
                                     % if permit.match(current_user.username,'/admin/bas/update'):
-                                    <a class="opt-btn btn-default" href="/admin/bas/update?bas_id=${bas.id}">
+                                    <a class="btn btn-xs" href="/admin/bas/update?bas_id=${bas.id}">
                                     <i class="fa fa-edit"></i> 修改</a>
                                     % endif
                                     % if permit.match(current_user.username,'/admin/bas/delete'):
-                                    <a class="opt-btn btn-default" href="javascript:deleteBas('${bas.id}')">
+                                    <a class="btn btn-xs" href="javascript:deleteBas('${bas.id}')">
                                     <i class="fa fa-times"></i> 删除</a>
                                     % endif
                                 </td>

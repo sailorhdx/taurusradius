@@ -16,16 +16,13 @@ class PortalLoginHandler(BaseHandler):
     """ portal 认证处理
     """
 
+    @defer.inlineCallbacks
     def get(self):
-        if self.current_user:
-            online = self.db.query(models.TrOnline).filter_by(account_number=self.current_user.username, framed_ipaddr=self.current_user.ipaddr).first()
-            page_title = self.current_user.get('tpl', {}).get('page_title', u'硬派无线认证')
-            wlan_params = self.current_user.get('wlan_params', {})
-            wlan_tpl = self.current_user.get('tpl', {})
-            tpl_name = wlan_tpl.get('tpl_path', 'default')
-            return self.render('{0}/status.html'.format(tpl_name), page_title=page_title, wlan_params=wlan_params, wlan_tpl=wlan_tpl, online=online)
+        qstr = self.request.query
+        username, password = self.get_remember_user()
+        if username and password:
+            yield self.post(qstr=qstr, username=username, password=password)
         else:
-            qstr = self.request.query
             wlan_params = self.get_wlan_params(qstr)
             ssid = wlan_params.get('ssid', 'default')
             if self.settings.debug:
@@ -36,16 +33,27 @@ class PortalLoginHandler(BaseHandler):
                  'tpl_path': 'default'}
             tplpath = self.get_login_template(tpl['tpl_path'])
             self.render(tplpath, msg=None, tpl=tpl, qstr=qstr, **wlan_params)
-            return
+        return
 
     @defer.inlineCallbacks
-    def post(self):
+    def post(self, **kwargs):
         qstr = self.get_argument('qstr', '')
+        username = self.get_argument('username', None)
+        password = self.get_argument('password', None)
+        if 'qstr' in kwargs:
+            qstr = kwargs['qstr']
+        if 'username' in kwargs:
+            username = kwargs['username']
+        if 'password' in kwargs:
+            password = kwargs['password']
         wlan_params = self.get_wlan_params(qstr)
+        logger.info(u'post wlan params:{0}'.format(utils.safeunicode(wlan_params)))
         ssid = wlan_params.get('ssid', 'default')
         wlanacip = wlan_params.get('wlanacip', '127.0.0.1')
         nasid = wlan_params.get('nasid', 'default')
         wlanuserip = wlan_params.get('wlanuserip', self.request.remote_ip)
+        is_chap = self.settings.config.portal.chap in (1, '1', 'chap')
+        userIp = wlanuserip
         start_time = time.time()
         nas = self.get_nas(wlanacip, nasid=nasid)
         if not nas:
@@ -57,20 +65,17 @@ class PortalLoginHandler(BaseHandler):
             secret = utils.safestr(nas['bas_secret'])
             _vendor = utils.safestr(nas['portal_vendor'])
             if _vendor not in ('cmccv1', 'cmccv2', 'huaweiv1', 'huaweiv2'):
+                logger.error(nas)
                 self.render_error(msg=u'AC设备 portal_vendor {0} 不支持 '.format(_vendor))
                 return
             hm_mac = wlan_params.get('wlanstamac', '').replace('.', ':').replace('-', ':')
             macbstr = hm_mac and struct.pack('BBBBBB', *[ int(i, base=16) for i in hm_mac.split(':') ]) or None
             send_portal = functools.partial(client.send, secret, log=logger, debug=self.settings.debug, vendor=_vendor, timeout=5)
             vendor = client.PortalClient.vendors.get(_vendor)
-            is_chap = self.settings.config.portal.chap in (1, '1', 'chap')
-            userIp = wlanuserip
-            username = self.get_argument('username', None)
-            password = self.get_argument('password', None)
             if self.settings.debug:
                 logger.info(u'开始 [username:%s] Portal认证, 参数:%s' % (username, utils.safeunicode(wlan_params)))
             tpl = self.get_template_attrs(ssid)
-            firsturl = tpl.get('home_page', '/')
+            firsturl = tpl.get('home_page', '/navigate')
 
             def back_login(msg = u''):
                 self.render(self.get_login_template(tpl['tpl_path']), tpl=tpl, msg=msg, qstr=qstr, **wlan_params)
@@ -85,7 +90,7 @@ class PortalLoginHandler(BaseHandler):
                     challenge_resp = yield send_portal(data=challenge_req, host=ac_addr, port=ac_port)
                     if challenge_resp.errCode > 0:
                         if challenge_resp.errCode == 2:
-                            self.set_session_user(username, userIp, utils.get_currtime(), nasaddr=ac_addr, macaddr=hm_mac, tpl=tpl, qstr=qstr, wlan_params=wlan_params)
+                            self.set_remerber_user(username, password)
                             self.redirect(firsturl)
                             return
                         raise Exception(vendor.mod.AckChallengeErrs[challenge_resp.errCode])
@@ -96,7 +101,7 @@ class PortalLoginHandler(BaseHandler):
                 auth_resp = yield send_portal(data=auth_req, host=ac_addr, port=ac_port)
                 if auth_resp.errCode > 0:
                     if auth_resp.errCode == 2:
-                        self.set_session_user(username, userIp, utils.get_currtime(), nasaddr=ac_addr, macaddr=hm_mac, tpl=tpl, qstr=qstr, wlan_params=wlan_params)
+                        self.set_remerber_user(username, password)
                         self.redirect(firsturl)
                         return
                     text_info = auth_resp.get_text_info()
@@ -107,7 +112,7 @@ class PortalLoginHandler(BaseHandler):
                 logger.info(u'用户 [username:{0}] 认证成功'.format(username))
                 if self.settings.debug:
                     logger.debug(u'用户 [username:%s] 认证耗时 [cast:%s ms]' % (username, (time.time() - start_time) * 1000))
-                self.set_session_user(username, userIp, utils.get_currtime(), nasaddr=ac_addr, macaddr=hm_mac, tpl=tpl, qstr=qstr, wlan_params=wlan_params)
+                self.set_remerber_user(username, password)
                 self.redirect(firsturl)
             except Exception as err:
                 import traceback

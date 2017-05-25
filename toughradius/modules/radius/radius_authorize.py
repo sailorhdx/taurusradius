@@ -69,7 +69,7 @@ class RadiusAuth(RadiusBasic):
             day_len = old_end - old_start
             new_expire = (_now + day_len).strftime('%Y-%m-%d')
             self.update_user_expire(new_expire)
-            logger.info('user:%s 账号未激活状态更新为正常，开始计费', trace='radius')
+            logger.info(u'user:%s 账号未激活状态更新为正常，开始计费' % self.request.account_number, trace='radius', username=self.request.account_number)
 
     def status_filter(self):
         """ 1：用户过期，状态,密码检查 """

@@ -7,7 +7,6 @@ import utils, httpclient
 import logger
 from storage import Storage
 from collections import namedtuple
-
 ApiStatus = namedtuple('ApiStatus', 'code desc msg')
 apistatus = Storage(success=ApiStatus(code=0, desc='success', msg=u'处理成功'),
                     sign_err=ApiStatus(code=90001, desc='message sign error', msg=u'消息签名错误'),
@@ -27,12 +26,12 @@ class ParseError(Exception):
     pass
 
 
-def make_sign(api_secret, params=[]):
+def make_sign(api_secret, params = []):
     """
         >>> make_sign("123456",[1,'2',u'中文'])
         '33C9065427EECA3490C5642C99165145'
     """
-    _params = [utils.safeunicode(p) for p in params if p is not None]
+    _params = [ utils.safeunicode(p) for p in params if p is not None ]
     _params.sort()
     _params.insert(0, api_secret)
     strs = ''.join(_params)
@@ -44,13 +43,13 @@ def check_sign(api_secret, msg):
     """
         >>> check_sign("123456",dict(code=1,s='2',msg=u'中文',sign='33C9065427EECA3490C5642C99165145'))
         True
-
+    
     """
     if 'sign' not in msg:
         return False
     else:
         sign = msg['sign']
-        params = [utils.safestr(msg[k]) for k in msg if k != 'sign' and msg[k] is not None]
+        params = [ utils.safestr(msg[k]) for k in msg if k != 'sign' and msg[k] is not None ]
         local_sign = make_sign(api_secret, params)
         result = sign == local_sign
         if not result:
@@ -58,7 +57,7 @@ def check_sign(api_secret, msg):
         return result
 
 
-def make_message(api_secret, enc_func=False, **params):
+def make_message(api_secret, enc_func = False, **params):
     """
         >>> json.loads(make_message("123456",**dict(code=1,msg=u"中文",nonce=1451122677)))['sign']
         u'58BAF40309BC1DC51D2E2DC43ECCC1A1'
@@ -73,11 +72,11 @@ def make_message(api_secret, enc_func=False, **params):
         return msg
 
 
-def make_error(api_secret, msg=None, enc_func=False):
+def make_error(api_secret, msg = None, enc_func = False):
     return make_message(api_secret, code=1, msg=msg, enc_func=enc_func)
 
 
-def parse_request(api_secret, reqbody, dec_func=False):
+def parse_request(api_secret, reqbody, dec_func = False):
     """
         >>> parse_request("123456",'{"nonce": 1451122677, "msg": "helllo", "code": 0, "sign": "DB30F4D1112C20DFA736F65458F89C64"}')
         <Storage {u'nonce': 1451122677, u'msg': u'helllo', u'code': 0, u'sign': u'DB30F4D1112C20DFA736F65458F89C64'}>
@@ -107,7 +106,7 @@ def parse_form_request(api_secret, request):
     return Storage(request)
 
 
-def request(apiurl, data=None, **kwargs):
+def request(apiurl, data = None, **kwargs):
     headers = {'Content-Type': ['application/json']}
     return httpclient.post(apiurl, data=data, **kwargs)
 

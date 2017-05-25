@@ -234,6 +234,12 @@ class AuthMessage(AuthPacket, ExtAttrMixin):
 
         return None
 
+    def get_framed_ipaddr(self):
+        try:
+            return tools.DecodeAddress(self.get(8)[0])
+        except:
+            return ''
+
     def get_session_timeout(self):
         try:
             return tools.DecodeInteger(self.get(27)[0]) or 0
@@ -402,10 +408,7 @@ class AcctMessage(AcctPacket, ExtAttrMixin):
 
     def get_user_name(self):
         try:
-            user_name = tools.DecodeString(self.get(1)[0])
-            if '@' in user_name:
-                return user_name[:user_name.index('@')]
-            return user_name
+            return tools.DecodeString(self.get(1)[0])
         except:
             return None
 

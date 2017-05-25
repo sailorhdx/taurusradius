@@ -13,15 +13,15 @@ from toughradius.modules import taskd
 class ExpireNotifyTask(TaseBasic):
     __name__ = 'wechat-expire-notify'
 
-    def get_notify_interval(self):
+    def get_next_interval(self):
         return 86400
 
     def first_delay(self):
-        return self.get_notify_interval()
+        return self.get_next_interval()
 
     def process(self, *args, **kwargs):
         self.logtimes()
-        next_interval = self.get_notify_interval()
+        next_interval = self.get_next_interval()
         try:
             logger.info('start process wechat_notify task')
             _ndays = self.get_param_value('expire_notify_days')

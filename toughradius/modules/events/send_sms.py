@@ -10,12 +10,12 @@ from toughradius.modules.events.event_basic import BasicEvent
 
 class SendSmsEvent(BasicEvent):
 
-    def event_sendsms(self, sendphone, content = None, **params):
+    def event_sendsms(self, sendphone, tplid, **params):
         gateway = self.get_param_value('sms_gateway')
         apikey = self.get_param_value('sms_api_user')
         apisecret = self.get_param_value('sms_api_pwd')
         try:
-            smsapi.send_sms(gateway, apikey, apisecret, sendphone, content, **params)
+            smsapi.send_sms(gateway, apikey, apisecret, sendphone, tplid, **params)
         except Exception as err:
             logger.exception(err)
 

@@ -95,6 +95,7 @@ class BaseHandler(cyclone.web.RequestHandler):
         template_vars['utils'] = utils
         template_vars['tools'] = tools
         template_vars['sys_version'] = sys_version
+        template_vars['sysenv'] = os.environ
         if self.current_user:
             template_vars['permit'] = self.current_user.permit
             template_vars['menu_icons'] = MENU_ICONS
@@ -213,6 +214,17 @@ class BaseHandler(cyclone.web.RequestHandler):
     def get_param_value(self, name, defval = None):
         val = self.db.query(models.TrParam.param_value).filter_by(param_name=name).scalar()
         return val or defval
+
+    def get_license_ulimit(self, ulimit):
+        if not ulimit:
+            if self.license.get('type') in 'stoughee' or '-oem' in self.license.get('type'):
+                return 100000
+            if self.license.get('type') in 'community':
+                return 10000
+            if self.license.get('type') in 'evaluation':
+                return 128
+        else:
+            return int(ulimit)
 
     def add_oplog(self, message):
         ops_log = models.TrOperateLog()

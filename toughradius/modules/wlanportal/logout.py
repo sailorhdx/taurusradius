@@ -36,10 +36,11 @@ class PortalLogoutHandler(BaseHandler):
             defer.returnValue(err)
 
     def get(self):
-        if not self.current_user:
+        username, password = self.get_remember_user()
+        if not username or not password:
             self.redirect('/login?ssid=default')
             return
         self.disconnect().addCallbacks(logger.info, logger.error)
-        qstr = self.current_user.get('qstr', 'ssid=default')
+        qstr = 'ssid=default'
         self.clear_session()
         self.redirect('/login?%s' % qstr, permanent=False)

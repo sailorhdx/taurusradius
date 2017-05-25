@@ -16,7 +16,7 @@ class AgencyService(BaseService):
     def add(self, formdata, **kwargs):
         try:
             if int(formdata.share_rate) > 100 or int(formdata.share_rate) < 0:
-                raise ValueError(u'分成比例必须在1-100')
+                raise ValueError(u'分成比例必须在0-100')
             if self.db.query(models.TrOperator.id).filter_by(operator_name=formdata.operator_name).count() > 0:
                 raise ValueError(u'操作员已经存在')
             agency = models.TrAgency()

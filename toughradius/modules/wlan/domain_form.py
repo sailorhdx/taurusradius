@@ -3,7 +3,7 @@
 from toughradius.toughlib import btforms
 from toughradius.toughlib.btforms import rules
 from toughradius.toughlib.btforms.rules import button_style, input_style
-button_style = {'class': 'btn btn-sm bg-navy'}
+button_style = {'class': 'btn btn-sm'}
 booleans = {'0': u'否',
  '1': u'是'}
 wlan_tpls = {'default': u'默认模板'}

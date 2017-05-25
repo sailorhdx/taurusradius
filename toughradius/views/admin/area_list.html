@@ -29,14 +29,14 @@
             <div class="form-group">
                 <label for="node_id" class="col-md-1 control-label">区域</label>
                 <div class="col-md-3">
-                    <select id="node_id" name="node_id" class="form-control">
+                    <select id="node_id" name="node_id" class="form-control input-sm">
                         % for node in node_list:
                           <option value="${node.id}" ${str(node.id)==node_id and "selected" or ""}>${node.node_name}</option>
                         % endfor
                     </select>
                 </div>
                 <div "col-md-3">
-                    <button type="submit" id="query_action" class="btn btn-sm bg-navy">查询</button>
+                    <button type="submit" id="query_action" class="btn btn-sm">查询</button>
                 </div>
             </div>
         </form>
@@ -44,7 +44,7 @@
 
         <div class="pull-left bottom10">
             % if permit.match(current_user.username,'/admin/area/add'):
-             <a href="/admin/area/add" class="btn btn-sm bg-navy">
+             <a href="/admin/area/add" class="btn btn-sm">
                   <i class="fa fa-plus-circle"></i> 创建社区</a>
             % endif
         </div>
@@ -63,11 +63,11 @@
                 <td>${area.addr_desc}</td>
                 <td>
                     % if permit.match(current_user.username,'/admin/area/update'):
-                    <a class="opt-btn btn-default" href="/admin/area/update?area_id=${area.id}">
+                    <a class="btn btn-xs" href="/admin/area/update?area_id=${area.id}">
                     <i class="fa fa-edit"></i> 修改</a>
                     % endif
                     % if permit.match(current_user.username,'/admin/area/delete'):
-                    <a class="opt-btn btn-default" href="javascript:deleteArea('${area.id}')">
+                    <a class="btn btn-xs" href="javascript:deleteArea('${area.id}')">
                     <i class="fa fa-times"></i> 删除</a>
                     % endif
                 </td>

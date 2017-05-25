@@ -14,7 +14,7 @@ from toughradius.toughlib.permit import permit
 from toughradius.toughlib import utils
 from toughradius.modules.settings import *
 from toughradius.common import tools
-if os.environ['LICENSE_TYPE'] != 'community':
+if os.environ.get('LICENSE_TYPE') != 'community':
 
     @permit.route('/admin/customer/note/getprint', u'用户票据打印', MenuUser, order=99.0, is_menu=False)
 

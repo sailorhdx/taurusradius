@@ -3,7 +3,7 @@
 import decimal, os
 decimal.getcontext().prec = 11
 decimal.getcontext().rounding = decimal.ROUND_UP
-FEES = PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, APMonth = (0, 1, 2, 3, 4, 5, 7, 8)
+FEES = PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, APMonth, PPDay, BODay = (0, 1, 2, 3, 4, 5, 7, 8, 9, 10)
 ACCOUNT_STATUS = UsrPreAuth, UsrNormal, UsrPause, UsrCancel, UsrExpire, UsrPadding = (0, 1, 2, 3, 4, 5)
 CARD_STATUS = CardInActive, CardActive, CardUsed, CardRecover = (0, 1, 2, 3)
 CARD_TYPES = ProductCard, BalanceCard = (0, 1)
@@ -36,7 +36,7 @@ ACCEPT_TYPES = {'open': u'开户',
  'change': u'变更',
  'auto_renew': u'自动续费',
  'apm_bill': u'后付费出账'}
-TPL_TYPES = OpenNotify, NextNotify, ExpireNotify, InstallNotify, MaintainNotify = ('open_notify', 'next_notify', 'expire_notify', 'install_notify', 'maintain_notify')
+TPL_TYPES = OpenNotify, NextNotify, ExpireNotify, IssuesNotify, VcodeNotify = ('open_notify', 'next_notify', 'expire_notify', 'issues_notify', 'vcode_notify')
 ADMIN_MENUS = MenuSys, MenuNode, MenuRes, MenuUser, ResWlan, MenuAgency, MenuOpt, MenuStat = (u'系统管理', u'区域管理', u'资源管理', u'用户管理', u'无线认证', u'代理商管理', u'维护管理', u'查询统计')
 MENU_ICONS = {u'系统管理': 'fa fa-cog',
  u'区域管理': 'fa fa-map-marker',
@@ -48,6 +48,7 @@ MENU_ICONS = {u'系统管理': 'fa fa-cog',
  u'查询统计': 'fa fa-bar-chart'}
 MAX_EXPIRE_DATE = '3000-12-30'
 param_cache_key = 'toughradius.cache.param.{0}'.format
+tplid_cache_key = 'toughradius.cache.sms.tplid.{0}'.format
 wlanattr_cache_key = 'toughradius.cache.wlan.domain.attr.{0}'.format
 account_cache_key = 'toughradius.cache.account.{0}'.format
 account_attr_cache_key = 'toughradius.cache.account.attr.{0}.{1}'.format
@@ -55,6 +56,7 @@ product_cache_key = 'toughradius.cache.product.{0}'.format
 product_attrs_cache_key = 'toughradius.cache.product.attrs.{0}'.format
 bas_cache_key = 'toughradius.cache.bas.{0}'.format
 bas_cache_ipkey = 'toughradius.cache.bas.ip.{0}'.format
+bas_attr_cache_key = 'toughradius.cache.bas.attr.{0}.{1}'.format
 account_bind_basip_key = 'toughradius.account.bind.bas.ipaddr.{0}'.format
 account_bind_basid_key = 'toughradius.account.bind.bas.nasid.{0}'.format
 radius_statcache_key = 'toughradius.cache.radius.stat'
@@ -71,24 +73,3 @@ wlan_template_cache_key = 'toughradius.cache.wlanportal.template.{0}'.format
 DEFAULT_RDB = 0
 LOGTRACE_RDB = 1
 SSPORTAL_RDB = 2
-
-def redis_conf(config):
-    eredis_url = os.environ.get('REDIS_URL')
-    eredis_port = os.environ.get('REDIS_PORT')
-    eredis_pwd = os.environ.get('REDIS_PWD')
-    eredis_db = os.environ.get('REDIS_DB')
-    is_update = any([eredis_url,
-     eredis_port,
-     eredis_pwd,
-     eredis_db])
-    if eredis_url:
-        config['redis']['host'] = eredis_url
-    if eredis_port:
-        config['redis']['port'] = int(eredis_port)
-    if eredis_pwd:
-        config['redis']['passwd'] = eredis_pwd
-    if eredis_db:
-        config['redis']['db'] = int(eredis_db)
-    if is_update:
-        config.save()
-    return config['redis']

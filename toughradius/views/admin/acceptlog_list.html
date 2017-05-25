@@ -81,9 +81,9 @@
             </div>
             <div class="form-group">
                 <div class="col-md-offset-5 col-md-7">
-                    <button type="button" onclick="do_submit();" class="btn btn-sm bg-navy">查询</button>
+                    <button type="button" onclick="do_submit();" class="btn btn-sm">查询</button>
                     % if permit.match(current_user.username,'/admin/customer/acceptlog/export'):
-                    <a href="javascript:do_export();" class="btn btn-sm bg-navy"><i class="fa fa-sign-out"></i> 导出数据</a>
+                    <a href="javascript:do_export();" class="btn btn-sm"><i class="fa fa-sign-out"></i> 导出数据</a>
                     % endif
                 </div>
             </div>

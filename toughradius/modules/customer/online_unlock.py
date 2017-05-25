@@ -67,7 +67,10 @@ class CustomerOnlineUnlockHandler(BaseHandler):
                 return
             if not CustomerOnlineUnlockHandler.dictionary:
                 CustomerOnlineUnlockHandler.dictionary = dictionary.Dictionary(os.path.join(os.path.dirname(toughradius.__file__), 'dictionarys/dictionary'))
-            deferd = authorize.disconnect(int(nas.vendor_id or 0), CustomerOnlineUnlockHandler.dictionary, nas.bas_secret, nas.ip_addr, coa_port=int(nas.coa_port or 3799), debug=True, Framed_IP_Address=online.framed_ipaddr, User_Name=username, NAS_IP_Address=nas.ip_addr, Acct_Session_Id=session_id)
+            dm_params = dict(Framed_IP_Address=online.framed_ipaddr, User_Name=username, Acct_Session_Id=session_id)
+            if int(self.get_param_value('radius_coa_send_nasaddr', 0)):
+                dm_params['NAS_IP_Address'] = nas.ip_addr
+            deferd = authorize.disconnect(int(nas.vendor_id or 0), CustomerOnlineUnlockHandler.dictionary, nas.bas_secret, nas.ip_addr, coa_port=int(nas.coa_port or 3799), debug=True, **dm_params)
             deferd.addCallback(self.onSendResp, self.get_request(online)).addErrback(self.onSendError, self.get_request(online))
             logreq = u'nas_addr=%s;coa_port=%s; username=%s; session_id=%s' % (nas.ip_addr,
              int(nas.coa_port or 3799),

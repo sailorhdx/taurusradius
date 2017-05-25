@@ -15,6 +15,7 @@ from twisted.internet import defer
 from toughradius.toughlib import utils
 from toughradius.toughlib import mcache
 from toughradius.toughlib import logger, dispatch
+from toughradius.toughlib.config import redis_conf
 from toughradius.toughlib.storage import Storage
 from toughradius.toughlib.redis_cache import CacheManager
 from toughradius.toughlib.dbengine import get_engine
@@ -294,7 +295,6 @@ class RADIUSAuthWorker(TraceMix):
             reply_attrs.update(req.resp_attrs)
             for plugin in self.auth_accept_plugins:
                 reply = plugin.plugin_func(reply, reply_attrs)
-
             if not req.VerifyReply(reply):
                 raise PacketError('[Radiusd] :: user:%s auth verify reply error' % username)
             self.log_trace(host, port, req, reply)

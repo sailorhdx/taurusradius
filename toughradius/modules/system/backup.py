@@ -77,6 +77,9 @@ class DeleteHandler(BaseHandler):
 
     @authenticated
     def post(self):
+        if os.environ.get('DEMO_VER'):
+            self.write(u'这是一个演示版本，不提供此功能')
+            return
         backup_path = self.settings.config.database.backup_path
         bakfs = self.get_argument('bakfs')
         try:
@@ -115,6 +118,9 @@ class UploadHandler(BaseHandler):
 class downloadHandler(BaseHandler):
 
     def get(self, filename):
+        if os.environ.get('DEMO_VER'):
+            self.write(u'这是一个演示版本，不提供此功能')
+            return
         if not self.current_user or self.current_user.opr_type > 0:
             return self.render_error(msg=u'未授权的访问')
         self.set_header('Content-Type', 'application/octet-stream')

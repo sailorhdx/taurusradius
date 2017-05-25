@@ -11,7 +11,7 @@ from toughradius.modules.wlan import domain_form
 from toughradius.common import tools
 import json
 
-@permit.route('/admin/wlan/domain', u'认证域管理', settings.ResWlan, order=1.0, is_menu=True)
+@permit.suproute('/admin/wlan/domain', u'认证域管理', settings.ResWlan, order=1.0, is_menu=True)
 
 class DomainHandler(BaseHandler):
 
@@ -21,7 +21,7 @@ class DomainHandler(BaseHandler):
         self.render('domain_list.html', domains=domains)
 
 
-@permit.route('/admin/wlan/domain/detail', u'认证域详情', settings.ResWlan, order=1.0001)
+@permit.suproute('/admin/wlan/domain/detail', u'认证域详情', settings.ResWlan, order=1.0001)
 
 class DomainDetailHandler(BaseHandler):
 
@@ -47,7 +47,7 @@ class DomainDetailHandler(BaseHandler):
         self.render('domain_detail.html', active=active, domain_id=domain_id, domain=domain, attrs=attrs, aps=aps, apform=apform, attrsform=attrsform)
 
 
-@permit.route('/admin/wlan/domain/add', u'认证域信息创建', settings.ResWlan, order=1.0002)
+@permit.suproute('/admin/wlan/domain/add', u'认证域信息创建', settings.ResWlan, order=1.0002)
 
 class AddHandler(BaseHandler):
 
@@ -74,7 +74,7 @@ class AddHandler(BaseHandler):
         self.redirect('/admin/wlan/domain', permanent=False)
 
 
-@permit.route('/admin/wlan/domain/update', u'认证域修改', settings.ResWlan, order=1.0003)
+@permit.suproute('/admin/wlan/domain/update', u'认证域修改', settings.ResWlan, order=1.0003)
 
 class UpdateHandler(BaseHandler):
 
@@ -98,7 +98,7 @@ class UpdateHandler(BaseHandler):
         self.redirect('/admin/wlan/domain', permanent=False)
 
 
-@permit.route('/admin/wlan/domain/delete', u'认证域删除', settings.ResWlan, order=1.0004)
+@permit.suproute('/admin/wlan/domain/delete', u'认证域删除', settings.ResWlan, order=1.0004)
 
 class DeleteHandler(BaseHandler):
 
@@ -116,7 +116,7 @@ class DeleteHandler(BaseHandler):
         return self.render_json(code=0, msg=u'删除域成功!')
 
 
-@permit.route('/admin/wlan/domain/attr/update', u'认证域属性新增', settings.ResWlan, order=2.0001)
+@permit.suproute('/admin/wlan/domain/attr/update', u'认证域属性新增', settings.ResWlan, order=2.0001)
 
 class DomainAttrUpdateHandler(BaseHandler):
 

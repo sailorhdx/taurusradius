@@ -5,6 +5,7 @@ import time
 import json
 import decimal
 import string
+import base64
 from hashlib import md5
 from toughradius.toughlib import utils, logger
 from toughradius.modules.ssportal.base import BaseHandler, authenticated
@@ -18,8 +19,8 @@ from toughradius.modules.dbservice.account_renew import AccountRenew
 from toughradius.modules.settings import order_paycaache_key
 from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, MAX_EXPIRE_DATE
 
-
 @permit.route('/ssportal/product/renew')
+
 class SSportalRenewOrderHandler(alipayment_new.BasicOrderHandler):
     """ 发起续费支付
     """
@@ -40,8 +41,7 @@ class SSportalRenewOrderHandler(alipayment_new.BasicOrderHandler):
             return self.render_alert(u'错误提示', u'套餐不存在')
         if product.product_status == 1:
             return self.render_alert(u'错误提示', u'套餐已停用')
-        is_month = product.product_policy in (PPMonth, PPMFlows)
-        form = order_forms.renew_form(is_month=is_month)
+        form = order_forms.renew_form(product.product_policy)
         form.account_number.set_value(account_number)
         form.product_id.set_value(product_id)
         form.product_name.set_value(product.product_name)
@@ -49,7 +49,9 @@ class SSportalRenewOrderHandler(alipayment_new.BasicOrderHandler):
         self.render('renew_modal_form.html', form=form)
 
     def post(self):
-        form = order_forms.renew_form()
+        product_id = self.get_argument('product_id')
+        product = self.db.query(models.TrProduct).get(product_id)
+        form = order_forms.renew_form(product.product_policy)
         if not form.validates(source=self.get_params()):
             return self.render_json(code=1, msg=form.errors)
         account = self.db.query(models.TrAccount).get(form.d.account_number)
@@ -86,6 +88,7 @@ class SSportalRenewOrderHandler(alipayment_new.BasicOrderHandler):
 
 
 @permit.route('/ssportal/product/renew/alipay')
+
 class SSportalProductRenewHandler(BaseHandler):
     """ 支付信息确认，跳转支付宝
     """
@@ -114,7 +117,4 @@ class SSportalProductRenewHandler(BaseHandler):
         order_id = self.get_argument('order_id')
         formdata = self.paycache.get(order_paycaache_key(order_id))
         product_name = self.get_product_name(formdata.product_id)
-        self.redirect(
-            self.alipay.create_direct_pay_by_user(order_id, u'套餐续费：%s' % product_name, product_name, formdata.fee_value,
-                                                  notify_path='/ssportal/alipay/verify/renew',
-                                                  return_path='/ssportal/alipay/verify/renew'))
+        self.redirect(self.alipay.create_direct_pay_by_user(order_id, u'套餐续费：%s' % product_name, product_name, formdata.fee_value, notify_path='/ssportal/alipay/verify/renew', return_path='/ssportal/alipay/verify/renew'))

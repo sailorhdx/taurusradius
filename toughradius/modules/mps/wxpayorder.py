@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # coding=utf-8
+import time
 import cyclone.sse
 import cyclone.web
+from urllib import urlencode
+from toughradius.common import smsapi
+from twisted.internet import reactor, defer
 from toughradius.modules.mps.base import BaseHandler
 from toughradius.modules.dbservice.customer_add import CustomerAdd
 from toughradius.common import tools
@@ -13,7 +17,7 @@ from toughradius.toughlib.storage import Storage
 from toughradius.toughlib.permit import permit
 from StringIO import StringIO
 from decimal import Decimal as _d
-from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, MAX_EXPIRE_DATE, order_wxpaycaache_key
+from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, MAX_EXPIRE_DATE, order_wxpaycaache_key, VcodeNotify
 import os
 import json
 import string
@@ -80,8 +84,25 @@ class WxpayNewOrderHandler(WxBasicOrderHandler):
         product = self.db.query(models.TrProduct).filter_by(id=pid).first()
         if not product:
             return self.render('error.html', msg=u'资费不存在')
+        account_number = self.get_argument('account_number', '')
+        if account_number and self.db.query(models.TrAccount).get(account_number):
+            self.render('error.html', msg=u'手机号码已经注册')
+            return
+        smsvcode = self.get_argument('vcode', '')
+        if account_number and not smsvcode:
+            self.render('error.html', msg=u'验证码不能为空')
+            return
+        if account_number and smsvcode and self.cache.get('ssportal.sms.vcode.{}'.format(account_number)) != smsvcode:
+            self.render('error.html', msg=u'验证码不匹配')
+            return
+        is_smsvcode = int(self.get_param_value('ssportal_smsvcode_required', 0))
+        if not account_number and is_smsvcode:
+            self.render('wxorder_vcode_form.html', product=product)
+            return
+        is_idcard = int(self.get_param_value('ssportal_idcard_required', 0))
+        is_address = int(self.get_param_value('ssportal_address_required', 0))
         mps_node_id = self.get_param_value('default_user_node_id', 1)
-        return self.render('wxorder_form.html', node_id=mps_node_id, username=self.next_account_number(mps_node_id), product=product)
+        return self.render('wxorder_form.html', node_id=mps_node_id, username=account_number or self.next_account_number(mps_node_id), product=product, vmobile=account_number, is_idcard=is_idcard, is_address=is_address)
 
     def post(self, pid):
         try:
@@ -89,6 +110,8 @@ class WxpayNewOrderHandler(WxBasicOrderHandler):
             realname = self.get_argument('realname', '').strip()
             node_id = self.get_argument('node_id', '').strip()
             mobile = self.get_argument('mobile', '').strip()
+            address = self.get_argument('address', '').strip()
+            idcard = self.get_argument('idcard', '').strip()
             username = self.get_argument('username', '').strip()
             password = self.get_argument('password', '').strip()
             months = int(self.get_argument('months', '1'))
@@ -113,9 +136,9 @@ class WxpayNewOrderHandler(WxBasicOrderHandler):
             formdata['node_id'] = node_id
             formdata['area_id'] = ''
             formdata['realname'] = realname
-            formdata['idcard'] = ''
+            formdata['idcard'] = idcard
             formdata['mobile'] = mobile
-            formdata['address'] = ''
+            formdata['address'] = address
             formdata['account_number'] = username
             formdata['password'] = password
             formdata['ip_address'] = ''
@@ -130,7 +153,7 @@ class WxpayNewOrderHandler(WxBasicOrderHandler):
             formdata['status'] = 1
             formdata['builder_name'] = ''
             formdata['customer_desc'] = u'客户微信自助开户'
-            formdata['billing_type'] = 0
+            formdata['billing_type'] = 1
             formdata['accept_source'] = 'wechat'
             if wechat_bind == 1:
                 formdata['wechat_oid'] = openid
@@ -231,3 +254,38 @@ class WxpayRechargeOrderHandler(WxBasicOrderHandler):
         except Exception as err:
             logger.exception(err, trace='wechat')
             self.render('error.html', msg=u'用户充值失败，请联系客服 %s' % repr(err))
+
+@permit.route('/mps/sms/sendvcode')
+
+class SendSmsVcodeHandler(BaseHandler):
+
+    @defer.inlineCallbacks
+    def get(self):
+        yield self.post()
+
+    @defer.inlineCallbacks
+    def post(self):
+        try:
+            phone = self.get_argument('phone')
+            last_send = self.session.get('sms_last_send', 0)
+            if last_send > 0:
+                sec = int(time.time()) - last_send
+                if sec < 60:
+                    self.render_json(code=1, msg=u'还需等待%s秒' % sec)
+                    return
+            self.session['sms_last_send'] = int(time.time())
+            self.session.save()
+            vcode = str(time.time()).replace('.', '')[-6:]
+            self.cache.set('ssportal.sms.vcode.{}'.format(phone), vcode, expire=300)
+            gateway = self.get_param_value('sms_gateway')
+            apikey = self.get_param_value('sms_api_user')
+            apisecret = self.get_param_value('sms_api_pwd')
+            tplid = self.get_tpl_id(VcodeNotify)
+            if not tplid:
+                self.render_json(code=1, msg=u'没有对应的短信模版')
+                return
+            resp = yield smsapi.send_sms(gateway, apikey, apisecret, phone, tplid, args=[vcode], kwargs=dict(vcode=vcode))
+            self.render_json(code=0, msg='ok')
+        except Exception as err:
+            logger.exception(err)
+            self.render_json(code=1, msg=u'发送短信失败')

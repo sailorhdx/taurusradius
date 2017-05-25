@@ -117,7 +117,7 @@ function deleteAp(app_id) {
                         <td>${ap.ap_desc}</td>
                         <td>
                             % if permit.match(current_user.username,'/admin/wlan/domain/ap/delete'):
-                            <a class="opt-btn btn-default" href="javascript:deleteAp('${ap.id}');">
+                            <a class="btn btn-xs" href="javascript:deleteAp('${ap.id}');">
                             <i class="fa fa-times"></i> 删除</a>                    
                             % endif
                         </td>
@@ -148,7 +148,7 @@ function deleteAp(app_id) {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-        <button type="button" onclick="addAP();" class="btn bg-navy">保存</button>
+        <button type="button" onclick="addAP();" class="btn">保存</button>
       </div>
     </div>
   </div>

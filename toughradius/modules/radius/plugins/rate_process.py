@@ -13,13 +13,6 @@ def ros_rate(resp, _in, _out, rate_code = None):
     return resp
 
 
-def panabit_rate(resp, _in, _out, rate_code = None):
-    _irate = _in / 1024
-    _orate = _out / 1024
-    resp['Mikrotik-Rate-Limit'] = '%sk/%sk' % (_irate, _orate)
-    return resp
-
-
 def aikuai_rate(resp, _in, _out, rate_code = None):
     _irate = _in / 1024 / 8
     _orate = _out / 1024 / 8
@@ -65,6 +58,14 @@ def huawei_rate(resp, _in, _out, rate_code = None):
     return resp
 
 
+def huawei_e1_rate(resp, _in, _out, rate_code = None):
+    resp['Huawei-Input-Average-Rate'] = _in / 1024
+    resp['Huawei-Input-Peak-Rate'] = _in / 1024
+    resp['Huawei-Output-Average-Rate'] = _out / 1024
+    resp['Huawei-Output-Peak-Rate'] = _out / 1024
+    return resp
+
+
 rate_funcs = {'0': std_rate,
  '9': cisco_rate,
  '2011': huawei_rate,
@@ -72,8 +73,8 @@ rate_funcs = {'0': std_rate,
  '3902': zte_rate,
  '25506': h3c_rate,
  '14988': ros_rate,
- '39999': panabit_rate,
- '10055': aikuai_rate}
+ '10055': aikuai_rate,
+ '30001': huawei_e1_rate}
 
 def radius_process(resp = None, resp_attrs = {}):
     try:

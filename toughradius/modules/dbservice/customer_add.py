@@ -11,15 +11,16 @@ from hashlib import md5
 from toughradius.modules import models
 from toughradius.toughlib import utils, dispatch, logger
 from toughradius.modules.events.settings import ACCOUNT_OPEN_EVENT
-from toughradius.modules.events.settings import SERVICE_INSTALL_EVENT
+from toughradius.modules.events.settings import ISSUES_ASSIGN_EVENT
 from toughradius.modules.dbservice import BaseService
 from toughradius.modules.dbservice import logparams
 from toughradius.common import tools
 from toughradius.toughlib.btforms import rules
 from toughradius.toughlib.storage import Storage
-
+from toughradius.modules.events import settings as evset
 
 class CustomerAdd(BaseService):
+
     def add_account_fixdflows(self, account_number, flows):
         attr = models.TrAccountAttr()
         attr.id = utils.get_uuid()
@@ -31,20 +32,19 @@ class CustomerAdd(BaseService):
         attr.sync_ver = tools.gen_sync_ver()
         self.db.add(attr)
 
+    def update_routeros_sync_event(self, name, pwd, profile, node_id):
+        dispatch.pub(evset.ROSSYNC_SET_PPPOE_USER, name, pwd, profile, node_id=node_id, async=True)
+        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_USER, name, pwd, profile, node_id=node_id, async=True)
+
     def check_data(self, formdata):
         """
         用户开户数据校验
         """
-        if '@' in formdata.account_number:
-            self.last_error = u"'@'是系统保留字符，不能在开始中使用"
+        max_giftdays = self.db.query(models.TrProductAttr.attr_value).filter_by(product_id=formdata.product_id, attr_name='max_giftdays').scalar() or 0
+        if int(max_giftdays) < int(formdata.get('giftdays', 0)):
+            self.last_error = u'最大赠送天数不能超过%s天' % max_giftdays
             return False
-        max_gifdays = self.db.query(models.TrProductAttr.attr_value).filter_by(product_id=formdata.product_id,
-                                                                               attr_name='max_gifdays').scalar() or 0
-        if int(max_gifdays) < int(formdata.get('giftdays', 0)):
-            self.last_error = u'最大赠送天数不能超过%s天' % max_gifdays
-            return False
-        max_giftflows = self.db.query(models.TrProductAttr.attr_value).filter_by(product_id=formdata.product_id,
-                                                                                 attr_name='max_giftflows').scalar() or 0
+        max_giftflows = self.db.query(models.TrProductAttr.attr_value).filter_by(product_id=formdata.product_id, attr_name='max_giftflows').scalar() or 0
         if float(max_giftflows) < float(formdata.get('giftflows', 0)):
             self.last_error = u'最大赠送流量不能超过%sG' % max_giftflows
             return False
@@ -87,19 +87,20 @@ class CustomerAdd(BaseService):
         if self.aes.decrypt(vcard.card_pwd) != vcard_pwd:
             self.last_error = u'充值卡密码错误'
             return False
-        if product.product_policy not in (BOMonth, BOFlows, BOTimes):
+        if product.product_policy not in (BOMonth,
+         BOFlows,
+         BOTimes,
+         BODay):
             self.last_error = u'当前资费不支持此充值卡'
             return False
-        pattr = self.db.query(models.TrProductAttr).filter_by(product_id=product.id, attr_name='product_tag',
-                                                              attr_value=vcard.product_tag).first()
+        pattr = self.db.query(models.TrProductAttr).filter_by(product_id=product.id, attr_name='product_tag', attr_value=vcard.product_tag).first()
         if not pattr:
             self.last_error = u'当前资费不支持此充值卡'
             return False
         return True
 
-    def warp_account_data(self, account, status=1):
-        data = dict(product_id=account.product_id, status=status, balance=account.balance,
-                    time_length=account.time_length, flow_length=account.flow_length, expire_date=account.expire_date)
+    def warp_account_data(self, account, status = 1):
+        data = dict(product_id=account.product_id, status=status, balance=account.balance, time_length=account.time_length, flow_length=account.flow_length, expire_date=account.expire_date)
         return json.dumps(data, ensure_ascii=False)
 
     @logparams
@@ -149,6 +150,8 @@ class CustomerAdd(BaseService):
         :type expire_date:    string
         :param months:   用户订购月数，预付费包月有效
         :type months:    int
+        :param days:   用户订购天数，预付费包日有效
+        :type days:    int
         :param fee_value:   交易费用 x.xx 元
         :type fee_value:    string
         :param giftflows:   赠送流量 x.xx GB
@@ -166,11 +169,12 @@ class CustomerAdd(BaseService):
         """
         try:
             account_number = self.parse_arg(formdata, 'account_number', rule=rules.not_null)
+            account_number = account_number.strip()
             formdata['account_number'] = account_number.strip()
             billing_type = int(formdata.get('billing_type', 1))
             pay_status = int(formdata.get('pay_status', 1))
             customer_id = self.parse_arg(formdata, 'customer_id', defval=utils.get_uuid())
-            order_id = self.parse_arg(formdata, 'order_id', defval=utils.gen_order_id(), rule=rules.not_null)
+            order_id = self.parse_arg(formdata, 'order_id', defval=utils.get_uuid(), rule=rules.not_null)
             product_id = self.parse_arg(formdata, 'product_id', rule=rules.not_null)
             node_id = self.parse_arg(formdata, 'node_id', rule=rules.not_null)
             area_id = self.parse_arg(formdata, 'area_id', defval='')
@@ -189,6 +193,7 @@ class CustomerAdd(BaseService):
             accept_source = self.parse_arg(formdata, 'accept_source', defval='console')
             expire_date = self.parse_arg(formdata, 'expire_date', rule=rules.is_date)
             months = self.parse_arg(formdata, 'months', defval='0', rule=rules.is_number)
+            days = self.parse_arg(formdata, 'days', defval='0', rule=rules.is_number)
             fee_value = self.parse_arg(formdata, 'fee_value', rule=rules.is_rmb)
             giftflows = self.parse_arg(formdata, 'giftflows', defval='0', rule=rules.is_number3)
             giftdays = self.parse_arg(formdata, 'giftdays', defval='0', rule=rules.is_number)
@@ -206,6 +211,8 @@ class CustomerAdd(BaseService):
                 vcard = self.db.query(models.TrValCard).get(vcard_code)
                 if not self.check_vcard(vcard, vcard_pwd, product):
                     return False
+            if hasattr(self.operator, 'agency_id') and self.operator.agency_id is not None:
+                agency_id = self.operator.agency_id
             customer = models.TrCustomer()
             customer.customer_id = customer_id
             customer.node_id = node_id
@@ -249,21 +256,16 @@ class CustomerAdd(BaseService):
             if product.product_policy == PPMonth:
                 order_fee = decimal.Decimal(product.fee_price) * decimal.Decimal(months)
                 order_fee = int(order_fee.to_integral_value())
+            if product.product_policy == PPDay:
+                order_fee = decimal.Decimal(product.fee_price) * decimal.Decimal(days)
+                order_fee = int(order_fee.to_integral_value())
             elif product.product_policy == APMonth:
                 order_fee = 0
-            elif product.product_policy == BOMonth:
+            elif product.product_policy in (BOMonth, BODay):
                 order_fee = int(product.fee_price)
             elif product.product_policy == BOFlows:
                 order_fee = int(product.fee_price)
                 flow_length = int(product.fee_flows)
-            elif product.product_policy in (PPTimes, PPFlow):
-                balance = utils.yuan2fen(fee_value)
-                expire_date = MAX_EXPIRE_DATE
-            elif product.product_policy == PPMFlows:
-                balance = utils.yuan2fen(fee_value)
-                expire_date = MAX_EXPIRE_DATE
-                fixdflows = utils.gb2kb(giftflows)
-                self.add_account_fixdflows(account_number, fixdflows)
             order = models.TrCustomerOrder()
             order.order_id = order_id
             order.customer_id = customer.customer_id
@@ -368,8 +370,7 @@ class CustomerAdd(BaseService):
             issues = None
             builder_phone = None
             if builder_name and pay_status == 1:
-                builder_phone = self.db.query(models.TrBuilder.builder_phone).filter_by(
-                    builder_name=builder_name).scalar()
+                builder_phone = self.db.query(models.TrBuilder.builder_phone).filter_by(builder_name=builder_name).scalar()
                 issues = models.TrIssues()
                 issues.id = utils.get_uuid()
                 issues.account_number = account.account_number
@@ -386,13 +387,14 @@ class CustomerAdd(BaseService):
             self.db.commit()
             dispatch.pub(ACCOUNT_OPEN_EVENT, account.account_number, async=True)
             if issues and builder_phone:
-                dispatch.pub(SERVICE_INSTALL_EVENT, issues.account_number, builder_phone, async=True)
+                dispatch.pub(ISSUES_ASSIGN_EVENT, issues.account_number, builder_phone, async=True)
+            self.update_routeros_sync_event(account_number, password, product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.exception(err, tag='customer_add_error')
             traceback.print_exc()
-            self.last_error = u'操作失败:%s' % utils.safeunicode(err)
+            self.last_error = u'客户开户操作失败:%s' % utils.safeunicode(err)
+            logger.error(self.last_error, tag='customer_add_error', username=formdata.get('account_number'))
             return False
 
         return
@@ -454,7 +456,10 @@ class CustomerAdd(BaseService):
                 order.customer_id = customer.customer_id
                 order.product_id = product.id
                 order.account_number = account_number
-                if product.product_policy in (PPTimes, PPFlow, PPMonth):
+                if product.product_policy in (PPTimes,
+                 PPFlow,
+                 PPMonth,
+                 PPDay):
                     order.order_fee = 0
                 else:
                     order.order_fee = product.fee_price
@@ -520,8 +525,7 @@ class CustomerAdd(BaseService):
             node_id = self.db.query(models.TrNode.id).limit(1).scalar()
             if not node_id:
                 raise ValueError(u'必须创建运营区域')
-            product_id = self.db.query(models.TrDomainAttr.attr_value).filter_by(domain_code=domain,
-                                                                                 attr_name='wlan_product_id').scalar()
+            product_id = self.db.query(models.TrDomainAttr.attr_value).filter_by(domain_code=domain, attr_name='wlan_product_id').scalar()
             if not product_id:
                 raise ValueError(u'认证域 [%s] 未提供自助热点资费套餐' % domain)
             if not self.db.query(models.TrProduct).get(product_id):
@@ -532,33 +536,33 @@ class CustomerAdd(BaseService):
                 self.db.commit()
             else:
                 formdata = Storage({'account_number': phone,
-                                    'password': vcode,
-                                    'node_id': node_id,
-                                    'area_id': '',
-                                    'idcard': phone,
-                                    'agency_id': None,
-                                    'builder_name': None,
-                                    'giftflows': '0',
-                                    'giftdays': '0',
-                                    'time_length': '1',
-                                    'flow_length': '0.5',
-                                    'expire_date': (_now + datetime.timedelta(days=1)).strftime('%Y-%m-%d'),
-                                    'fee_value': '0.00',
-                                    'status': '1',
-                                    'realname': phone,
-                                    'address': u'wlan portal',
-                                    'ip_address': None,
-                                    'product_id': product_id,
-                                    'mobile': phone,
-                                    'months': '1',
-                                    'customer_desc': user_desc})
+                 'password': vcode,
+                 'node_id': node_id,
+                 'area_id': '',
+                 'idcard': phone,
+                 'agency_id': None,
+                 'builder_name': None,
+                 'giftflows': '0',
+                 'giftdays': '0',
+                 'time_length': '1',
+                 'flow_length': '0.5',
+                 'expire_date': (_now + datetime.timedelta(days=1)).strftime('%Y-%m-%d'),
+                 'fee_value': '0.00',
+                 'status': '1',
+                 'realname': phone,
+                 'address': u'wlan portal',
+                 'ip_address': None,
+                 'product_id': product_id,
+                 'mobile': phone,
+                 'months': '1',
+                 'customer_desc': user_desc})
                 self.add(formdata)
             return True
         except Exception as err:
             import traceback
             traceback.print_exc()
-            logger.error(u'auto add customer err %s' % utils.safeunicode(err), trace='wlan')
             self.last_error = u'热点用户注册失败:%s' % utils.safeunicode(err)
+            logger.error(self.last_error, tag='wlan_customer_add_error', trace='wlan', username=phone)
             return False
 
         return

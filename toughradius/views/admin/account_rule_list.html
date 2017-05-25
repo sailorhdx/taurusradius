@@ -26,7 +26,7 @@
      <div class="container">
         <div class="pull-left bottom10">
             % if permit.match(current_user.username,'/admin/account_rule/add'):
-            <a href="/admin/account_rule/add" class="btn btn-sm bg-navy"><i class="fa fa-plus-circle"></i> 创建规则</a>
+            <a href="/admin/account_rule/add" class="btn btn-sm"><i class="fa fa-plus-circle"></i> 创建规则</a>
             % endif
         </div>
         <table class="table">
@@ -48,11 +48,11 @@
                 <td>${rule.user_sn}</td>
                 <td>
                     % if permit.match(current_user.username,'/admin/account_rule/update'):
-                    <a class="opt-btn btn-default" href="/admin/account_rule/update?rule_id=${rule.id}">
+                    <a class="btn btn-xs" href="/admin/account_rule/update?rule_id=${rule.id}">
                     <i class="fa fa-edit"></i> 修改</a>
                     % endif
                     % if permit.match(current_user.username,'/admin/account_rule/delete'):
-                    <a class="opt-btn btn-default" href="javascript:deleteRule('${rule.id}')">
+                    <a class="btn btn-xs" href="javascript:deleteRule('${rule.id}')">
                     <i class="fa fa-times"></i> 删除</a>
                     % endif
                 </td>

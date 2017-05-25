@@ -17,22 +17,27 @@
         <h5>工单基本信息</h5>
         <table class="table table-bordered">
                 <tbody>
-                    <tr class="active">
-                        <td>ID-${issues.id}</td>
+                    <tr>
+                        <th>ID</th>
+                        <td>${issues.id}</td>
                         <th>状态</th>
                         <td>
                             <span ${colors[issues.status]}>${{0:u"未处理",1: u'处理中', 2: u'挂起', 3: u'取消',4:u'处理完成'}[issues.status]}</span>
                         </td>
                         <th>用户</th>
                         <td><a href="/admin/customer/detail?account_number=${issues.account_number}">${issues.account_number}</a></td>
-                        <th>类型</th>
-                        <td>${{0:u'新装',1:u'故障',2:u'投诉',3:u'其他'}[issues.issues_type]}</td>
-                        <th>当前服务人员</th>
-                        <td>${issues.builder_name|h}</td>
                     </tr>
                     <tr >
-                        <td>工单内容</td>
-                        <td colspan="8">${issues.content|h}</td>
+                        <th>类型</th>
+                        <td>${{0:u'新装',1:u'故障',2:u'投诉',3:u'其他'}[issues.issues_type]}</td>
+                        <th>服务人员</th>
+                        <td>${issues.builder_name|h}</td>
+                        <th>操作时间</th>
+                        <td>${issues.date_time}</td>
+                    </tr>
+                    <tr >
+                        <th>工单内容</th>
+                        <td colspan="10">${issues.content|h}</td>
                     </tr>
                     % if issues.status in (0,1,2) and (current_user.opr_type == 0 or issues.operator_name == current_user.username):
                     <tr>

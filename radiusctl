@@ -281,7 +281,7 @@ def standalone(conf,debug):
         from toughradius.modules import radiusd
         from toughradius.modules import taskd
         from toughradius.modules import syncd
-        from toughradius.modules.settings import redis_conf
+        from toughradius.toughlib.config import redis_conf
         from toughradius.toughlib.redis_cache import CacheManager
         config = iconfig.find_config(conf)
         check_environ(config)

@@ -15,8 +15,14 @@ class Storage(dict):
     def __getattr__(self, key):
         try:
             r = self[key]
-            if isinstance(r, basestring):
-                return r.decode('utf-8')
+            if isinstance(r, str):
+                try:
+                    return r.decode('utf-8')
+                except:
+                    return r
+
+            elif isinstance(r, unicode):
+                return r
             return r
         except KeyError as k:
             raise AttributeError, k
@@ -87,6 +93,7 @@ class Form(object):
         self.attrs = kw.pop('attrs', {})
         self.valid = True
         self.note = None
+        self.desc = None
         self.htopic = kw.pop('htopic', '')
         self.validators = kw.pop('validators', [])
         self.action = kw.pop('action', '')
@@ -109,6 +116,7 @@ class Form(object):
 
     def render(self):
         out = ''
+        out.append(self.renderdesc(self.desc))
         out += self.rendernote(self.note)
         out += '<table class="formtab table table-bordered">\n'
         out += '<thead ><tr class=active><th>%s</th><th class=rtd><a class="btn"               href="javascript:history.go(-1);">%s</a></th></tr></thead>\n' % (self.title, net.websafe('\xe8\xbf\x94\xe5\x9b\x9e'))
@@ -126,6 +134,7 @@ class Form(object):
 
     def render_css(self):
         out = []
+        out.append(self.renderdesc(self.desc))
         out.append(self.rendernote(self.note))
         for i in self.inputs:
             out.append('    <div class="form-group">\n')
@@ -149,6 +158,12 @@ class Form(object):
     def rendernote(self, note):
         if note:
             return '<span class="wrong">%s</span>' % net.websafe(note)
+        else:
+            return ''
+
+    def renderdesc(self, desc):
+        if desc:
+            return '<div class="well form-well">%s</div>' % net.websafe(desc)
         else:
             return ''
 

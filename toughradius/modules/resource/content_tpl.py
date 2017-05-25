@@ -13,7 +13,7 @@ from toughradius.modules.settings import *
 from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
 from toughradius.common import tools
 
-@permit.suproute('/admin/contenttpl', u'通知模板管理', MenuRes, order=4.0, is_menu=True)
+@permit.route('/admin/contenttpl', u'通知模板管理', MenuRes, order=4.0, is_menu=True)
 
 class ContentTplListHandler(BaseHandler):
 
@@ -42,6 +42,7 @@ class ContentTplAddHandler(BaseHandler):
         tpl = models.TrContentTemplate()
         tpl.id = utils.get_uuid()
         tpl.tpl_type = form.d.tpl_type
+        tpl.tpl_id = form.d.tpl_id
         tpl.tpl_content = form.d.tpl_content
         tpl.sync_ver = tools.gen_sync_ver()
         self.db.add(tpl)
@@ -69,6 +70,7 @@ class ContentTplUpdateHandler(BaseHandler):
             return self.render('base_form.html', form=form)
         tpl = self.db.query(models.TrContentTemplate).get(form.d.id)
         tpl.tpl_type = form.d.tpl_type
+        tpl.tpl_id = form.d.tpl_id
         tpl.tpl_content = form.d.tpl_content
         tpl.sync_ver = tools.gen_sync_ver()
         self.add_oplog(u'修改模板信息:%s' % form.d.tpl_type)

@@ -171,6 +171,12 @@ class BaseHandler(cyclone.web.RequestHandler):
         val = self.db.query(models.TrParam.param_value).filter_by(param_name=name).scalar()
         return val or defval
 
+    def get_product_attr(self, pid, name, attr_type = 0):
+        return self.db.query(models.TrProductAttr).filter_by(product_id=pid, attr_name=name, attr_type=attr_type).first()
+
+    def get_tpl_id(self, tpl_type):
+        return self.db.query(models.TrContentTemplate.tpl_id).filter_by(tpl_type=tpl_type).scalar()
+
 
 def authenticated(method):
 

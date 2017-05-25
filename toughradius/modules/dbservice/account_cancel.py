@@ -11,8 +11,13 @@ from toughradius.modules.dbservice import BaseService
 from toughradius.modules.dbservice import logparams
 from toughradius.common import tools
 from toughradius.toughlib.btforms import rules
+from toughradius.modules.events import settings as evset
 
 class AccountCancel(BaseService):
+
+    def update_routeros_del_event(self, name, node_id):
+        dispatch.pub(evset.ROSSYNC_DEL_PPPOE_USER, name, node_id=node_id, async=True)
+        dispatch.pub(evset.ROSSYNC_DEL_HOTSPOT_USER, name, node_id=node_id, async=True)
 
     @logparams
     def cancel(self, formdata, **kwargs):
@@ -20,9 +25,9 @@ class AccountCancel(BaseService):
 
         :param formdata:   用户销户参数表
         :type formdata:    dict
-
+        
         formdata params:
-
+        
         :param account_number:   用户账号
         :type account_number:    string
         :param operate_desc:    操作描述
@@ -94,9 +99,12 @@ class AccountCancel(BaseService):
             for online in self.db.query(models.TrOnline).filter_by(account_number=account.account_number):
                 dispatch.pub(UNLOCK_ONLINE_EVENT, online.account_number, online.nas_addr, online.acct_session_id, async=True)
 
+            self.update_routeros_del_event(account_number, None)
             return True
         except Exception as err:
             self.db.rollback()
-            logger.error(traceback.format_exc(), tag='account_cancel_error')
             self.last_error = u'用户销户失败:%s, %s' % (utils.safeunicode(err.message), err.__class__)
+            logger.error(self.last_error, tag='account_cancel_error', username=formdata.get('account_number'))
             return False
+
+        return

@@ -30,6 +30,7 @@
                           <option value="warn" ${msg_type==u'warn' and "selected" or ""}>系统警告消息</option>
                           <option value="info" ${msg_type==u'info' and "selected" or ""}>系统日志消息</option>
                           <option value="api" ${msg_type==u'api' and "selected" or ""}>接口日志消息</option>
+                          <option value="routeros" ${msg_type==u'routeros' and "selected" or ""}>RouterOS同步消息</option>
                     </select>
                 </div>
                 <label for="keyword" class="col-sm-2 control-label">用户账号/关键字</label>
@@ -52,9 +53,9 @@
             % for msg in messages:
             <div class="msg-box break-all">
                 % if msg_type == 'api':
-                ${msg.replace('<',"&lt;").replace(r'\n','<br>')}
+                ${msg.replace('<',"&lt;").replace(r'\n','<br>')|n}
                 % else:
-                ${msg.replace('\n','<br>').replace('\t',u'&nbsp&nbsp&nbsp&nbsp')}
+                ${msg.replace('\n','<br>').replace('\t',u'&nbsp&nbsp&nbsp&nbsp')|n}
                 % endif
             </div>
             % endfor

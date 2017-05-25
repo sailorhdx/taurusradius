@@ -4,13 +4,8 @@ import os
 import cmd
 import subprocess
 import sys
-welcome_str = "
-Hello, This is a toughradius cmd tools.
-
-Type 'help' or '?' list available subcommands and some.
-
-"
-shell_tag = lambda tag: u'{0}'.format(tag).encode('utf-8')
+welcome_str = "\nHello, This is a toughradius cmd tools. \n\nType 'help' or '?' list available subcommands and some. \n\n"
+shell_tag = lambda tag: u'\x1b[32m\x1b[1m{0}\x1b[0m'.format(tag).encode('utf-8')
 
 def syscmd(args):
     subshell = subprocess.Popen(args, shell=True, stdin=None, stdout=None)

@@ -25,7 +25,7 @@ class ExpireNotifyTask(TaseBasic):
         smtp_tls = int(self.get_param_value('smtp_tls', '0')) == 1
         return sendmail(server=smtp_server, port=smtp_port, user=smtp_user, password=smtp_pwd, from_addr=from_addr, mailto=mailto, topic=topic, content=content, tls=smtp_tls)
 
-    def get_notify_interval(self):
+    def get_next_interval(self):
         try:
             notify_interval = int(self.get_param_value('mail_notify_interval', 1440)) * 60.0
             notify_time = self.get_param_value('mail_notify_time', None)
@@ -38,11 +38,11 @@ class ExpireNotifyTask(TaseBasic):
         return
 
     def first_delay(self):
-        return self.get_notify_interval()
+        return self.get_next_interval()
 
     def process(self, *args, **kwargs):
         self.logtimes()
-        next_interval = self.get_notify_interval()
+        next_interval = self.get_next_interval()
         try:
             logger.info('start process mail_notify task')
             _enable = int(self.get_param_value('mail_notify_enable', 0))

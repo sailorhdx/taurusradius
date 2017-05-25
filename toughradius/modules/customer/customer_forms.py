@@ -4,7 +4,7 @@ from toughradius.toughlib import btforms
 from toughradius.toughlib.btforms import dataform
 from toughradius.toughlib.btforms import rules
 from toughradius.toughlib.btforms.rules import button_style, input_style
-button_style = {'class': 'btn btn-sm bg-navy'}
+button_style = {'class': 'btn btn-sm'}
 boolean = {0: u'否',
  1: u'是'}
 user_state = {0: u'未激活',
@@ -26,8 +26,8 @@ def customer_fast_open_form(nodes = [], products = [], agencies = []):
     items.append(btforms.Dropdown('node_id', description=u'区域*', args=nodes, required='required', **input_style))
     items.append(btforms.Dropdown('area_id', description=u'社区*', args=[], required='required', **input_style))
     items.append(btforms.Hidden('realname', description=u'用户姓名*', **input_style))
-    items.append(btforms.Hidden('idcard', rules.len_of(1, 32), description=u'证件号码*', **input_style))
-    items.append(btforms.Hidden('mobile', rules.len_of(1, 32), description=u'用户手机号码*', **input_style))
+    items.append(btforms.Hidden('idcard', rules.len_of(0, 18), description=u'证件号码*', **input_style))
+    items.append(btforms.Hidden('mobile', rules.len_of(0, 11), description=u'用户手机号码*', **input_style))
     items.append(btforms.Hidden('address', rules.len_of(1, 255), description=u'用户地址', required='required', **input_style))
     items.append(btforms.Dropdown('product_id', args=products, description=u'资费*', required='required', **input_style))
     items.append(btforms.Textbox('account_number', description=u'用户账号*', required='required', **input_style))
@@ -36,7 +36,8 @@ def customer_fast_open_form(nodes = [], products = [], agencies = []):
     items.append(btforms.Hidden('ip_address', description=u'用户IP地址', **input_style))
     items.append(btforms.Hidden('agency_id', description=u'代理商', **input_style))
     items.append(btforms.Hidden('charge_code', description=u'收费项', **input_style))
-    items.append(btforms.Textbox('months', rules.is_number, description=u'月数(包月有效)', required='required', **input_style))
+    items.append(btforms.Textbox('months', description=u'月数(包月有效)', **input_style))
+    items.append(btforms.Textbox('days', description=u'天数(包日有效)', **input_style))
     items.append(btforms.Textbox('giftdays', rules.is_number, description=u'赠送天数', help=u'包月资费，买断包月资费有效', value=0, required='required', **input_style))
     items.append(btforms.Textbox('giftflows', rules.is_number, description=u'赠送流量(G)', help=u'流量包月资费有效', value=0, required='required', **input_style))
     items.append(btforms.Textbox('fee_value', rules.is_rmb, description=u'缴费金额(套餐资费+收费项)*', required='required', **input_style))
@@ -74,8 +75,9 @@ def customer_open_form(nodes = [], products = [], agencies = []):
     items.append(btforms.Dropdown('node_id', description=u'区域*', args=nodes, required='required', **input_style))
     items.append(btforms.Dropdown('area_id', description=u'社区*', args=[], required='required', **input_style))
     items.append(btforms.Textbox('realname', rules.len_of(2, 32), description=u'用户姓名*', required='required', **input_style))
-    items.append(btforms.Textbox('idcard', rules.len_of(1, 32), description=u'证件号码*', **input_style))
-    items.append(btforms.Textbox('mobile', rules.len_of(1, 32), description=u'用户手机号码*', **input_style))
+    items.append(btforms.Textbox('idcard', rules.len_of(0, 18), description=u'证件号码*', **input_style))
+    items.append(btforms.Textbox('mobile', rules.len_of(0, 11), description=u'用户手机号码*', **input_style))
+    items.append(btforms.Textbox('email', description=u'电子邮箱*', **input_style))
     items.append(btforms.Textbox('address', rules.len_of(1, 255), description=u'用户地址', hr=True, required='required', **input_style))
     items.append(btforms.Textbox('account_number', description=u'用户账号*', required='required', **input_style))
     items.append(btforms.Textbox('password', description=u'认证密码*', required='required', **input_style))
@@ -84,7 +86,8 @@ def customer_open_form(nodes = [], products = [], agencies = []):
     items.append(btforms.Dropdown('product_id', args=products, description=u'资费*', required='required', **input_style))
     items.append(btforms.Dropdown('agency_id', args=agencies, description=u'代理商', **input_style))
     items.append(btforms.Dropdown('charge_code', args=[], description=u'收费项', **input_style))
-    items.append(btforms.Textbox('months', rules.is_number, description=u'月数(包月有效)', required='required', **input_style))
+    items.append(btforms.Textbox('months', description=u'月数(包月有效)', **input_style))
+    items.append(btforms.Textbox('days', description=u'天数(包日有效)', **input_style))
     items.append(btforms.Textbox('giftdays', rules.is_number, description=u'赠送天数', help=u'包月资费，买断包月资费有效', value=0, required='required', **input_style))
     items.append(btforms.Textbox('giftflows', rules.is_number, description=u'赠送流量(G)', help=u'流量包月资费有效', value=0, required='required', **input_style))
     items.append(btforms.Textbox('fee_value', rules.is_rmb, description=u'缴费金额(套餐资费+收费项)*', required='required', **input_style))

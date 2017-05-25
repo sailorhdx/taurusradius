@@ -11,6 +11,7 @@ from toughradius.toughlib.permit import permit
 from toughradius.toughlib import utils, dispatch, db_cache
 from toughradius.modules.settings import *
 from toughradius.common import tools
+from toughradius.modules.dbservice.account_service import AccountService
 
 @permit.route('/admin/account/release', u'用户解绑', MenuUser, order=2.8)
 
@@ -19,12 +20,7 @@ class AccountReleasetHandler(account.AccountHandler):
     @authenticated
     def post(self):
         account_number = self.get_argument('account_number')
-        user = self.db.query(models.TrAccount).filter_by(account_number=account_number).first()
-        user.mac_addr = ''
-        user.vlan_id1 = 0
-        user.vlan_id2 = 0
-        user.sync_ver = tools.gen_sync_ver()
-        self.add_oplog(u'释放用户账号（%s）绑定信息' % account_number)
-        self.db.commit()
-        dispatch.pub(db_cache.CACHE_DELETE_EVENT, account_cache_key(account_number), async=True)
+        manager = AccountService(self.db, self.aes)
+        if not manager.release(account_number):
+            return self.render_json(code=1, msg=manager.last_error)
         return self.render_json(msg=u'解绑成功')

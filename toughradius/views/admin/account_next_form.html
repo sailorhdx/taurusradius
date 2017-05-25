@@ -7,6 +7,7 @@
 function productCalc(){
     param = {
         'months': $("#months").val() || 0,
+        'days': $("#days").val() || 0,
         'product_id':$("#product_id").val(),
         'old_expire':$("#old_expire").val(),
         'giftdays':$("#giftdays").val(),
@@ -25,6 +26,14 @@ function productCalc(){
             $("#months").val(0);
             $("#months").parent().parent().hide();
         }
+
+        if(ev.data.policy == 9){
+            $("#days").parent().parent().show();
+        }else{
+            $("#days").val(0);
+            $("#days").parent().parent().hide();
+        }
+
     }, "json");
 }
 
@@ -40,6 +49,9 @@ $(document).ready(function (){
     $('#months').blur(function() {
         productCalc();
     });  
+    $('#days').blur(function() {
+        productCalc();
+    });
     $('#giftdays').blur(function() {
         productCalc();
     });   

@@ -177,7 +177,7 @@ class Packet(dict):
             key, item = self._EncodeKeyValues(key, items)
             dict.__setitem__(self, key, item)
         else:
-            raise isinstance(item, list) or AssertionError
+            #raise isinstance(item, list) or AssertionError
             dict.__setitem__(self, key, item)
 
     def keys(self):
@@ -222,8 +222,8 @@ class Packet(dict):
         :return: raw packet
         :rtype:  string
         """
-        raise self.authenticator or AssertionError
-        raise self.secret is not None or AssertionError
+        #raise self.authenticator or AssertionError
+        #raise self.secret is not None or AssertionError
         attr = self._PktEncodeAttributes()
         header = struct.pack('!BBH', self.code, self.id, 20 + len(attr))
         authenticator = md5_constructor(header[0:4] + self.authenticator + attr + self.secret).digest()
@@ -460,7 +460,7 @@ class AcctPacket(Packet):
         :return: True if verification failed else False
         :rtype: boolean
         """
-        raise self.raw_packet or AssertionError
+        #raise self.raw_packet or AssertionError
         hash = md5_constructor(self.raw_packet[0:4] + 16 * six.b('\x00') + self.raw_packet[20:] + self.secret).digest()
         return hash == self.authenticator
 
@@ -514,7 +514,7 @@ class CoAPacket(Packet):
         :return: True if verification failed else False
         :rtype: boolean
         """
-        raise self.raw_packet or AssertionError
+        #raise self.raw_packet or AssertionError
         hash = md5_constructor(self.raw_packet[0:4] + 16 * six.b('\x00') + self.raw_packet[20:] + self.secret).digest()
         return hash == self.authenticator
 

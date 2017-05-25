@@ -17,7 +17,7 @@ from toughradius.modules.dbservice.account_renew import AccountRenew
 from toughradius.modules.dbservice.account_charge import AccountCharge
 from toughradius.modules.settings import order_paycaache_key
 
-@permit.route('/ssportal/alipay/verify/(\w+)')
+@permit.route('/ssportal/alipay/verify/(\\w+)')
 
 class SSportalProductOrderVerifyHandler(BaseHandler):
     """ 支付宝支付第三步： 支付通知处理

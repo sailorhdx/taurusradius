@@ -13,6 +13,9 @@ from toughradius.modules import taskd
 class DdnsUpdateTask(TaseBasic):
     __name__ = 'ddns-update'
 
+    def get_next_interval(self):
+        return 60
+
     def first_delay(self):
         return 5
 

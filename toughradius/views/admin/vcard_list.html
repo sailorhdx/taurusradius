@@ -171,13 +171,13 @@ function do_export(){
             </div>
             <div class="form-group">
                 <div class="col-md-offset-5 col-md-7">
-                    <button type="button" onclick="do_submit();" class="btn btn-sm bg-navy">查询</button>
+                    <button type="button" onclick="do_submit();" class="btn btn-sm">查询</button>
                     % if permit.match(current_user.username,'/admin/vcard/export'):
-                    <a href="javascript:do_export();" class="btn btn-sm bg-navy">
+                    <a href="javascript:do_export();" class="btn btn-sm">
                     <i class="fa fa-sign-out"></i> 导出数据</a>
                     % endif
                     % if permit.match(current_user.username,'/admin/vcard/batchadd'):
-                         <a href="/admin/vcard/batchadd" class="btn btn-sm bg-navy">
+                         <a href="/admin/vcard/batchadd" class="btn btn-sm">
                          <i class="fa fa-plus-circle"></i> 批量发行</a>
                     % endif                    
                 </div>
@@ -186,11 +186,11 @@ function do_export(){
 
         <div class="pull-left bottom10">
         % if permit.match(current_user.username,'/admin/vcard/active'):
-             <a href="javascript:activeCards();" class="btn btn-sm bg-navy">
+             <a href="javascript:activeCards();" class="btn btn-sm">
              <i class="fa fa-arrow-up"></i> 激活</a>
         % endif
         % if permit.match(current_user.username,'/admin/vcard/deactive'):
-             <a href="javascript:deactiveCards();" class="btn btn-sm bg-navy">
+             <a href="javascript:deactiveCards();" class="btn btn-sm">
              <i class="fa fa-arrow-up"></i> 取消激活</a>
         % endif
         % if permit.match(current_user.username,'/admin/vcard/delete'):

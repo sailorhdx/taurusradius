@@ -15,7 +15,7 @@ from toughradius.modules.settings import *
 from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
 from toughradius.common import tools
 
-@permit.suproute('/admin/builder', u'服务人员管理', MenuNode, order=8.0, is_menu=True)
+@permit.route('/admin/builder', u'服务人员管理', MenuNode, order=8.0, is_menu=True)
 
 class BuilderHandler(BaseHandler):
 
@@ -114,7 +114,7 @@ class BuilderDeleteHandler(BaseHandler):
         self.redirect('/admin/builder', permanent=False)
 
 
-if os.environ['LICENSE_TYPE'] != 'community':
+if os.environ.get('LICENSE_TYPE') != 'community':
 
     @permit.route('/admin/builder/qrcode/new', u'服务人员二维码创建', MenuNode, order=8.0005, is_menu=False)
 

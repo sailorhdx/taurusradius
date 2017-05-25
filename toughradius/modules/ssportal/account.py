@@ -5,7 +5,8 @@ import time
 from toughradius.modules.ssportal.base import BaseHandler, authenticated
 from toughradius.toughlib.permit import permit
 from toughradius.modules import models
-from toughradius.toughlib import utils
+from toughradius.toughlib import utils, dispatch, db_cache
+from toughradius.common import tools
 from toughradius.modules.settings import *
 
 @permit.route('/ssportal/account')
@@ -21,3 +22,20 @@ class AccountHandler(BaseHandler):
         type_map = ACCEPT_TYPES
         get_attr_val = lambda an: self.db.query(models.TrAccountAttr.attr_value).filter_by(account_number=self.current_user.username, attr_name=an).scalar()
         return self.render('account.html', customer=customer, user=user, orders=orders, get_attr_val=get_attr_val, type_map=type_map)
+
+
+@permit.route('/ssportal/account/release')
+
+class AccountReleasetHandler(BaseHandler):
+
+    @authenticated
+    def post(self):
+        account_number = self.current_user.username
+        user = self.db.query(models.TrAccount).filter_by(account_number=account_number).first()
+        user.mac_addr = ''
+        user.vlan_id1 = 0
+        user.vlan_id2 = 0
+        user.sync_ver = tools.gen_sync_ver()
+        self.db.commit()
+        dispatch.pub(db_cache.CACHE_DELETE_EVENT, account_cache_key(account_number), async=True)
+        return self.render_json(msg=u'½â°ó³É¹¦')

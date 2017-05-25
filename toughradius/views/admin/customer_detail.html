@@ -86,7 +86,7 @@ $(document).ready(function(){
         <div class="pull-left bottom10">
 
             <div class="btn-group">
-              <button type="button" class="btn btn-sm bg-navy dropdown-toggle" style="width:160px;"
+              <button type="button" class="btn btn-sm dropdown-toggle" style="width:160px;"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-info-circle"></i> 用户账号修改 <span class="caret"></span>
               </button>
@@ -100,7 +100,7 @@ $(document).ready(function(){
             </div>
             <!-- 受理按钮组 -->
             <div class="btn-group">
-              <button type="button" class="btn btn-sm bg-navy dropdown-toggle" style="width:160px;"
+              <button type="button" class="btn btn-sm dropdown-toggle" style="width:160px;"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-smile-o"></i> 用户业务受理 <span class="caret"></span>
               </button>
@@ -108,7 +108,7 @@ $(document).ready(function(){
                 ${cus_ui.accept_normal(u"用户资费变更",user.status,"/admin/account/change?account_number=%s"%user.account_number,icon='suitcase')}  
                 ${cus_ui.accept_normal(u"用户账号停机",user.status,"javascript:do_pause('%s');"%user.account_number,"/admin/account/pause",icon='pause')} 
                 ${cus_ui.accept_pause(u"用户账号复机",user.status,"javascript:do_resume('%s');"%user.account_number,"/admin/account/resume",icon='mail-forward')}  
-                % if user.product_policy in (0,2,3,5):
+                % if user.product_policy in (0,2,3,5,9,10):
                     ${cus_ui.accept_normal(u"用户账号续费",user.status,"/admin/account/next?account_number=%s"%user.account_number,icon='cny')}    
                 % elif user.product_policy in (1,4,7): 
                    ${cus_ui.accept_normal(u"用户账号充值",user.status,"/admin/account/charge?account_number=%s"%user.account_number,icon='cny')}  
@@ -143,7 +143,7 @@ $(document).ready(function(){
                     <a href="#issues_list" aria-controls="issues_list" role="tab" data-toggle="tab">用户工单</a>
                 </li>
                 <li role="presentation">
-                    <a href="#userlogs" aria-controls="userlogs" role="tab" data-toggle="tab">认证日志</a>
+                    <a href="#userlogs" aria-controls="userlogs" role="tab" data-toggle="tab">用户日志</a>
                 </li>
                  % if handler.license.type != 'community':
                 <li role="presentation">
@@ -214,7 +214,11 @@ $(document).ready(function(){
                                 % if user.status == 0:
                                     <span class="label label-info">未激活</span>
                                 % elif user.status == 1:
+                                    % if utils.is_expire(user.expire_date):
+                                    <span class="label label-warning">到期</span>
+                                    % else:
                                     <span class="label label-success">正常</span>
+                                    % endif
                                 % elif user.status == 2:
                                     <span class="label label-default">停机</span>
                                 % elif user.status == 3:
@@ -287,11 +291,11 @@ $(document).ready(function(){
                 <td>${attr.attr_desc|h}</td>
                 <td>
                 % if permit.match(current_user.username,'/admin/customer/attr/update'):
-                <a class="opt-btn btn-default" href="/admin/customer/attr/update?attr_id=${attr.id}">
+                <a class="btn btn-xs" href="/admin/customer/attr/update?attr_id=${attr.id}">
                 <i class="fa fa-edit"></i> 修改</a>
                 % endif
                 % if permit.match(current_user.username,'/admin/customer/attr/delete'):
-                <a class="opt-btn btn-default" href="javascript:deleteAttr('${attr.id}');">
+                <a class="btn btn-xs" href="javascript:deleteAttr('${attr.id}');">
                 <i class="fa fa-times"></i> 删除</a>
                 % endif
                 </td>
@@ -324,12 +328,12 @@ $(document).ready(function(){
                     <td>${order.create_time}</td>
                     <td>
                         % if order.pay_status <> 2 and permit.match(current_user.username,'/admin/customer/order/check'): 
-                        <a class="opt-btn btn-default" href="/admin/customer/order/check?order_id=${order.order_id}"><i class="fa fa-check-circle"></i> 对账</a>
+                        <a class="btn btn-xs" href="/admin/customer/order/check?order_id=${order.order_id}"><i class="fa fa-check-circle"></i> 对账</a>
                         % endif                    
-                        <a class="opt-btn btn-default" href="javascript:void(0);" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="${order.order_desc|h}">
+                        <a class="btn btn-xs" href="javascript:void(0);" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="${order.order_desc|h}">
                         <i class="fa fa-info-circle"></i></a> 
                         % if permit.match(current_user.username,'/admin/customer/note/print'):
-                        <a class="opt-btn btn-default" href="/admin/customer/note/print?order_id=${order.order_id}">
+                        <a class="btn btn-xs" href="/admin/customer/note/print?order_id=${order.order_id}">
                             <i class="fa fa-print"></i> 打印</a>
                         % endif
                     </td>
@@ -386,7 +390,7 @@ $(document).ready(function(){
                     <td>${issues.content[:140] or ""}...</td>
                     <td>
                         % if permit.match(current_user.username,'/admin/issues/detail'):
-                        <a href="/admin/issues/detail?issues_id=${issues.id}" class="opt-btn btn-default">
+                        <a href="/admin/issues/detail?issues_id=${issues.id}" class="btn btn-xs">
                         <i class="fa fa-file-o"></i> 工单详情</a>
                         % endif
                     </td>                    
@@ -395,13 +399,13 @@ $(document).ready(function(){
                 </tbody>
             </table>
             </div>
-            <div role="tabpanel" class="tab-pane" id="userlogs">
+            <div role="tabpanel" class="tab-pane" id="userlogs" style="height:420px;overflow:auto;margin-top:1px;">
             % for msg in userlogs:
-                % if '[RADIUSD]' not in msg:
+            % if '[RADIUSD]' not in msg:
                 <div class="msg-box break-all">
-                    ${msg.replace('\n','<br>').replace('\t',u'&nbsp&nbsp&nbsp&nbsp')}
+                    ${msg.replace('\n','<br>').replace('\t',u'&nbsp&nbsp&nbsp&nbsp')|n}
                 </div>
-                % endif
+            % endif
             % endfor
             </div>
              % if handler.license.type != 'community':

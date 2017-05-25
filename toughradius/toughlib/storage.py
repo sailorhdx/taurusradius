@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #coding:utf-8
 
+
 class Storage(dict):
 
     def __getattr__(self, key):

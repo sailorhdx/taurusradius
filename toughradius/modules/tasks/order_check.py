@@ -16,6 +16,9 @@ from toughradius.modules import taskd
 class OrderCheckTask(TaseBasic):
     __name__ = 'order-check'
 
+    def get_next_interval(self):
+        return 86400
+
     def first_delay(self):
         return 5
 

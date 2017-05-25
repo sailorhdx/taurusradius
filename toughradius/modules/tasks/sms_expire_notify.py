@@ -13,7 +13,7 @@ from toughradius.modules import taskd
 class ExpireNotifyTask(TaseBasic):
     __name__ = 'sms-expire-notify'
 
-    def get_notify_interval(self):
+    def get_next_interval(self):
         try:
             notify_interval = int(self.get_param_value('sms_notify_interval', 1440)) * 60.0
             notify_time = self.get_param_value('sms_notify_time', None)
@@ -26,11 +26,11 @@ class ExpireNotifyTask(TaseBasic):
         return
 
     def first_delay(self):
-        return self.get_notify_interval()
+        return self.get_next_interval()
 
     def process(self, *args, **kwargs):
         self.logtimes()
-        next_interval = self.get_notify_interval()
+        next_interval = self.get_next_interval()
         try:
             logger.info('start process mail_notify task')
             _enable = int(self.get_param_value('sms_notify_enable', 0))

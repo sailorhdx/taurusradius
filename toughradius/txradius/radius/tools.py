@@ -2,6 +2,34 @@
 # coding=utf-8
 import struct
 import six
+import json
+
+def DecodeAnyAttr(val):
+    if val is None:
+        return ''
+    else:
+        if isinstance(val, unicode):
+            try:
+                return val.encode('utf-8')
+            except:
+                return val.encode('gb2312')
+
+        else:
+            if isinstance(val, str):
+                return val
+            if isinstance(val, int):
+                return str(val)
+            if isinstance(val, float):
+                return str(val)
+            if isinstance(val, (dict, list)):
+                return json.dumps(val, ensure_ascii=False)
+            try:
+                return str(val)
+            except:
+                return val
+
+        return
+
 
 def EncodeString(str):
     if len(str) > 253:

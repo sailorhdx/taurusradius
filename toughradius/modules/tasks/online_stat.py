@@ -15,6 +15,9 @@ from toughradius.modules import taskd
 class OnlineStatTask(TaseBasic):
     __name__ = 'online-stat'
 
+    def get_next_interval(self):
+        return 120
+
     def first_delay(self):
         return 5
 

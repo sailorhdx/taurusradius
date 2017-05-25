@@ -149,8 +149,7 @@ if os.environ.get('TOUGHEE_SUPER_RPC') == 'true':
                         f.seek(f.tell() - 16384)
                     else:
                         f.seek(0)
-                    return cyclone.escape.xhtml_escape(utils.safeunicode(f.read())).replace('
-', '<br/>')
+                    return cyclone.escape.xhtml_escape(utils.safeunicode(f.read())).replace('\n', '<br/>')
             else:
                 return 'logfile %s not exist' % logfile
 

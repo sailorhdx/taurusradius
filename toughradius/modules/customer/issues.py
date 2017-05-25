@@ -10,10 +10,8 @@ from toughradius.toughlib.permit import permit
 from toughradius.toughlib import utils, dispatch
 from toughradius.modules.settings import *
 from toughradius.common import tools
-from toughradius.modules.events.settings import SERVICE_INSTALL_EVENT
-from toughradius.modules.events.settings import SERVICE_MAINTAIN_EVENT
+from toughradius.modules.events.settings import ISSUES_ASSIGN_EVENT
 from toughradius.modules.events.settings import DBSYNC_STATUS_ADD
-from toughradius.modules.events.settings import ISSUES_ASSIGN
 
 class IssuesBasicHandler(BaseHandler):
 
@@ -37,10 +35,7 @@ class IssuesBasicHandler(BaseHandler):
         builder = self.get_builder(issues.builder_name)
         if not builder:
             return
-        if int(issues.issues_type) == 0:
-            dispatch.pub(SERVICE_INSTALL_EVENT, issues.account_number, builder_phone=builder.builder_phone, wechat_oid=builder.wechat_oid)
-        elif int(issues.issues_type) == 1:
-            dispatch.pub(SERVICE_MAINTAIN_EVENT, issues.account_number, builder_phone=builder.builder_phone, wechat_oid=builder.wechat_oid)
+        dispatch.pub(ISSUES_ASSIGN_EVENT, issues.account_number, builder_phone=builder.builder_phone, wechat_oid=builder.wechat_oid)
 
 
 @permit.route('/admin/issues/list', u'用户工单管理', MenuUser, order=1.101, is_menu=True)
@@ -69,6 +64,7 @@ class IssuesListHandler(IssuesBasicHandler):
             _query = _query.filter_by(issues_type=issues_type)
         if status:
             _query = _query.filter_by(status=status)
+        _query = _query.order_by(models.TrIssues.date_time.desc())
         self.render('issues_list.html', page_data=self.get_page_data(_query), builders=self.get_builders_by_opr(), **self.get_params())
         return
 
