@@ -1,0 +1,13 @@
+[Unit]  
+Description=toughee  
+After=network.target
+
+[Service]  
+Type=forking  
+ExecStart=/opt/toughee/radiusctl daemon -s startup
+ExecReload=/opt/toughee/radiusctl daemon -s reload
+ExecStop=/opt/toughee/radiusctl daemon -s shutdown
+PrivateTmp=true  
+   
+[Install]  
+WantedBy=multi-user.target  

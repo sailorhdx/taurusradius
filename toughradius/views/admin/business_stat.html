@@ -1,0 +1,207 @@
+<%inherit file="base.html"/>
+
+<%def name="head()">
+<link rel="stylesheet" href="/static/js/bootstrap-datetimepicker.css"> 
+<script src="/static/js/moment-with-locales.js"></script>
+<script src="/static/js/bootstrap-datetimepicker.js"></script>
+<script src="/static/js/highcharts.js"></script>
+<script src="/static/js/hightchart.darkly.js"></script>
+<script src="/static/js/exporting.js"></script>
+<script>
+
+
+$(document).ready(function(){
+    $("#stat_month").datetimepicker({
+        viewMode: 'years',
+        format: "YYYY-MM",
+        locale: 'zh-cn'
+    });
+    $("#stat_month").val('${utils.get_currdate()[0:7]}');
+    do_update_chart();
+});
+
+
+function update_income_trend(stat_month,pay_status)
+{
+    $.get("/admin/stat/income/trend/month", {stat_month:stat_month,pay_status:pay_status} , function (ev) {
+        if (ev.code == 0) {
+            new Highcharts.Chart({
+                credits : {enabled:false},
+                chart: {type: 'areaspline',renderTo: 'income-trend-chart',height:360},
+                title: {text: '营业收入趋势'},
+                subtitle: {text: stat_month+' 总收入: '+ev.fee_total+' 元'},
+                xAxis: {categories: ev.categories},
+                yAxis: {
+                    title: {text: '营业额'},
+                    labels: {formatter: function() {return this.value + '元';}}            
+                },
+                tooltip: {shared: false},
+                legend: {enabled: false},    
+                plotOptions: {areaspline: {
+                    stacking: 'normal',
+                    marker: {enabled: false,symbol: 'circle',radius: 2,states: {hover: {enabled: true}}},
+                    fillOpacity: 0.5
+                }},           
+                series: [{data:ev.data}],
+                navigation: {buttonOptions: {enabled: false}}
+            });
+        }else{
+            console.log(ev.msg);
+        }
+    }, "json");
+}
+
+
+function update_income_node_rate(stat_month,pay_status)
+{
+    $.get("/admin/stat/income/noderate/month", {stat_month:stat_month,pay_status:pay_status} , function (ev) {
+        if (ev.code == 0) {
+            $('#node-income-rate-chart').highcharts({
+                credits : {enabled:false},
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie',
+                    height:360
+                },
+                title: {
+                    text: '区域营收比例'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}：{point.y} 元</b>: {point.percentage:.1f} %',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: '区域收入比例',
+                    colorByPoint: true,
+                    data: ev.data
+                }],
+                navigation: {buttonOptions: {enabled: false}}
+            });
+        }else{
+            console.log(ev.msg);
+        }
+    }, "json");
+}
+
+function update_income_product_rate(stat_month,pay_status)
+{
+    $.get("/admin/stat/income/productrate/month", {stat_month:stat_month,pay_status:pay_status} , function (ev) {
+        if (ev.code == 0) {
+            $('#product-income-rate-chart').highcharts({
+                credits : {enabled:false},
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie',
+                    height:360
+                },
+                title: {
+                    text: '资费营收比例'
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}：{point.y} 元</b>: {point.percentage:.1f} %',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: '资费收入比例',
+                    colorByPoint: true,
+                    data: ev.data
+                }],
+                navigation: {buttonOptions: {enabled: false}}
+            });
+        }else{
+            console.log(ev.msg);
+        }
+    }, "json");
+}
+
+function do_update_chart()
+{
+    stat_month = $("#stat_month").val();
+    pay_status = $("#pay_status").val();
+    update_income_trend(stat_month,pay_status);
+    update_income_node_rate(stat_month,pay_status);
+    update_income_product_rate(stat_month,pay_status);
+}
+
+</script>
+</%def>
+
+<%def name="body()">
+<section class="content">
+<div class="box box-default">
+    <div class="box-header">
+        <i class="fa fa-bar-chart-o"></i>
+        <h3 class="box-title">运营分析</h3>
+        <div class="bar pull-right">
+            <form class="form-inline">
+              <div class="form-group">
+                 <select id="pay_status" name="pay_status" class="form-control input-sm" >
+                    <option value="">所有</option>
+                    <option value="0"  ${"0"==pay_status and "selected" or ""}>未支付</option>
+                    <option value="1"  ${"1"==pay_status and "selected" or ""}>已支付</option>
+                    <option value="2"  ${"2"==pay_status and "selected" or ""}>已对账</option>
+                </select>
+                <input type="text" class="form-control" id="stat_month" name="stat_month" placeholder="统计月份">
+              </div>
+              <button type="button" class="btn btn-default" onclick="do_update_chart();">刷新</button>
+            </form>
+        </div>              
+    </div>
+    <div class="box-body">
+        <div class="container center" id="income-trend-chart">  </div>
+    </div>
+</div>
+
+<div class="box box-default">
+    <div class="box-header">
+        <i class="fa fa-bar-chart-o"></i>
+        <h3 class="box-title">区域营收比例</h3>            
+    </div>
+    <div class="box-body">
+        <div class="container center " id="node-income-rate-chart">  </div>
+    </div>
+</div>
+
+<div class="box box-default">
+    <div class="box-header">
+        <i class="fa fa-bar-chart-o"></i>
+        <h3 class="box-title">资费营收比例</h3>            
+    </div>
+    <div class="box-body">
+        <div class="container center" id="product-income-rate-chart">  </div>
+    </div>
+</div>    
+
+
+
+</section>
+
+</%def>

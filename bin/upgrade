@@ -1,0 +1,85 @@
+#!/bin/sh
+
+############################################################################
+# toughee upgrade script
+############################################################################
+
+install_release()
+{
+    echo "rm old temp file"
+    test -d /tmp/toughee && rm -fr /tmp/toughee
+    cd /tmp && tar Jxf toughee-linux-x64.tar.xz
+    echo "start upgrade ..."
+    test -d /opt/toughee/toughradius && mv /opt/toughee/toughradius /var/toughee/toughradius_`date +%Y%m%d%H%M%S`
+    \cp -r /tmp/toughee/toughradius /opt/toughee/toughradius
+    install /tmp/toughee/Makefile /opt/toughee/Makefile
+    install -m 0755  /tmp/toughee/radiusctl /opt/toughee/radiusctl
+    install -m 0755 /opt/toughee/radiusctl  /usr/local/bin/radiusctl
+    echo "upgrade done, please restart radius service"
+}
+
+up_stable()
+{
+    echo "fetch stable release"
+    curl http://download.toughradius.net/toughee-stable-linux-x64.tar.xz -o /tmp/toughee-linux-x64.tar.xz
+    install_release
+}
+
+up_dev()
+{
+    echo "fetch dev release"
+    curl http://download.toughradius.net/toughee-dev-linux-x64.tar.xz -o /tmp/toughee-linux-x64.tar.xz
+    install_release
+}
+
+upfree_stable()
+{
+    echo "fetch free stable release"
+    curl http://download.toughradius.net/toughee-community-stable-linux-x64.tar.xz -o /tmp/toughee-linux-x64.tar.xz
+    install_release
+}
+
+upfree_dev()
+{
+    echo "fetch free dev release"
+    curl http://download.toughradius.net/toughee-community-dev-linux-x64.tar.xz -o /tmp/toughee-linux-x64.tar.xz
+    install_release
+}
+
+usage ()
+{
+    cat <<EOF
+    Usage: $0 [OPTIONS] 
+    
+    stable                upgrade toughee stable release
+    dev                   upgrade toughee dev release
+    free_stable           upgrade toughee free stable release
+    free_dev              upgrade toughee free dev release
+
+    All other options are passed to the upgrade program.
+EOF
+        exit 1
+}
+
+case "$1" in
+
+  stable)
+    up_stable
+  ;;
+
+  dev)
+    up_dev
+  ;;
+
+  free_stable)
+    upfree_stable
+  ;;
+
+  free_dev)
+    upfree_dev
+  ;;
+
+  *)
+   usage
+  ;;
+esac
