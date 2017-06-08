@@ -41,7 +41,7 @@ class MpsUserbindHandler(BaseHandler):
             if self.aes.decrypt(account.password) != password:
                 return self.render('mps_bind_form.html', msg=u'用户名与密码不符')
             if account.status not in (0, 1):
-                return self.render('mps_bind_form.html', msg=u'用户账号不在正常状态，有疑问请联系客服', isp_code=isp_code)
+                return self.render('mps_bind_form.html', msg=u'用户账号不在正常状态，有疑问请联系客服', isp_code=account.status)
             customer = self.db.query(models.TrCustomer).get(account.customer_id)
             customer.wechat_oid = openid
             self.db.commit()

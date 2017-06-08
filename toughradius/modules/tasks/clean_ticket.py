@@ -37,7 +37,7 @@ class ClearTicketTask(TaseBasic):
                 db.query(models.TrTicket).filter(models.TrTicket.acct_stop_time < edate).delete()
                 db.commit()
                 logger.info(u'上网数据清理完成,下次执行还需等待 %s' % self.format_time(next_interval), trace='task')
-            except:
+            except Exception as err:
                 logger.info(u'上网数据清理失败,%s, 下次执行还需等待 %s' % (repr(err), self.format_time(next_interval)), trace='task')
                 logger.exception(err)
 

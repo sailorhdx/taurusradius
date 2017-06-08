@@ -6,9 +6,9 @@
 
 function busy(flag) {
     if (flag) {
-        $("#sync_addrpool").attr("disabled", "disabled");
-        $("#sync_profile").attr("disabled", "disabled");
-        $("#sync_user").attr("disabled", "disabled");
+        $("#sync_addrpool").attr("disabled", "disabled"); 
+        $("#sync_profile").attr("disabled", "disabled");    
+        $("#sync_user").attr("disabled", "disabled");    
     } else {
         $("#sync_addrpool").removeAttr("disabled");
         $("#sync_profile").removeAttr("disabled");
@@ -76,9 +76,9 @@ function doResync(bas_id,stype)
                      <a id="sync_user" href="javascript:doResync('${bas.id}','user');" class="btn btn-sm bg-navy">
                      <i class="fa fa-refresh"></i> 同步用户数据</a>
                 % endif
-            % endif
+            % endif            
 
-        </div>
+        </div>   
 
 
         <div class="clearfix"></div>
@@ -93,8 +93,8 @@ function doResync(bas_id,stype)
                 % if sysenv.get("LICENSE_TYPE",'') in ['stoughee','routeros-oem']:
                 <li role="presentation">
                     <a href="#synclogs" aria-controls="synclogs" role="tab" data-toggle="tab">同步日志</a>
-                </li>
-                % endif
+                </li>     
+                % endif           
             </ul>
             <!-- Tab panes -->
             <div class="tab-content">
@@ -107,24 +107,24 @@ function doResync(bas_id,stype)
                         <td>接入设备地址</td>
                         <td>${bas.ip_addr}</td>
                         <td>接入设备ID</td>
-                        <td>${bas.nas_id}</td>
-                    </tr>
+                        <td>${bas.nas_id}</td>                 
+                    </tr> 
                     <tr>
                         <td>厂商类型</td>
-                        <td>${bastype.get(str(bas.vendor_id))}</td>
+                        <td>${bastype.get(str(bas.vendor_id))}</td>    
                         <td>AC 端口</td>
-                        <td>${bas.ac_port}</td>
+                        <td>${bas.ac_port}</td>                        
                         <td>强制下线端口</td>
                         <td>${bas.coa_port}</td>
-                    </tr>
+                    </tr>   
                     <tr>
                         <td>Wlan Portal 协议</td>
-                        <td>${bas.portal_vendor}</td>
+                        <td>${bas.portal_vendor}</td>                     
                         <td>共享密钥</td>
                         <td>${bas.bas_secret} Mbps</td>
                         <td>时区类型</td>
                         <td>${{0:u"标准时区，北京时间",1:u"时间与时区相同"}[bas.time_type]}</td>
-                    </tr>
+                    </tr>                                                                                
             </tbody>
         </table>
         </div>
@@ -163,13 +163,13 @@ function doResync(bas_id,stype)
             </tr>
             % endfor
             </tbody>
-        </table>
+        </table>       
         </div>
         % if sysenv.get("LICENSE_TYPE",'') in ['stoughee','routeros-oem']:
         <div role="tabpanel" class="tab-pane" id="synclogs" style="height:420px;overflow:auto;margin-top:1px;">
         % if synclogs:
         % for msg in synclogs:
-            % if bas.ip_addr in msg:
+            % if bas.ip_addr in msg: 
             <div class="msg-box break-all">
                 ${msg.replace('\n','<br>').replace('\t',u'&nbsp&nbsp&nbsp&nbsp')|n}
             </div>
@@ -178,7 +178,7 @@ function doResync(bas_id,stype)
         % endif
         </div>
         % endif
-    </div>
+    </div>   
 
     </div>
 </div>

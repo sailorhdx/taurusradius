@@ -244,7 +244,8 @@ class BaseHandler(cyclone.web.RequestHandler):
 
     def send_wechat_notify(self, openid, message):
         if openid and message:
-            reactor.callLater(1.0, self.wechat.send_text_message, openid, content)
+            from twisted.internet.iocpreactor import reactor
+            reactor.callLater(1.0, self.wechat.send_text_message, openid, message)
 
 
 class PageNotFoundHandler(BaseHandler):

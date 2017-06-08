@@ -27,7 +27,7 @@ class BasAddListHandler(BaseHandler):
     def post(self):
         form = bas_forms.bas_attr_add_form()
         if not form.validates(source=self.get_params()):
-            return self.render('basattr_form.html', form=form, pattrs=radius_attrs)
+            return self.render('basattr_form.html', form=form)
         attr = models.TrBasAttr()
         attr.id = utils.get_uuid()
         attr.bas_id = form.d.bas_id

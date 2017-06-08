@@ -228,10 +228,10 @@ class RadiusBasic:
 
         if all((nasaddr, session_id)):
             with self.dbengine.begin() as conn:
-                online = conn.execute(online_table.select().where(online_table.c.nas_addr == nasaddr).where(acct_session_id == session_id)).first()
+                online = conn.execute(online_table.select().where(online_table.c.nas_addr == nasaddr).where(online_table.acct_session_id == session_id)).first()
                 ticket = new_ticket(online)
                 conn.execute(ticket_table.insert().values(**ticket))
-                conn.execute(online_table.delete().where(online_table.c.nas_addr == nasaddr).where(acct_session_id == session_id))
+                conn.execute(online_table.delete().where(online_table.c.nas_addr == nasaddr).where(online_table.acct_session_id == session_id))
         elif nasaddr and not session_id:
             with self.dbengine.begin() as conn:
                 onlines = conn.execute(online_table.select().where(online_table.c.nas_addr == nasaddr))

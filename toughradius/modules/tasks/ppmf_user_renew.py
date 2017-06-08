@@ -43,7 +43,7 @@ class PPmfUserRewTask(TaseBasic):
                     if alog.count() == 0:
                         rets = dispatch.pub('ppmf_user_renew', account.account_number, account.product_id)
 
-            except:
+            except Exception as err:
                 next_interval = 120
                 logger.info(u'预付费流量包月续费执行失败,%s, 下次执行还需等待 %s' % (repr(err), self.format_time(next_interval)), trace='task')
                 logger.exception(err)

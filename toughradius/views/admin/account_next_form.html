@@ -7,7 +7,7 @@
 function productCalc(){
     param = {
         'months': $("#months").val() || 0,
-        'days': $("#days").val() || 0,
+        'days': $("#days").val() || 0,        
         'product_id':$("#product_id").val(),
         'old_expire':$("#old_expire").val(),
         'giftdays':$("#giftdays").val(),
@@ -20,12 +20,13 @@ function productCalc(){
             $("#fee_value").val(ev.data.fee_value);
             $("#expire_date").val(ev.data.expire_date);
         }
+        
         if(ev.data.policy == 0){
             $("#months").parent().parent().show();
         }else{
             $("#months").val(0);
             $("#months").parent().parent().hide();
-        }
+        }        
 
         if(ev.data.policy == 9){
             $("#days").parent().parent().show();
@@ -33,6 +34,7 @@ function productCalc(){
             $("#days").val(0);
             $("#days").parent().parent().hide();
         }
+
 
     }, "json");
 }
@@ -51,7 +53,7 @@ $(document).ready(function (){
     });  
     $('#days').blur(function() {
         productCalc();
-    });
+    });  
     $('#giftdays').blur(function() {
         productCalc();
     });   

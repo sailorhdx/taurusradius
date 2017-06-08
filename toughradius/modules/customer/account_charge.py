@@ -33,9 +33,9 @@ class AccountChargeHandler(account.AccountHandler):
         user = self.query_account(account_number)
         form = account_forms.account_charge_form()
         if account.status not in (1, 4):
-            return render('account_form', user=user, form=form, msg=u'无效用户状态')
+            return self.render('account_form', user=user, form=form, msg=u'无效用户状态')
         if not form.validates(source=self.get_params()):
-            return render('account_form', user=user, form=form)
+            return self.render('account_form', user=user, form=form)
         manager = AccountCharge(self.db, self.aes, operator=self.current_user)
         if not manager.charge(form.d):
             return self.render('account_form.html', user=user, form=form, msg=manager.last_error)

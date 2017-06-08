@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 import os,sys,re,time
 RUNDIR = "/opt/toughee"
-if os.path.exists(RUNDIR):
-    sys.path.insert(0,RUNDIR)
+if not os.path.exists(RUNDIR):
+    RUNDIR = os.path.dirname(__file__)
+sys.path.insert(0,RUNDIR)
 from toughradius.toughlib import choosereactor
 choosereactor.install_optimal_reactor(False)
 import sys,signal,click,re
@@ -130,6 +131,69 @@ def ssportal(conf,debug):
 @click.command()
 @click.option('-c','--conf', default=radius_json, help='config file')
 @click.option('-d','--debug', is_flag=True)
+@click.option('-p','--port', default=0,type=click.INT,help='web port')
+@click.option('-lp','--listen-port', default=0,type=click.INT,help='listen port')
+def wlanportal(conf,debug,port,listen_port):
+    """ 自助服务进程 """
+    try:
+        from toughradius.modules import wland
+        from toughradius.modules.wlanportal import portald
+        config = iconfig.find_config(conf)
+        check_environ(config)
+        update_timezone(config)
+        if debug:
+            config['system']['debug'] = True   
+        if port > 1024:
+            config['portal']['port'] = port        
+        if listen_port > 1024:
+            config['portal']['listen'] = listen_port    
+
+        dbengine = get_engine(config)
+        setup_logger(config)
+        wland.run(config,dbengine)
+        if listen_port > 0:
+            portald.run(config,dbengine)
+        reactor_run()           
+    except Exception, e:
+        traceback.print_exc()
+
+
+@click.command()
+@click.option('-c','--conf', default=radius_json, help='config file')
+def acsim(conf):
+    """ AC模拟器 """
+    try:
+        from toughradius.txportal.simulator import portald
+        config = iconfig.find_config(conf)
+        update_timezone(config)
+        setup_logger(config)
+        portald.run_master(config.acsim)
+        portald.run_worker(config.acsim)
+        reactor_run()           
+    except Exception, e:
+        traceback.print_exc()
+
+@click.command()
+@click.option('-c','--conf', default=radius_json, help='config file')
+@click.option('-d','--debug', is_flag=True)
+def mpd(conf,debug):
+    """ 微信服务进程 """
+    try:
+        from toughradius.modules import mpd
+        config = iconfig.find_config(conf)
+        check_environ(config)
+        update_timezone(config)
+        if debug:
+            config['system']['debug'] = True   
+        setup_logger(config)
+        mpd.run(config)
+        reactor_run()           
+    except Exception, e:
+        traceback.print_exc()
+
+@click.command()
+@click.option('-c','--conf', default=radius_json, help='config file')
+@click.option('-d','--debug', is_flag=True)
 def task(conf,debug):
     """ 定时任务进程 """
     try:
@@ -157,12 +221,13 @@ def syncd(conf,debug):
         check_environ(config)
         update_timezone(config)
         if debug:
-            config['system']['debug'] = True
+            config['system']['debug'] = True    
         setup_logger(config)
         syncd.run(config)
         reactor_run()
     except Exception, e:
         traceback.print_exc()
+
 
 @click.command()
 @click.option('-c','--conf', default=radius_json, help='config file')
@@ -182,6 +247,7 @@ def auth(conf,debug):
         reactor_run()
     except Exception, e:
         traceback.print_exc()
+
 
 @click.command()
 @click.option('-c','--conf', default=radius_json, help='config file')
@@ -235,6 +301,29 @@ def initdb(conf,force):
 
 @click.command()
 @click.option('-c','--conf', default=radius_json, help='config file')
+def backup(conf):
+    """ 升级数据库 """
+    try:
+        from toughradius.common import initdb as init_db
+        config = iconfig.find_config(conf)  
+        init_db.backup(config)
+    except:
+        traceback.print_exc()
+
+
+@click.command()
+@click.option('-c','--conf', default=radius_json, help='config file')
+def updb(conf):
+    """ 升级数据库 """
+    try:
+        from toughradius.common import initdb as init_db
+        config = iconfig.find_config(conf)  
+        init_db.upgrade(config)
+    except:
+        traceback.print_exc()
+
+@click.command()
+@click.option('-c','--conf', default=radius_json, help='config file')
 def builddb(conf):
     """ 初始化数据库表 """
     from toughradius.common import initdb as init_db
@@ -278,6 +367,7 @@ def standalone(conf,debug):
     """ 单进程运行模式 """
     try:
         from toughradius.modules import free_httpd as httpd
+        # from toughradius.modules import sspd
         from toughradius.modules import radiusd
         from toughradius.modules import taskd
         from toughradius.modules import syncd
@@ -303,6 +393,7 @@ def standalone(conf,debug):
     except:
         traceback.print_exc()
 
+
 @click.command()
 @click.option('-i','--iconf', default=radius_json, help='input config file')
 @click.option('-c','--conf', default=radius_json, help='config file')
@@ -325,6 +416,20 @@ def shell(conf):
         toughshell.main(config)
     except:
         traceback.print_exc()
+  
+@click.command()
+def dbdoc():
+    try:
+        from toughradius.common import mkdbdoc
+        print "ToughEE 数据字典"
+        print "=====================\n\n"
+        for mdl in mkdbdoc.mdls:
+            mkdbdoc.print_model(mdl)
+            print
+    except:
+        traceback.print_exc()
+
+
 
 @click.command()
 @click.option('-c','--conf', default=radius_conf, help='daemon config file')
@@ -350,12 +455,17 @@ def daemon(conf,signal,nodaemon,debug):
 
 cli.add_command(manage)
 cli.add_command(ssportal)
+#cli.add_command(wlanportal)
+#cli.add_command(acsim)
+#cli.add_command(mpd)
 cli.add_command(task)
 cli.add_command(syncd)
 cli.add_command(auth)
 cli.add_command(acct)
 cli.add_command(worker)
 cli.add_command(initdb)
+#cli.add_command(backup)
+#cli.add_command(updb)
 #cli.add_command(importe2)
 cli.add_command(builddb)
 cli.add_command(addtable)
@@ -363,6 +473,7 @@ cli.add_command(deltable)
 cli.add_command(redotable)
 cli.add_command(standalone)
 #cli.add_command(shell)
+#cli.add_command(dbdoc)
 cli.add_command(daemon)
 
 if __name__ == '__main__':

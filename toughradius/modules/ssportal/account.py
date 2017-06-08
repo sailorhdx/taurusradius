@@ -38,4 +38,4 @@ class AccountReleasetHandler(BaseHandler):
         user.sync_ver = tools.gen_sync_ver()
         self.db.commit()
         dispatch.pub(db_cache.CACHE_DELETE_EVENT, account_cache_key(account_number), async=True)
-        return self.render_json(msg=u'½â°ó³É¹¦')
+        return self.render_json(msg=u'è§£ç»‘æˆåŠŸ')

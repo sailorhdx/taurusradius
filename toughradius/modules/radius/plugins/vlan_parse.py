@@ -73,6 +73,8 @@ def radius_parse(req):
 
     return req
 
+def parse_normal(req):
+    return req
 
 plugin_name = 'radius vlan parse'
 plugin_types = ['radius_auth_req', 'radius_acct_req']

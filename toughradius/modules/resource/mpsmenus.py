@@ -119,7 +119,7 @@ if os.environ.get('LICENSE_TYPE') != 'community':
                 self.cache.set(self.MpsMenuCacheKey, menu_result)
                 _resp = self.wechat.create_menu(menu_object)
                 if int(_resp.get('errcode')) > 0:
-                    logger.error(u'同步菜单失败，' + _result.get('errmsg'))
+                    logger.error(u'同步菜单失败，' + _resp.get('errmsg'))
                     logger.error(menu_result)
                     return self.render_json(code=0, msg=u'同步微信菜单失败了［%s］，请检查错误再试试' % _resp.get('errmsg'))
             except:

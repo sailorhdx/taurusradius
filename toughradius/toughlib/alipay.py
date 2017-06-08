@@ -47,7 +47,7 @@ class AliPay:
         if 'sign' not in msg:
             return False
         params = {self.safestr(k):self.safestr(msg[k]) for k in msg if k in ('sign', 'sign_type')}
-        local_sign = make_sign(params)
+        local_sign = self.make_sign(params)
         return msg['sign'] == local_sign
 
     def make_request_url(self, **params):

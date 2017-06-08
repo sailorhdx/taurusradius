@@ -210,7 +210,7 @@ class SSportalProductOrderHandler(BasicOrderHandler):
             product_id = self.get_argument('product_id', '')
             product = self.db.query(models.TrProduct).get(product_id)
             if not product:
-                return self.render('neworder_form.html', form=form, msg=u'套餐不存在')
+                return self.render('neworder_form.html', product=product, msg=u'套餐不存在')
             is_idcard = int(self.get_param_value('ssportal_idcard_required', 0))
             is_address = int(self.get_param_value('ssportal_address_required', 0))
             is_month = product.product_policy in (PPMonth, PPMFlows)

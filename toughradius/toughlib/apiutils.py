@@ -83,7 +83,7 @@ def parse_request(api_secret, reqbody, dec_func = False):
     """
     try:
         if type(reqbody) == type(dict):
-            return self.parse_form_request(reqbody)
+            return parse_form_request(reqbody)
         if callable(dec_func):
             req_msg = json.loads(dec_func(reqbody))
         else:

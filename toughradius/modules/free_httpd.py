@@ -109,7 +109,8 @@ class HttpServer(cyclone.web.Application):
         """ 初始化授权吗安装服务
         """
         logger.info('Start install service')
-        cyclone.web.Application.__init__(self, [('/', InstallHandler)], **settings)
+        from twisted.internet._signals import installHandler
+        cyclone.web.Application.__init__(self, [('/', installHandler)], **settings)
 
     def get_param_value(self, name, defval = None):
 

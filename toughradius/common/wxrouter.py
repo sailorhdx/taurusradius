@@ -91,6 +91,7 @@ def load_routes(route_path = None, pkg_prefix = None):
         try:
             sub_module = os.path.join(route_path, ev)
             if os.path.isdir(sub_module):
+                from toughradius.toughlib.permit import load_events
                 load_events(route_path=sub_module, pkg_prefix='{0}.{1}'.format(pkg_prefix, ev))
             _ev = '{0}.{1}'.format(pkg_prefix, ev)
             robj = importlib.import_module(_ev)

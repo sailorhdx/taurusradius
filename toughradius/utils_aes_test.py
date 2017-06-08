@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 #coding:utf-8
+import re
+
 from Crypto.Cipher import AES
 from Crypto import Random
 import hashlib
 import base64
 import os
 import json
+
 from toughradius.common import tools, safefile
 from toughradius.toughlib import utils
 
@@ -120,6 +123,14 @@ def changeTime(allTime):
         return "%d mins, %d sec" % (int(mins[0]), math.ceil(mins[1]))
 
 if __name__ == '__main__':
+    m = re.match('(\w\w\w)-(\d\d\d)', 'abc-123')
+    if m is not None:
+        print '1111'
+        print m.group()
+        print m.groups()
+    else:
+        print '2222'
+
     aes = AESCipher("0pNxtSi4kFaK2MEZTLYIATnQIdrCPtLq")
     aa = aes.encrypt(u"中文".encode('utf-8'))
     print aa

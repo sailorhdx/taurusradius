@@ -10,6 +10,7 @@ from toughradius.toughlib import utils
 from toughradius.toughlib.btforms import rules
 from cyclone import httpclient
 from twisted.internet import defer
+from hashlib import md5
 
 class SmsApi(object):
 

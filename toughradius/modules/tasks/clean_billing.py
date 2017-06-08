@@ -36,7 +36,7 @@ class ClearBillingTask(TaseBasic):
                 db.query(models.TrBilling).filter(models.TrBilling.create_time < edate).delete()
                 db.commit()
                 logger.info(u'计费缓存数据清理完成,下次执行还需等待 %s' % self.format_time(next_interval), trace='task')
-            except:
+            except Exception as err:
                 logger.info(u'计费缓存数据清理失败,%s, 下次执行还需等待 %s' % (repr(err), self.format_time(next_interval)), trace='task')
                 logger.exception(err)
 

@@ -43,7 +43,7 @@ class APmfUserRewTask(TaseBasic):
                     if alog.count() == 0:
                         rets = dispatch.pub('apm_user_billing', account.account_number, async=True)
 
-            except:
+            except Exception as err:
                 logger.info(u'用户后付费包月自动出账执行失败,%s, 下次执行还需等待 %s' % (repr(err), self.format_time(next_interval)), trace='task')
                 logger.exception(err)
 

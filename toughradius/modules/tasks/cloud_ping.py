@@ -10,7 +10,7 @@ import platform as pf
 from twisted.internet import defer
 from cyclone import httpclient
 from toughradius.toughlib import dispatch, logger
-from toughradius.modules import taskd
+from toughradius.modules import taskd, models
 from toughradius.common import tools
 from toughradius.toughlib.dbutils import make_db
 from toughradius import __version__

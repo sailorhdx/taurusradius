@@ -25,7 +25,7 @@ function productCalc(){
 
             //预付费包月
             if(ev.data.policy == 0){
-               $("#days").val(0);
+               $("#days").val(0);             
                $("#months").parent().parent().show();
                $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().show();
@@ -37,7 +37,7 @@ function productCalc(){
 
             //预付费包日
             if(ev.data.policy == 9){
-               $("#month").val(0);
+               $("#month").val(0);              
                $("#months").parent().parent().hide();
                $("#days").parent().parent().show();
                $("#giftdays").parent().parent().hide();
@@ -46,7 +46,7 @@ function productCalc(){
                $("#charge_code").parent().parent().show();
                return;
             }
-
+          
             //预付费时长
             if(ev.data.policy == 1){
                $("#months").parent().parent().hide();
@@ -61,7 +61,7 @@ function productCalc(){
             //买断包月
             if(ev.data.policy == 2){
                $("#days").val(0);
-               $("#month").val(0);
+               $("#month").val(0);              
                $("#months").parent().parent().hide();
                $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().show();
@@ -83,7 +83,7 @@ function productCalc(){
                $("#charge_code").parent().parent().show();
                return;
             }
-
+          
             //买断时长
             if(ev.data.policy == 3){
                $("#days").val(0);
@@ -96,11 +96,11 @@ function productCalc(){
                $("#charge_code").parent().parent().show();
                return;
             }
-
+            
             //预付费流量
             if(ev.data.policy == 4){
                $("#days").val(0);
-               $("#month").val(0);
+               $("#month").val(0);              
                $("#months").parent().parent().hide();
                $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().hide();
@@ -109,11 +109,11 @@ function productCalc(){
                $("#charge_code").parent().parent().show();
                return;
             }
-
+          
             //买断流量
             if(ev.data.policy == 5){
                $("#days").val(0);
-               $("#month").val(0);
+               $("#month").val(0);              
                $("#months").parent().parent().hide();
                $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().hide();
@@ -121,11 +121,11 @@ function productCalc(){
                $("#billing_type").parent().parent().hide();
                $("#charge_code").parent().parent().show();
                return;
-            }
+            }    
 
             //包月流量
             if(ev.data.policy == 7){
-               $("#days").val(0);
+               $("#days").val(0);          
                $("#months").parent().parent().show();
                $("#days").parent().parent().hide();
                $("#giftdays").parent().parent().hide();
@@ -134,12 +134,12 @@ function productCalc(){
                $("#charge_code").parent().parent().show();
                return;
             }
-
+          
 
             //后付费包月
             if(ev.data.policy == 8){
                $("#days").val(0);
-               $("#month").val(0);
+               $("#month").val(0);              
                 $("#giftdays").parent().parent().hide();
                 $("#giftflows").parent().parent().hide();
                 $("#charge_code").parent().parent().show();
@@ -283,7 +283,7 @@ $(document).ready(function (){
     }); 
     $('#days').blur(function() {
         productCalc();
-    });
+    }); 
     $('#giftdays').blur(function() {
         productCalc();
     }); 
