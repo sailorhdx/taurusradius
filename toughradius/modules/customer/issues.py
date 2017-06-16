@@ -168,7 +168,7 @@ class IssuesAssignHandler(IssuesBasicHandler):
         self.add_oplog(u'转派工单%s给%s' % (issues_id, builder_name))
         builder = self.get_builder(issues.builder_name)
         if builder:
-            dispatch.pub(ISSUES_ASSIGN_EVENT, issues.account_number, builder_phone=builder.builder_phone, wechat_oid=builder.wechat_oid, content=issues.content)
+            dispatch.pub(ISSUES_ASSIGN, issues.account_number, builder_phone=builder.builder_phone, wechat_oid=builder.wechat_oid, content=issues.content)
         self.db.commit()
         self.redirect('/admin/issues/detail?issues_id=%s' % issues_id)
 

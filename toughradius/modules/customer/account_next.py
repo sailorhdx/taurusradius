@@ -70,7 +70,7 @@ class AccountNextHandler(account.AccountHandler):
         form = account_forms.account_next_form()
         form.product_id.set_value(user.product_id)
         if not form.validates(source=self.get_params()):
-            return self.render('account_next_form.html', user=user, form=form)
+            return render('account_next_form.html', user=user, form=form)
         manager = AccountRenew(self.db, self.aes, operator=self.current_user)
         if not manager.renew(form.d):
             return self.render('account_next_form.html', user=user, form=form, msg=manager.last_error)

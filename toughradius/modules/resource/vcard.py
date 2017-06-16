@@ -84,7 +84,7 @@ if os.environ.get('LICENSE_TYPE') != 'community':
         pass
 
 
-    @permit.route('/admin/vcard/batchadd', u'发行充值卡', MenuRes, order=4.0001)
+    @permit.suproute('/admin/vcard/batchadd', u'发行充值卡', MenuRes, order=4.0001)
 
     class VcardBatchAddHandler(BaseHandler):
 

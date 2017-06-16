@@ -87,8 +87,8 @@ class BasService(BaseService):
 
             self.add_oplog(u'修改接入设备信息:%s' % bas.ip_addr)
             self.db.commit()
-            dispatch.pub(CACHE_DELETE_EVENT, bas_cache_key(bas.id), async=True)
-            dispatch.pub(CACHE_DELETE_EVENT, bas_cache_ipkey(bas.ip_addr), async=True)
+            dispatch.pub(CACHE_DELETE_EVENT, bas_cache_key(bas.nas_id), async=True)
+            dispatch.pub(CACHE_DELETE_EVENT, bas_cache_key(bas.ip_addr), async=True)
             return bas
         except Exception as err:
             self.db.rollback()

@@ -31,7 +31,7 @@ function update_income_trend(stat_month,pay_status,accept_type)
                 chart: {
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
-                    plotShadow: false,
+                    plotShadow: false,                    
                     type: 'areaspline',
                     height:240
                 },
@@ -40,15 +40,15 @@ function update_income_trend(stat_month,pay_status,accept_type)
                 xAxis: {categories: ev.categories},
                 yAxis: {
                     title: {text: '营业额'},
-                    labels: {formatter: function() {return this.value + '元';}}
+                    labels: {formatter: function() {return this.value + '元';}}            
                 },
                 tooltip: {shared: false},
-                legend: {enabled: false},
+                legend: {enabled: false},    
                 plotOptions: {areaspline: {
                     stacking: 'normal',
                     marker: {enabled: false,symbol: 'circle',radius: 2,states: {hover: {enabled: true}}},
                     fillOpacity: 0.5
-                }},
+                }},           
                 series: [{
                     name: '营业收入',
                     data:ev.fee_data
@@ -60,7 +60,7 @@ function update_income_trend(stat_month,pay_status,accept_type)
                 chart: {
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
-                    plotShadow: false,
+                    plotShadow: false,                    
                     type: 'areaspline',
                     height:240
                 },
@@ -69,21 +69,21 @@ function update_income_trend(stat_month,pay_status,accept_type)
                 xAxis: {categories: ev.categories},
                 yAxis: {
                     title: {text: '用户受理数'},
-                    labels: {formatter: function() {return this.value + '人';}}
+                    labels: {formatter: function() {return this.value + '人';}}            
                 },
                 tooltip: {shared: false},
-                legend: {enabled: false},
+                legend: {enabled: false},    
                 plotOptions: {areaspline: {
                     stacking: 'normal',
                     marker: {enabled: false,symbol: 'circle',radius: 2,states: {hover: {enabled: true}}},
                     fillOpacity: 0.5
-                }},
+                }},           
                 series: [{
                     name: '用户受理数',
                     data:ev.dev_data
                 }],
                 navigation: {buttonOptions: {enabled: false}}
-            });
+            });            
         }else{
             console.log(ev.msg);
         }
@@ -378,7 +378,7 @@ function do_update_chart()
               </div>
               <button type="button" class="btn btn-default" onclick="do_update_chart();">刷新</button>
             </form>
-        </div>
+        </div>              
     </div>
     <div class="box-body">
         <div class="container">
@@ -399,15 +399,15 @@ function do_update_chart()
 <div class="box box-default">
 <div class="box-header">
     <i class="fa fa-bar-chart-o"></i>
-    <h3 class="box-title">区域营收分析</h3>
+    <h3 class="box-title">区域营收分析</h3>            
 </div>
 <div class="box-body">
 <div class="container">
         <div class="row">
             <div class="col-md-12">
                 <div class="" id="node-income-rate-chart">  </div>
-                <div class="top10" id="node-userdev-rate-chart">  </div>
-            </div>
+                <div class="top10" id="node-userdev-rate-chart">  </div>     
+            </div>        
         </div>
 </div>
 </div>
@@ -416,7 +416,7 @@ function do_update_chart()
 <div class="box box-default">
 <div class="box-header">
     <i class="fa fa-bar-chart-o"></i>
-    <h3 class="box-title">资费营收分析</h3>
+    <h3 class="box-title">资费营收分析</h3>            
 </div>
 <div class="box-body">
 <div class="container">
@@ -433,7 +433,7 @@ function do_update_chart()
 <div class="box box-default">
 <div class="box-header">
     <i class="fa fa-bar-chart-o"></i>
-    <h3 class="box-title">操作员营收分析</h3>
+    <h3 class="box-title">操作员营收分析</h3>            
 </div>
 <div class="box-body">
 <div class="container">
@@ -443,11 +443,11 @@ function do_update_chart()
                 <div class="top10" id="opr-userdev-rate-chart">  </div>
             </div>
         </div>
-    </div>
-</div>
-</div>
-</div>
-
+    </div>        
+</div>    
+</div>    
+</div>    
+   
 </section>
 
 </%def>

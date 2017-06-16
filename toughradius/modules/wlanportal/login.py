@@ -29,7 +29,7 @@ class PortalLoginHandler(BaseHandler):
                 logger.info(u'Open portal auth page, wlan params:{0}'.format(utils.safeunicode(wlan_params)))
             tpl = self.get_template_attrs(ssid)
             if not tpl:
-                tpl = {'page_title': u'硬派无线认证',
+                tpl = {'page_title': u'无线认证',
                  'tpl_path': 'default'}
             tplpath = self.get_login_template(tpl['tpl_path'])
             self.render(tplpath, msg=None, tpl=tpl, qstr=qstr, **wlan_params)

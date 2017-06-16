@@ -17,7 +17,7 @@ from toughradius.toughlib.storage import Storage
 from toughradius.toughlib.permit import permit
 from StringIO import StringIO
 from decimal import Decimal as _d
-from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, MAX_EXPIRE_DATE, order_wxpaycaache_key, VcodeNotify
+from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, PPDay, BODay, MAX_EXPIRE_DATE, order_wxpaycaache_key, VcodeNotify
 import os
 import json
 import string
@@ -29,6 +29,12 @@ class WxBasicOrderHandler(BaseHandler):
     用户开户订购套餐
     """
 
+    def get_expire_date(self, expire):
+        if utils.is_expire(expire):
+            return utils.get_currdate()
+        else:
+            return expire
+
     def next_account_number(self, node_id):
         node = self.db.query(models.TrNode).get(node_id)
         rule = self.db.query(models.TrAccountRule).get(node.rule_id)
@@ -37,11 +43,26 @@ class WxBasicOrderHandler(BaseHandler):
         account_number = '%s%s' % (rule.user_prefix, string.rjust(str(rule.user_sn), rule.user_suffix_len, '0'))
         return account_number
 
-    def calc_fee(self, product_id, months = 0, old_expire = None, charge_fee = 100):
+    def calc_fee(self, product_id, months = 0, days = 0, old_expire = None, charge_fee = 100):
         product = self.db.query(models.TrProduct).get(product_id)
         self_recharge_minfee = utils.yuan2fen(self.get_param_value('self_recharge_minfee', 100))
         fee_value, expire_date = (None, None)
-        if product.product_policy in (PPTimes, PPFlow):
+        if product.product_policy == PPDay:
+            fee = decimal.Decimal(days) * decimal.Decimal(product.fee_price)
+            fee_value = utils.fen2yuan(int(fee.to_integral_value()))
+            start_expire = datetime.datetime.now()
+            if old_expire:
+                start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
+            expire_date = start_expire + datetime.timedelta(days=days)
+            expire_date = expire_date.strftime('%Y-%m-%d')
+        elif product.product_policy == BODay:
+            start_expire = datetime.datetime.now()
+            if old_expire:
+                start_expire = datetime.datetime.strptime(old_expire, '%Y-%m-%d')
+            fee_value = utils.fen2yuan(product.fee_price)
+            expire_date = start_expire + datetime.timedelta(days=product.fee_days)
+            expire_date = expire_date.strftime('%Y-%m-%d')
+        elif product.product_policy in (PPTimes, PPFlow):
             fee_value = charge_fee or self_recharge_minfee
             expire_date = MAX_EXPIRE_DATE
         elif product.product_policy in (BOTimes, BOFlows):
@@ -69,7 +90,7 @@ class WxBasicOrderHandler(BaseHandler):
         return (fee_value, expire_date)
 
 
-@permit.route('/mps/wxorder/new/(\w+)')
+@permit.route('/mps/wxorder/new/(\\w+)')
 
 class WxpayNewOrderHandler(WxBasicOrderHandler):
     """
@@ -115,6 +136,7 @@ class WxpayNewOrderHandler(WxBasicOrderHandler):
             username = self.get_argument('username', '').strip()
             password = self.get_argument('password', '').strip()
             months = int(self.get_argument('months', '1'))
+            days = int(self.get_argument('days', '1'))
             wechat_bind = int(self.get_argument('wechat_bind', '0'))
             product = self.db.query(models.TrProduct).filter_by(id=pid).first()
             if not product:
@@ -146,6 +168,7 @@ class WxpayNewOrderHandler(WxBasicOrderHandler):
             formdata['agency_id'] = ''
             formdata['charge_code'] = ''
             formdata['months'] = months
+            formdata['days'] = days
             formdata['giftdays'] = 0
             formdata['giftflows'] = 0
             formdata['fee_value'] = fee_value
@@ -190,7 +213,8 @@ class WxpayRenewOrderHandler(WxBasicOrderHandler):
             account = self.db.query(models.TrAccount).filter_by(customer_id=customer.customer_id).first()
             product = self.db.query(models.TrProduct).filter_by(id=account.product_id).first()
             months = int(self.get_argument('months', '1'))
-            fee_value, expire_date = self.calc_fee(product.id, months=months, old_expire=account.expire_date)
+            days = int(self.get_argument('days', '1'))
+            fee_value, expire_date = self.calc_fee(product.id, months=months, old_expire=self.get_expire_date(account.expire_date))
             order_id = tools.gen_num_id(16)
             formdata = Storage({'order_attach': 'reneworder'})
             formdata['wxpay_body'] = u'套餐续费：%s' % product.product_name
@@ -199,6 +223,7 @@ class WxpayRenewOrderHandler(WxBasicOrderHandler):
             formdata['order_id'] = order_id
             formdata['product_id'] = account.product_id
             formdata['months'] = months
+            formdata['days'] = days
             formdata['fee_value'] = fee_value
             formdata['expire_date'] = expire_date
             formdata['accept_source'] = 'wechat'
@@ -254,6 +279,7 @@ class WxpayRechargeOrderHandler(WxBasicOrderHandler):
         except Exception as err:
             logger.exception(err, trace='wechat')
             self.render('error.html', msg=u'用户充值失败，请联系客服 %s' % repr(err))
+
 
 @permit.route('/mps/sms/sendvcode')
 

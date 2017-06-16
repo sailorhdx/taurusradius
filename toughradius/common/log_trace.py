@@ -20,22 +20,22 @@ class LogTrace(object):
         logger.info('LogTrace connected')
 
     def count(self):
-        """ 日志缓存总数
+        """ 鏃ュ織缂撳瓨鎬绘暟
         """
         return self.redis.dbsize()
 
     def clean(self):
-        """ 日志清理缓存
+        """ 鏃ュ織娓呯悊缂撳瓨
         """
         logger.info('clear system trace')
         return self.redis.flushdb()
 
     def trace_radius(self, username, message):
-        """ 跟踪用户 radius 消息
-
-        :param username: 用户账号
+        """ 璺熻釜鐢ㄦ埛 radius 娑堟伅
+        
+        :param username: 鐢ㄦ埛璐﹀彿
         :type username: string
-        :param message: 用户 radius 消息内容
+        :param message: 鐢ㄦ埛 radius 娑堟伅鍐呭
         :type message: string
         """
         key = self.radius_key(username)
@@ -44,11 +44,11 @@ class LogTrace(object):
         self.redis.lpush(key, message)
 
     def trace_userlog(self, username, message):
-        """ 跟踪用户诊断消息
-
-        :param username: 用户账号
+        """ 璺熻釜鐢ㄦ埛璇婃柇娑堟伅
+        
+        :param username: 鐢ㄦ埛璐﹀彿
         :type username: string
-        :param message: 用户 radius 消息内容
+        :param message: 鐢ㄦ埛 radius 娑堟伅鍐呭
         :type message: string
         """
         key = self.userlog_key(username)
@@ -57,11 +57,11 @@ class LogTrace(object):
         self.redis.lpush(key, message)
 
     def trace_log(self, name, message):
-        """ 跟踪系统日志
-
-        :param name: 日志名称 (info,debug,error,exception,event,api)
+        """ 璺熻釜绯荤粺鏃ュ織
+        
+        :param name: 鏃ュ織鍚嶇О (info,debug,error,exception,event,api)
         :type name: string
-        :param message: 日志消息
+        :param message: 鏃ュ織娑堟伅
         :type message: string
         """
         key = self.trace_key(name)
@@ -70,46 +70,46 @@ class LogTrace(object):
         self.redis.lpush(key, message)
 
     def list_radius(self, username):
-        """ 查询用户 radius 日志
-
-        :param username: 用户账号
-        :type username: string
+        """ 鏌ヨ鐢ㄦ埛 radius 鏃ュ織
+        
+        :param username: 鐢ㄦ埛璐﹀彿
+        :type username: string        
         """
         key = self.radius_key(username)
         return [ utils.safeunicode(v) for v in self.redis.lrange(key, 0, 512) ]
 
     def list_userlog(self, username):
-        """ 查询用户诊断日志
-
-        :param username: 用户账号
-        :type username: string
+        """ 鏌ヨ鐢ㄦ埛璇婃柇鏃ュ織
+        
+        :param username: 鐢ㄦ埛璐﹀彿
+        :type username: string    
         """
         key = self.userlog_key(username)
         return [ utils.safeunicode(v) for v in self.redis.lrange(key, 0, 512) ]
 
     def list_trace(self, name):
-        """ 查询系统日志
-
-        :param name: 日志名称 (info,debug,error,exception,event,api)
-        :type name: string
+        """ 鏌ヨ绯荤粺鏃ュ織
+        
+        :param name: 鏃ュ織鍚嶇О (info,debug,error,exception,event,api)
+        :type name: string      
         """
         key = self.trace_key(name)
         return [ utils.safeunicode(v) for v in self.redis.lrange(key, 0, 512) ]
 
     def delete_radius(self, username):
-        """ 删除用户日志
-
-        :param username: 用户账号
-        :type username: string
+        """ 鍒犻櫎鐢ㄦ埛鏃ュ織
+        
+        :param username: 鐢ㄦ埛璐﹀彿
+        :type username: string          
         """
         key = self.radius_key(username)
         return self.redis.delete(key)
 
     def delete_trace(self, name):
-        """ 删除系统日志
-
-        :param name: 日志名称 (info,debug,error,exception,event,api)
-        :type name: string
+        """ 鍒犻櫎绯荤粺鏃ュ織
+        
+        :param name: 鏃ュ織鍚嶇О (info,debug,error,exception,event,api)
+        :type name: string      
         """
         key = self.trace_key(name)
         return self.redis.delete(key)

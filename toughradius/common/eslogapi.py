@@ -30,7 +30,7 @@ class EslogApi(object):
     def init_index(self):
         try:
             puturl = '{0}/{1}'.format(self.apiurl, self.index)
-            reqmsg = '{"mappings": {"toughee": {"_ttl": {"enabled": true,"default": "7d"}}}}'
+            reqmsg = '{"mappings": {"taurusxee": {"_ttl": {"enabled": true,"default": "7d"}}}}'
             user_and_pwd = '{0}:{1}'.format(self.apiuser, self.apipwd)
             headers = {'Authorization': ['Basic {0}'.format(base64.b64encode(user_and_pwd))]}
             d = httpclient.fetch(puturl, postdata=reqmsg, headers=headers)
@@ -44,7 +44,7 @@ class EslogApi(object):
             ttl = kwargs.pop('ttl', '7d')
             reqmsg = dict(ver=__version__, timestamp=_ctime.isoformat(), tag=kwargs.pop('tag', 'normal'))
             reqmsg.update(kwargs)
-            puturl = '{0}/{1}/toughee?ttl={2}'.format(self.apiurl, self.index, ttl)
+            puturl = '{0}/{1}/taurusxee?ttl={2}'.format(self.apiurl, self.index, ttl)
             user_and_pwd = '{0}:{1}'.format(self.apiuser, self.apipwd)
             headers = {'Authorization': ['Basic {0}'.format(base64.b64encode(user_and_pwd))]}
             postdata = utils.safestr(json.dumps(reqmsg, ensure_ascii=False))

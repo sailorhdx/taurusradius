@@ -57,7 +57,7 @@ function restartall(){
     $(function () {
         $('#upgrade_upload').uploadifive({
             'buttonText': '上传版本文件升级',
-            'buttonClass': 'btn btn-sm',
+            'buttonClass': 'btn btn-sm bg-navy',
             'width': 120,
             'lightheight': 18,
             'height':30,
@@ -111,8 +111,8 @@ function restartall(){
                 % endif
                 % if current_user.opr_type == 0:
                 <div class="pull-left bottom10">
-                     <a id="upgrade_upload" class="btn btn-sm"><i class="fa fa-upload"></i>  上传版本升级</a>
-                     <a href="javascript:restartall();" class="btn btn-sm"><i class="fa fa-play-circle"></i>  重启系统服务</a>
+                     <a id="upgrade_upload" class="btn btn-sm bg-navy"><i class="fa fa-upload"></i>  上传版本升级</a>
+                     <a href="javascript:restartall();" class="btn btn-sm bg-navy"><i class="fa fa-play-circle"></i>  重启系统服务</a>
                 </div>
                 % endif   
                 <div class="clearfix"></div>

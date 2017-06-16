@@ -59,7 +59,7 @@ class WsBaseHandler(BaseHandler):
 
     def send_wsresp(self, method, code = 0, error = None, **kwargs):
         if error:
-            logger.info(u'[SOAPError] {0}'.format(error), trace='api')
+            logger.error(u'[SOAPError] {0}'.format(error), trace='api')
         resp = self._wsresp(method, code=code, **kwargs)
         logger.info(resp, trace='api')
         self.write(resp)

@@ -36,7 +36,7 @@
                     </select>
                 </div>
                 <div "col-md-3">
-                    <button type="submit" id="query_action" class="btn btn-sm">查询</button>
+                    <button type="submit" id="query_action" class="btn btn-sm bg-navy">查询</button>
                 </div>
             </div>
         </form>
@@ -44,7 +44,7 @@
 
         <div class="pull-left bottom10">
             % if permit.match(current_user.username,'/admin/area/add'):
-             <a href="/admin/area/add" class="btn btn-sm">
+             <a href="/admin/area/add" class="btn btn-sm bg-navy">
                   <i class="fa fa-plus-circle"></i> 创建社区</a>
             % endif
         </div>

@@ -35,7 +35,7 @@
             <div class="container">
                 % if permit.match(current_user.username,'/admin/wlan/domain/add'):
                 <div class="pull-left bottom10">
-                     <a href="/admin/wlan/domain/add" class="btn btn-sm">
+                     <a href="/admin/wlan/domain/add" class="btn btn-sm bg-navy">
                      <i class="fa fa-plus-circle"></i> 创建认证域</a>
                 </div>
                 % endif
@@ -63,7 +63,7 @@
                                     <i class="fa fa-edit"></i> 修改</a>
                                     % endif
                                     % if permit.match(current_user.username,'/admin/wlan/domain/delete'):
-                                    <a class="btn btn-xs btn-default" href="javascript:deleteDomain('${domain.id}')">
+                                    <a class="btn btn-xs" href="javascript:deleteDomain('${domain.id}')">
                                     <i class="fa fa-times"></i> 删除</a>
                                     % endif
                                 </td>

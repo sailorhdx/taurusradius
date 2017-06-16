@@ -5,6 +5,7 @@ import traceback
 from toughradius.toughlib import utils, apiutils, dispatch, logger
 from toughradius.toughlib.permit import permit
 from toughradius.modules.api.apibase import ApiHandler
+from toughradius.modules.api.apibase import authapi
 from toughradius.modules import models
 from toughradius.modules.dbservice.customer_add import CustomerAdd
 
@@ -15,6 +16,7 @@ class CustomerAddApiHandler(ApiHandler):
     def get(self):
         self.post()
 
+    @authapi
     def post(self):
         try:
             formdata = self.parse_form_request()

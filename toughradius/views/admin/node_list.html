@@ -47,11 +47,11 @@
                 <td>${node.node_desc|h}</td>
                 <td>
                     % if permit.match(current_user.username,'/admin/node/update'):
-                    <a class="opt-btn btn-default" href="/admin/node/update?node_id=${node.id}">
+                    <a class="btn btn-xs" href="/admin/node/update?node_id=${node.id}">
                     <i class="fa fa-edit"></i> 修改</a>
                     % endif
                     % if permit.match(current_user.username,'/admin/node/delete'):
-                    <a class="opt-btn btn-default" href="javascript:deleteNode('${node.id}')">
+                    <a class="btn btn-xs" href="javascript:deleteNode('${node.id}')">
                     <i class="fa fa-times"></i> 删除</a>
                     % endif
                 </td>

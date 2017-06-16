@@ -131,7 +131,7 @@ class LicenseUploadHandler(BaseHandler):
                 self.write(u'这是一个演示版本，不提供此功能')
                 return
             f = self.request.files['Filedata'][0]
-            save_path = '/var/toughee/.license'
+            save_path = '/var/taurusradius/.license'
             tf = open(save_path, 'wb')
             licstr = f['body']
             start_tag = '----------START_TOUGHEE_LICENSE----------'

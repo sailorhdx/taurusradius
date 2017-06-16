@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # coding=utf-8
+import os
 import json
 import time
 import traceback
+import functools
 from hashlib import md5
 from cyclone.util import ObjectDict
 from toughradius.toughlib import utils, apiutils, dispatch, logger
@@ -69,3 +71,17 @@ class ApiHandler(BaseHandler):
 
     def render_unknow(self, err = None, msg = None):
         self.render_result(code=apistatus.unknow.code, msg=self._decode_msg(err, msg or apistatus.unknow))
+
+
+def authapi(method):
+
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        allows = os.environ.get('AllowIps')
+        if allows and self.request.remote_ip not in allows:
+            return self.render_json(msg=u'未授权的访问IP来源')
+        if int(self.get_param_value('system_api_enable', '0')) == 0:
+            return self.render_json(msg=u'未授权的访问API调用')
+        return method(self, *args, **kwargs)
+
+    return wrapper

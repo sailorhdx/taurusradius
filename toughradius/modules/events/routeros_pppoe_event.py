@@ -13,7 +13,7 @@ from twisted.internet import reactor
 class RouterOSPppoeSyncEvent(RouterOSSyncEvent):
 
     def event_rossync_resync_pppoe_profile(self, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         try:
             logger.info('resync pppoe profile: bas_id={0}'.format(bas_id))
@@ -35,7 +35,7 @@ class RouterOSPppoeSyncEvent(RouterOSSyncEvent):
             logger.exception(err)
 
     def event_rossync_set_pppoe_profile(self, name, pool = None, rate_limit = None, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('set pppoe profile: name={0}, {1} {2}'.format(name, pool, rate_limit))
         allros = []
@@ -55,7 +55,7 @@ class RouterOSPppoeSyncEvent(RouterOSSyncEvent):
             d.addErrback(self.onerror, 'del pppoe profile', rcli.apiaddr)
 
     def event_rossync_del_pppoe_profile(self, name, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('del pppoe profile: name={0}'.format(name))
         allros = []
@@ -69,7 +69,7 @@ class RouterOSPppoeSyncEvent(RouterOSSyncEvent):
             d.addErrback(self.onerror, 'del pppoe profile', rcli.apiaddr)
 
     def event_rossync_resync_pppoe_user(self, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         try:
             logger.info('resync pppoe user: bas_id={0}'.format(bas_id))
@@ -91,7 +91,7 @@ class RouterOSPppoeSyncEvent(RouterOSSyncEvent):
             logger.exception(err)
 
     def event_rossync_set_pppoe_user(self, name, password, profile, node_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         with make_db(self.db) as db:
             if node_id and db.query(models.TrNode.id).filter_by(id=node_id, node_type='pppoe').count() == 0:
@@ -116,7 +116,7 @@ class RouterOSPppoeSyncEvent(RouterOSSyncEvent):
             d.addErrback(self.onerror, 'del pppoe user', rcli.apiaddr)
 
     def event_rossync_del_pppoe_user(self, name, node_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('del pppoe user: name={0}'.format(name))
         allros = []

@@ -15,10 +15,6 @@ from toughradius.modules.events import settings as evset
 
 class AccountCharge(BaseService):
 
-    def update_routeros_sync_event(self, name, pwd, profile, node_id):
-        dispatch.pub(evset.ROSSYNC_SET_PPPOE_USER, name, pwd, profile, node_id=node_id, async=True)
-        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_USER, name, pwd, profile, node_id=node_id, async=True)
-
     def check_vcard(self, vcard, vcard_pwd, product):
         if not vcard:
             self.last_error = u'充值卡不存在'
@@ -144,7 +140,6 @@ class AccountCharge(BaseService):
             self.db.commit()
             dispatch.pub(ACCOUNT_NEXT_EVENT, order.account_number, async=True)
             dispatch.pub(redis_cache.CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
-            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()

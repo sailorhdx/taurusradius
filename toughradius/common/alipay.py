@@ -131,6 +131,6 @@ if __name__ == '__main__':
     params = {}
     params['service'] = 'create_direct_pay_by_user'
     params['payment_type'] = '1'
-    params['aaaa'] = u'好'
+    params['aaaa'] = u'\u597d'
     print alipay.make_request_url(**params)
-    print alipay.create_direct_pay_by_user('2323525', u'阿士大夫', u'啥打法是否', 0.01)
+    print alipay.create_direct_pay_by_user('2323525', u'\u963f\u58eb\u5927\u592b', u'\u5565\u6253\u6cd5\u662f\u5426', 0.01)

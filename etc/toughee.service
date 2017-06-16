@@ -4,9 +4,9 @@ After=network.target
 
 [Service]  
 Type=forking  
-ExecStart=/opt/toughee/radiusctl daemon -s startup
-ExecReload=/opt/toughee/radiusctl daemon -s reload
-ExecStop=/opt/toughee/radiusctl daemon -s shutdown
+ExecStart=/opt/taurusradius/radiusctl daemon -s startup
+ExecReload=/opt/taurusradius/radiusctl daemon -s reload
+ExecStop=/opt/taurusradius/radiusctl daemon -s shutdown
 PrivateTmp=true  
    
 [Install]  

@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # coding=utf-8
+import os, sys
 import cyclone.auth
 import cyclone.escape
 import cyclone.web
+import toughradius
 from toughradius.modules.base import BaseHandler, authenticated
 from toughradius.modules.system import param_forms
 from toughradius.modules import models
 from toughradius.toughlib.permit import permit
-from toughradius.toughlib import dispatch, db_cache
+from toughradius.toughlib import dispatch, db_cache, logger, utils
 from toughradius.modules.settings import *
 from toughradius.common import tools
 
@@ -66,3 +68,45 @@ class ParamUpdateHandler(BaseHandler):
         self.add_oplog(u'操作员(%s)修改参数' % self.current_user.username)
         self.db.commit()
         self.redirect('/admin/param?active=%s' % active)
+
+
+@permit.suproute('/(MP_verify_.*\\.txt$)')
+
+class DnsvHandler(BaseHandler):
+
+    def get(self, vfile):
+        file_path = os.path.join(os.path.dirname(toughradius.__file__), 'static/dnsv')
+        _vfile = os.path.join(file_path, vfile)
+        with open(_vfile) as fs:
+            self.write(fs.read())
+
+
+@permit.suproute('/admin/param/dnsv/upload')
+
+class DnsvUploadHandler(BaseHandler):
+
+    @authenticated
+    def post(self):
+        try:
+            if os.environ.get('DEMO_VER'):
+                self.write(u'这是一个演示版本，不提供此功能')
+                return
+            file_path = os.path.join(os.path.dirname(toughradius.__file__), 'static/dnsv')
+            try:
+                if not os.path.exists(file_path):
+                    os.makedirs(file_path)
+            except:
+                pass
+
+            f = self.request.files['Filedata'][0]
+            filename = os.path.basename(utils.safestr(f['filename']))
+            save_path = os.path.join(file_path, filename)
+            tf = open(save_path, 'wb')
+            filestr = f['body']
+            tf.write(filestr.strip())
+            tf.close()
+            logger.info('write {0}'.format(save_path))
+            self.write(u'上传完成')
+        except Exception as err:
+            logger.error(err)
+            self.write(u'上传失败 %s' % utils.safeunicode(err))

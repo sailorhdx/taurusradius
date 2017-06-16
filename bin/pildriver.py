@@ -1,4 +1,4 @@
-#!/opt/toughee_src/bin/pyrun
+#!/opt/taurusradius/bin/pyrun
 """PILdriver, an image-processing calculator using PIL.
 
 An instance of class PILDriver is essentially a software stack machine

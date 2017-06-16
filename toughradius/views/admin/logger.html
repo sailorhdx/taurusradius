@@ -24,9 +24,9 @@
                     </select>
                     </div>
                     <div class="col-sm-3">
-                    <button type="submit" class="btn btn-sm" id="submit" placeholder="submit" name="submit"><b>查询</b></button>
+                    <button type="submit" class="btn btn-sm bg-navy" id="submit" placeholder="submit" name="submit"><b>查询</b></button>
                      % if current_user.opr_type == 0:
-                         <a class="btn btn-sm" href="/admin/logger/download?log_name=${log_name}">
+                         <a class="btn btn-sm bg-navy" href="/admin/logger/download?log_name=${log_name}">
                          <i class="fa fa-download"></i> 下载当前日志</a>
                     % endif
                     </div>

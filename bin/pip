@@ -1,4 +1,4 @@
-#!/opt/toughee_src/bin/pyrun
+#!/opt/taurusradius/bin/pyrun
 
 # -*- coding: utf-8 -*-
 import re

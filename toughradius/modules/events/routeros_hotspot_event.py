@@ -13,7 +13,7 @@ from twisted.internet import reactor
 class RouterOSHotspotSyncEvent(RouterOSSyncEvent):
 
     def event_rossync_resync_hotspot_profile(self, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         try:
             logger.info('resync hotspot profile: bas_id={0}'.format(bas_id))
@@ -35,7 +35,7 @@ class RouterOSHotspotSyncEvent(RouterOSSyncEvent):
             logger.exception(err)
 
     def event_rossync_set_hotspot_profile(self, name, pool = None, rate_limit = None, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('set hotspot profile: name={0}, {1} {2}'.format(name, pool, rate_limit))
         allros = []
@@ -55,7 +55,7 @@ class RouterOSHotspotSyncEvent(RouterOSSyncEvent):
             d.addErrback(self.onerror, 'set hotspot profile', rcli.apiaddr)
 
     def event_rossync_del_hotspot_profile(self, name, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('del hotspot profile: name={0}'.format(name))
         allros = []
@@ -69,7 +69,7 @@ class RouterOSHotspotSyncEvent(RouterOSSyncEvent):
             d.addErrback(self.onerror, 'del hotspot profile', rcli.apiaddr)
 
     def event_rossync_resync_hotspot_user(self, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         try:
             logger.info('resync hotspot user: bas_id={0}'.format(bas_id))
@@ -91,7 +91,7 @@ class RouterOSHotspotSyncEvent(RouterOSSyncEvent):
             logger.exception(err)
 
     def event_rossync_set_hotspot_user(self, name, password = None, profile = None, node_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         with make_db(self.db) as db:
             if node_id and db.query(models.TrNode.id).filter_by(id=node_id, node_type='hotspot').count() == 0:
@@ -115,7 +115,7 @@ class RouterOSHotspotSyncEvent(RouterOSSyncEvent):
             d.addErrback(self.onerror, 'del hotspot user', rcli.apiaddr)
 
     def event_rossync_del_hotspot_user(self, name, node_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('del hotspot user: name={0}'.format(name))
         allros = []

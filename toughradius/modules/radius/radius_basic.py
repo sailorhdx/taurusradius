@@ -188,21 +188,14 @@ class RadiusBasic:
         with self.dbengine.begin() as conn:
             conn.execute(table.insert().values(**data))
 
-    def update_billing(self, billing, fixd_flows = None):
+    def update_billing(self, billing):
         billing['sync_ver'] = tools.gen_sync_ver()
         acctount_table = models.TrAccount.__table__
         acctount_attr_table = models.TrAccountAttr.__table__
-        bill_table = models.TrBilling.__table__
         online_table = models.TrOnline.__table__
         with self.dbengine.begin() as conn:
-            conn.execute(acctount_table.update().where(acctount_table.c.account_number == billing.account_number).values(balance=billing.balance, time_length=billing.time_length, flow_length=billing.flow_length))
-            if fixd_flows is not None:
-                billing.flow_length += fixd_flows
-                conn.execute(acctount_attr_table.update().where(acctount_attr_table.c.account_number == billing.account_number).where(acctount_attr_table.c.attr_name == 'fixd_flows').values(attr_value=fixd_flows))
-            billing['id'] = utils.get_uuid()
-            conn.execute(bill_table.insert().values(**billing))
+            conn.execute(acctount_table.update().where(acctount_table.c.account_number == billing.account_number).values(time_length=billing.time_length, flow_length=billing.flow_length))
             conn.execute(online_table.update().where(online_table.c.nas_addr == billing.nas_addr).where(online_table.c.acct_session_id == billing.acct_session_id).values(billing_times=billing.acct_session_time, input_total=billing.input_total, output_total=billing.output_total))
-        return
 
     def unlock_online(self, nasaddr, session_id):
         """ 清理在线用户，生成上网记录 """
@@ -228,10 +221,10 @@ class RadiusBasic:
 
         if all((nasaddr, session_id)):
             with self.dbengine.begin() as conn:
-                online = conn.execute(online_table.select().where(online_table.c.nas_addr == nasaddr).where(online_table.acct_session_id == session_id)).first()
+                online = conn.execute(online_table.select().where(online_table.c.nas_addr == nasaddr).where(acct_session_id == session_id)).first()
                 ticket = new_ticket(online)
                 conn.execute(ticket_table.insert().values(**ticket))
-                conn.execute(online_table.delete().where(online_table.c.nas_addr == nasaddr).where(online_table.acct_session_id == session_id))
+                conn.execute(online_table.delete().where(online_table.c.nas_addr == nasaddr).where(acct_session_id == session_id))
         elif nasaddr and not session_id:
             with self.dbengine.begin() as conn:
                 onlines = conn.execute(online_table.select().where(online_table.c.nas_addr == nasaddr))

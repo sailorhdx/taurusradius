@@ -21,18 +21,18 @@
 
 进入 mysql 终端管理, 执行以下语句：
 
-    > mysql >  create database toughee DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci; 
+    > mysql >  create database taurusradius DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 
-    > mysql >  GRANT ALL ON toughee.* TO raduser@'127.0.0.1' IDENTIFIED BY 'radpwd' WITH GRANT OPTION; 
+    > mysql >  GRANT ALL ON taurusradius.* TO raduser@'127.0.0.1' IDENTIFIED BY 'radpwd' WITH GRANT OPTION;
 
     > mysql >  FLUSH PRIVILEGES; 
 
 修改数据库配置部分,具体参数请根据实际填写。
 
     "database": {
-        "backup_path": "/var/toughee/data",
+        "backup_path": "/var/taurusradius/data",
         "dbtype": "mysql",
-        "dburl": "mysql://raduser:radpwd@127.0.0.1:3306/toughee?charset=utf8",
+        "dburl": "mysql://raduser:radpwd@127.0.0.1:3306/taurusradius?charset=utf8",
         "echo": 0,
         "pool_recycle": 300,
         "pool_size": 60

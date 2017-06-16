@@ -5,9 +5,9 @@
     }, 
     "conf_file": "etc/toughee.json", 
     "database": {
-        "backup_path": "/var/toughee/data", 
+        "backup_path": "/var/taurusradius/data", 
         "dbtype": "sqlite", 
-        "dburl": "sqlite:////var/toughee/toughee_test.sqlite3", 
+        "dburl": "sqlite:////var/taurusradius/toughee_test.sqlite3", 
         "echo": 0, 
         "pool_recycle": 300, 
         "pool_size": 120

@@ -13,7 +13,7 @@ from twisted.internet import reactor
 class RouterOSPoolSyncEvent(RouterOSSyncEvent):
 
     def event_rossync_resync_pool(self, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         try:
             logger.info('resync pool: bas_id={0}'.format(bas_id))
@@ -39,7 +39,7 @@ class RouterOSPoolSyncEvent(RouterOSSyncEvent):
             logger.exception(err)
 
     def event_rossync_add_pool(self, name, ranges, next_pool = None, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('add pool: name={0}, {1} {2}'.format(name, ranges, next_pool))
         allros = []
@@ -53,7 +53,7 @@ class RouterOSPoolSyncEvent(RouterOSSyncEvent):
             d.addErrback(self.onerror, 'add pool', rcli.apiaddr)
 
     def event_rossync_set_pool(self, name, ranges = None, next_pool = None, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('set pool: name={0}, {1} {2}'.format(name, ranges, next_pool))
         allros = []
@@ -67,7 +67,7 @@ class RouterOSPoolSyncEvent(RouterOSSyncEvent):
             d.addErrback(self.onerror, 'set pool', rcli.apiaddr)
 
     def event_rossync_del_pool(self, name, bas_id = None, **kwargs):
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         logger.info('del pool: name={0}'.format(name))
         allros = []

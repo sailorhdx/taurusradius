@@ -16,9 +16,12 @@ bool_bypass = {'0': u'免密码认证',
  '2': u'免用户密码认证'}
 renew_time_types = {'0': u'从当前时间开始计算',
  '1': u'从用户到期时间开始计算'}
-themes = {'default': u'默认风格',
- 'darkly': u'深色风格',
- 'slate': u'硬派风格'}
+themes = {'skin-black': u'黑色风格',
+          'skin-blue': u'蓝色风格',
+          'skin-green': u'绿色风格',
+          'skin-purple': u'紫色风格',
+          'skin-red': u'红色风格',
+          'skin-yellow': u'黄色风格'}
 en_modes = {'normal': u'明文',
  'compatible': u'兼容模式',
  'safe': u'安全模式'}
@@ -54,24 +57,20 @@ if os.environ.get('DEMO_VER'):
 else:
 
     def mps_form():
-        return btforms.Form(btforms.Textbox('mps_apiurl', description=u'微信公众号接口地址', **input_style), btforms.Password('mps_token', description=u'微信公众号令牌(Token)', **input_style), btforms.Textbox('mps_appid', description=u'微信公众号应用ID', **input_style), btforms.Password('mps_apisecret', description=u'微信公众号应用密钥', **input_style), btforms.Password('mps_encoding_aes_key', description=u'微信公众号消息加解密密钥', **input_style), btforms.Dropdown('mps_encrypt_mode', args=en_modes.items(), description=u'微信公众号消息加解密模式', **input_style), btforms.Textarea('mps_welcome_text', description=u'公众号欢迎信息', rows=5, hr=True, **input_style), btforms.Dropdown('mps_wxpay_enable', args=booleans.items(), description=u'启用微信支付', **input_style), btforms.Textbox('mps_wxpay_mch_id', description=u'微信支付商户号', **input_style), btforms.Password('mps_wxpay_key', description=u'微信支付Key', **input_style), btforms.Textbox('mps_wxpay_ip', description=u'微信支付商户网站IP', **input_style), btforms.Textbox('mps_wxpay_notify_url', description=u'微信支付结果通知URL', **input_style), btforms.Button('submit', type='submit', html=u'<b>更新</b>', **button_style), title=u'微信公众号配置管理', action='/admin/param/update?active=mpscfg')
+        return btforms.Form(btforms.Textbox('mps_apiurl', description=u'微信公众号接口地址', **input_style), btforms.Password('mps_token', description=u'微信公众号令牌(Token)', **input_style), btforms.Textbox('mps_appid', description=u'微信公众号应用ID', **input_style), btforms.Password('mps_apisecret', description=u'微信公众号应用密钥', **input_style), btforms.Password('mps_encoding_aes_key', description=u'微信公众号消息加解密密钥', **input_style), btforms.Dropdown('mps_encrypt_mode', args=en_modes.items(), description=u'微信公众号消息加解密模式', **input_style), btforms.Textbox('mps_dnsv_upload', description=u'域名验证文件', type='button', **input_style), btforms.Textarea('mps_welcome_text', description=u'公众号欢迎信息', rows=5, hr=True, **input_style), btforms.Dropdown('mps_wxpay_enable', args=booleans.items(), description=u'启用微信支付', **input_style), btforms.Textbox('mps_wxpay_mch_id', description=u'微信支付商户号', **input_style), btforms.Password('mps_wxpay_key', description=u'微信支付Key', **input_style), btforms.Textbox('mps_wxpay_ip', description=u'微信支付商户网站IP', **input_style), btforms.Textbox('mps_wxpay_notify_url', description=u'微信支付结果通知URL', **input_style), btforms.Button('submit', type='submit', html=u'<b>更新</b>', **button_style), title=u'微信公众号配置管理', action='/admin/param/update?active=mpscfg')
 
 
 def adconfig_form(nodes = [], **kwargs):
     form = btforms.Form(title=u'高级参数设置', action='/admin/param/update?active=adconfig')
     items = form.inputs = []
+    items.append(btforms.Dropdown('system_api_enable', args=booleans.items(), description=u'启用API接口', **input_style))
     items.append(btforms.Textbox('system_ticket_expire_days', description=u'上网日志保留天数', **input_style))
     items.append(btforms.Textbox('expire_notify_days', rules.is_number, description=u'到期提醒提前天数', **input_style))
-    items.append(btforms.Textbox('expire_ipaddr_pool', description=u'到期用户下发地址池', help=u'到期，余额不足用户下发', **input_style))
+    items.append(btforms.Textbox('expire_ipaddr_pool', description=u'到期用户下发地址池', help=u'到期，余额不足用户下发,不使用可填写none', **input_style))
     items.append(btforms.Dropdown('renew_time_type', args=renew_time_types.items(), description=u'续费模式', **input_style))
-    if os.environ.get('LICENSE_TYPE', '') in ('stoughee', 'routeros-oem'):
-        items.append(btforms.Dropdown('routeros_sync_enable', args=booleans.items(), description=u'启用RouterOS数据同步', **input_style))
     items.append(btforms.Dropdown('default_user_node_id', args=nodes, description=u'默认用户区域', help=u'自助开户使用', **input_style))
-    items.append(btforms.Textbox('self_recharge_minfee', rules.is_rmb, description=u'自助充值最低金额(元)', help=u'自助门户或微信充值最低金额', **input_style))
     items.append(btforms.Textbox('billtask_last_day', rules.is_number, description=u'用户账单任务截止日期(1-28)', **input_style))
     items.append(btforms.Dropdown('billing_fee_precision', args=fee_precisions.items(), description=u'后付费账单金额精度(元/分)', **input_style))
-    items.append(btforms.Dropdown('ssportal_idcard_required', args=booleans.items(), description=u'自助注册开户需要身份证信息', **input_style))
-    items.append(btforms.Dropdown('ssportal_address_required', args=booleans.items(), description=u'自助注册开户需要填写地址', **input_style))
     items.append(btforms.Dropdown('ssportal_smsvcode_required', args=booleans.items(), description=u'自助注册开户采用短信验证', **input_style))
     items.append(btforms.Dropdown('ssportal_allow_release_bind', args=booleans.items(), description=u'自助服务允许清除Mac绑定', **input_style))
     items.append(btforms.Dropdown('ssportal_allow_online_unlock', args=booleans.items(), description=u'自助服务允许下线操作', **input_style))

@@ -9,7 +9,7 @@ lbutton_style = {'class': 'btn btn-sm btn-link'}
 boolean = {0: u'否',
  1: u'是'}
 
-def order_form(is_month = True, is_idcard = False, is_address = False):
+def order_form(policy):
     form = btforms.Form(title=u'套餐订购', action='/ssportal/product/order')
     items = form.inputs = []
     items.append(btforms.Textbox('realname', rules.not_null, size=64, description=u'用户姓名', required='required', **input_style))
@@ -18,16 +18,14 @@ def order_form(is_month = True, is_idcard = False, is_address = False):
     items.append(btforms.Textbox('password', rules.is_alphanum2(6, 9), description=u'认证密码', required='required', **input_style))
     items.append(btforms.Textbox('product_name', readonly='readonly', description=u'资费', **input_style))
     items.append(btforms.Hidden('product_id', description=u'资费', required='required', **input_style))
-    if is_month:
+    if int(policy) == PPMonth:
         items.append(btforms.Textbox('months', rules.is_number, description=u'订购月数(预付费包月)', required='required', **input_style))
     else:
         items.append(btforms.Hidden('months', description=u'订购月数(预付费包月)', **input_style))
-    if is_address:
-        items.append(btforms.Textbox('address', rules.not_null, description=u'地址信息', required='required', **input_style))
-    if is_idcard:
-        items.append(btforms.Textbox('idcard', rules.is_idcard, description=u'身份证号码', required='required', **input_style))
-        items.append(btforms.Textbox('idcard1_upload', description=u'身份证正面图(人像)', type='button', **input_style))
-        items.append(btforms.Textbox('idcard2_upload', description=u'身份证反面图(国徽)', type='button', **input_style))
+    if int(policy) == PPDay:
+        items.append(btforms.Textbox('days', rules.is_number, description=u'订购天数(预付费包天)', required='required', **input_style))
+    else:
+        items.append(btforms.Hidden('days', description=u'订购天数(预付费包天)', **input_style))
     if os.environ.get('LICENSE_TYPE') != 'community':
         items.append(btforms.Textbox('vcard_code', description=u'充值卡', **input_style))
         items.append(btforms.Password('vcard_pwd', description=u'充值卡密码', **input_style))
@@ -49,23 +47,26 @@ def smsvcode_form(pid = '', phone = ''):
 def renew_form(policy):
     if not policy is not None:
         raise AssertionError
-        form = btforms.Form(title=u'套餐续费', action='/ssportal/product/renew')
-        items = form.inputs = []
-        items.append(btforms.Textbox('account_number', description=u'用户账号', readonly='readonly', **input_style))
-        items.append(btforms.Textbox('product_name', readonly='readonly', description=u'资费', **input_style))
-        items.append(btforms.Hidden('product_id', description=u'资费', required='required', **input_style))
-        if int(policy) in (PPMonth, PPMFlows):
-            items.append(btforms.Textbox('months', rules.is_number, description=u'续费月数', required='required', **input_style))
-        elif int(policy) == BOMonth:
-            items.append(btforms.Textbox('months', rules.is_number, description=u'续费月数(不填写表示续费整个套餐)', required='required', **input_style))
-        if int(policy) == PPDay:
-            items.append(btforms.Textbox('days', rules.is_number, description=u'续费天数', required='required', **input_style))
-        elif int(policy) == BODay:
-            items.append(btforms.Textbox('days', description=u'续费天数(不填写表示续费整个套餐)', **input_style))
-        os.environ.get('LICENSE_TYPE') != 'community' and items.append(btforms.Textbox('vcard_code', description=u'充值卡', **input_style))
-        items.append(btforms.Password('vcard_pwd', description=u'充值卡密码', **input_style))
+    form = btforms.Form(title=u'套餐续费', action='/ssportal/product/renew')
+    items = form.inputs = []
+    items.append(btforms.Textbox('account_number', description=u'用户账号', readonly='readonly', **input_style))
+    items.append(btforms.Textbox('product_name', readonly='readonly', description=u'资费', **input_style))
+    items.append(btforms.Hidden('product_id', description=u'资费', required='required', **input_style))
+    if int(policy) == PPMonth:
+        items.append(btforms.Textbox('months', rules.is_number, description=u'续费月数', required='required', **input_style))
+    elif int(policy) == BOMonth:
+        items.append(btforms.Textbox('months', rules.is_number, description=u'续费月数(不填写表示续费整个套餐)', required='required', **input_style))
+    else:
+        items.append(btforms.Hidden('months', description=u'订购月数(预付费包月)', **input_style))
+    if int(policy) == PPDay:
+        items.append(btforms.Textbox('days', rules.is_number, description=u'续费天数', required='required', **input_style))
+    elif int(policy) == BODay:
+        items.append(btforms.Textbox('days', description=u'续费天数(不填写表示续费整个套餐)', **input_style))
+    else:
+        items.append(btforms.Hidden('days', description=u'订购天数(预付费包天)', **input_style))
+    os.environ.get('LICENSE_TYPE') != 'community' and items.append(btforms.Textbox('vcard_code', description=u'充值卡', **input_style))
+    items.append(btforms.Password('vcard_pwd', description=u'充值卡密码', **input_style))
     return form
-
 
 def charge_form():
     form = btforms.Form(title=u'账号充值', action='/ssportal/product/charge')

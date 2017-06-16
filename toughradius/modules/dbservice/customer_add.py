@@ -149,9 +149,9 @@ class CustomerAdd(BaseService):
         :param expire_date:   用户到期时间 yyyy-mm-dd
         :type expire_date:    string
         :param months:   用户订购月数，预付费包月有效
-        :type months:    int
-        :param days:   用户订购天数，预付费包日有效
         :type days:    int
+        :param days:    用户订购天数，预付费包日有效
+        :type months:    int
         :param fee_value:   交易费用 x.xx 元
         :type fee_value:    string
         :param giftflows:   赠送流量 x.xx GB
@@ -170,7 +170,7 @@ class CustomerAdd(BaseService):
         try:
             account_number = self.parse_arg(formdata, 'account_number', rule=rules.not_null)
             account_number = account_number.strip()
-            formdata['account_number'] = account_number.strip()
+            formdata['account_number'] = account_number
             billing_type = int(formdata.get('billing_type', 1))
             pay_status = int(formdata.get('pay_status', 1))
             customer_id = self.parse_arg(formdata, 'customer_id', defval=utils.get_uuid())

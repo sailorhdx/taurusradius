@@ -99,7 +99,7 @@ class RouterOSSyncEvent(BasicEvent):
     def event_rossync_init(self, **kwargs):
         """ routeros api client init
         """
-        if os.environ.get('LICENSE_TYPE', '') not in ('stoughee', 'routeros-oem'):
+        if os.environ.get('LICENSE_TYPE', '') not in ('taurusxee', 'routeros-oem'):
             return
         self.get_all_ros()
 

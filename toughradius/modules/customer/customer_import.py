@@ -64,14 +64,12 @@ class CustomerImportHandler(CustomerHandler):
             if not line or u'用户姓名' in line:
                 continue
             attr_array = line.split(',')
-            if len(attr_array) < 14:
+            if len(attr_array) < 13:
                 return self.render('customer_import_form.html', form=iform, msg=u'第 %s  行错误: 用户字段必须是14个 ' % _num)
-            if '@' in attr_array[7]:
-                return self.render('customer_import_form.html', form=iform, msg=u"第 %s 行错误: '@'是系统保留域描述关键字，开户不能使用" % _num)
             if attr_array[7] in accounts:
                 continue
             vform = customer_forms.customer_import_vform()
-            vform.fill(**dict(realname=utils.safeunicode(attr_array[0]), node=utils.safeunicode(attr_array[1]), area=utils.safeunicode(attr_array[2]), product=utils.safeunicode(attr_array[3]), idcard=attr_array[4], mobile=attr_array[5], address=utils.safeunicode(attr_array[6]), account_number=attr_array[7], password=attr_array[8], begin_date=attr_array[9], expire_date=attr_array[10], balance=attr_array[11], time_length=utils.hour2sec(attr_array[12]), flow_length=utils.mb2kb(attr_array[13])))
+            vform.fill(**dict(realname=utils.safeunicode(attr_array[0]), node=utils.safeunicode(attr_array[1]), area=utils.safeunicode(attr_array[2]), product=utils.safeunicode(attr_array[3]), idcard=attr_array[4], mobile=attr_array[5], address=utils.safeunicode(attr_array[6]), account_number=attr_array[7], password=attr_array[8], begin_date=attr_array[9], expire_date=attr_array[10], time_length=utils.hour2sec(attr_array[11]), flow_length=utils.mb2kb(attr_array[12])))
             impusers.append(vform)
 
         _unums = 0
@@ -164,7 +162,7 @@ class CustomerImportHandler(CustomerHandler):
                 account.mac_addr = ''
                 account.password = self.aes.encrypt(form.d.password)
                 account.status = 1
-                account.balance = balance
+                account.balance = 0
                 account.time_length = time_length
                 account.flow_length = flow_length
                 account.expire_date = expire_date

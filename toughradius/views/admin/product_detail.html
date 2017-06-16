@@ -31,7 +31,7 @@
             <a href="/admin/product/attr/add?product_id=${product.id}" class="btn btn-sm bg-navy">
             <i class="fa fa-plus-circle"></i> 创建资费属性</a>
             % endif
-        </div>
+        </div>   
 
 
         <div class="clearfix"></div>
@@ -58,48 +58,48 @@
                         <td>资费策略</td>
                         <td>${product_policys[product.product_policy]}</td>
                         <td>资费状态</td>
-                        <td>${{0:u"正常", 1:u"停用"}[product.product_status]}</td>
-                    </tr>
+                        <td>${{0:u"正常", 1:u"停用"}[product.product_status]}</td>                 
+                    </tr> 
                     <tr>
                         <td>授权流量</td>
-                        <td>${utils.kb2gb(product.fee_flows)} G</td>
+                        <td>${utils.kb2gb(product.fee_flows)} G</td>    
                         <td>授权月数</td>
-                        <td>${product.fee_months or  ''}</td>
+                        <td>${product.fee_months or  ''}</td>                        
                         <td>授权天数</td>
-                        <td>${product.fee_days or  ''}</td>
-                    </tr>
+                        <td>${product.fee_days or  ''}</td>                        
+                    </tr>   
                     <tr>
                         <td>授权时长</td>
-                        <td>${utils.sec2hour(product.fee_times)} 小时</td>
+                        <td>${utils.sec2hour(product.fee_times)} 小时</td>                     
                         <td>最大上行速率</td>
                         <td>${utils.bps2mbps(product.input_max_limit)} Mbps</td>
                         <td>最大下行速率</td>
                         <td>${utils.bps2mbps(product.output_max_limit)} Mbps</td>
-                    </tr>
+                    </tr>   
                     <tr>
                         <td>支持到期免费授权</td>
-                        <td>${{0:u"否", 1:u"是"}[product.free_auth]}</td>
+                        <td>${{0:u"否", 1:u"是"}[product.free_auth]}</td>                     
                         <td>免费授权最大上行速率</td>
                         <td>${utils.bps2mbps(product.free_auth_uprate)} Mbps</td>
                         <td>免费授权最大下行速率</td>
                         <td>${utils.bps2mbps(product.free_auth_downrate)} Mbps</td>
-                    </tr>
+                    </tr>   
                     <tr>
                         <td>绑定MAC</td>
-                        <td>${{0:u"否", 1:u"是"}[product.bind_mac]}</td>
+                        <td>${{0:u"否", 1:u"是"}[product.bind_mac]}</td>                        
                         <td>绑定VLAN</td>
                         <td>${{0:u"否", 1:u"是"}[product.bind_vlan]}</td>
                         <td>并发数</td>
                         <td>${product.concur_number}</td>
-                    </tr>
+                    </tr>   
                     <tr>
                         <td>资费价格</td>
-                        <td>${utils.fen2yuan(product.fee_price)} 元</td>
+                        <td>${utils.fen2yuan(product.fee_price)} 元</td>                    
                         <td>创建时间</td>
-                        <td>${product.create_time}</td>
+                        <td>${product.create_time}</td>  
                         <td>更新时间</td>
-                        <td>${product.update_time}</td>
-                    </tr>
+                        <td>${product.update_time}</td>                                             
+                    </tr>                                                                                          
             </tbody>
         </table>
         </div>
@@ -124,11 +124,11 @@
                 <td>${attr.attr_name|h}</td>
                 <td>
                 % if permit.match(current_user.username,'/admin/product/attr/update'):
-                <a class="opt-btn btn-default" href="/admin/product/attr/update?attr_id=${attr.id}">
+                <a class="btn btn-xs" href="/admin/product/attr/update?attr_id=${attr.id}">
                 <i class="fa fa-edit"></i> 修改</a>
                 % endif
                 % if permit.match(current_user.username,'/admin/product/attr/delete'):
-                <a class="opt-btn btn-default" href="javascript:deleteAttr('${attr.id}');">
+                <a class="btn btn-xs" href="javascript:deleteAttr('${attr.id}');">
                 <i class="fa fa-times"></i> 删除</a>
                 % endif
                 </td>

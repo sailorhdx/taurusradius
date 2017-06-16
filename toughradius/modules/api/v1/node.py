@@ -6,6 +6,7 @@ from toughradius.toughlib.btforms import dataform
 from toughradius.toughlib.btforms import rules
 from toughradius.toughlib import utils, apiutils, dispatch, logger
 from toughradius.toughlib.permit import permit
+from toughradius.modules.api.apibase import authapi
 from toughradius.modules.api.apibase import ApiHandler
 from toughradius.modules import models
 from toughradius.modules.dbservice.node_service import NodeService
@@ -20,6 +21,7 @@ class NodeQueryHandler(ApiHandler):
     def get(self):
         self.post()
 
+    @authapi
     def post(self):
         try:
             formdata = self.parse_form_request()

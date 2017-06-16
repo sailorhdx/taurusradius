@@ -33,7 +33,7 @@ def string_to_level(log_level):
 
 class SimpleLogger:
 
-    def __init__(self, config, name = 'toughee'):
+    def __init__(self, config, name = 'taurusxee'):
         self.name = name
         self.setup(config)
 
@@ -84,7 +84,7 @@ class SimpleLogger:
 
 class Logger:
 
-    def __init__(self, config, name = 'toughee'):
+    def __init__(self, config, name = 'taurusxee'):
         self.name = name
         self.setup(config)
 

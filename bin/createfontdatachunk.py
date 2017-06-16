@@ -1,4 +1,4 @@
-#!/opt/toughee_src/bin/pyrun
+#!/opt/taurusradius/bin/pyrun
 from __future__ import print_function
 import base64
 import os

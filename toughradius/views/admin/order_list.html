@@ -211,7 +211,7 @@ function do_bcheck(){
              <a href="javascript:do_bcheck();" class="btn btn-sm bg-navy">
              <i class="fa fa-arrow-up"></i> 批量对账</a>
         % endif
-        </div>
+        </div>           
 
         <table class="table " id="ordertable">
             <thead>
@@ -225,9 +225,9 @@ function do_bcheck(){
                 <th>订单金额</th>
                 <th>实缴金额</th>
                 <th ></th>
-            </tr>
+            </tr>   
         </thead>
-        <tbody>
+        <tbody>         
             % for order in page_data.result:
             <tr>
                 <td><input name="orderbox" type="checkbox" value="${order.order_id}"></td>
@@ -239,11 +239,11 @@ function do_bcheck(){
                 <td>${utils.fen2yuan(order.order_fee)}</td>
                 <td>${utils.fen2yuan(order.actual_fee)}</td>
                 <td>
-                % if order.pay_status <> 2 and permit.match(current_user.username,'/admin/customer/order/check'):
-                <a class="opt-btn btn-default" href="/admin/customer/order/check?order_id=${order.order_id}"><i class="fa fa-check-circle"></i> 对账</a>
+                % if order.pay_status <> 2 and permit.match(current_user.username,'/admin/customer/order/check'): 
+                <a class="btn btn-xs" href="/admin/customer/order/check?order_id=${order.order_id}"><i class="fa fa-check-circle"></i> 对账</a>
                 % endif
-                <a class="opt-btn btn-default" href="javascript:void(0);" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="${order.order_desc}"><i class="fa fa-info-circle"></i></a>
-                % if permit.match(current_user.username,'/admin/customer/note/print'):
+                <a class="btn btn-xs" href="javascript:void(0);" data-container="body" data-toggle="popover" data-trigger="focus" data-placement="top" data-content="${order.order_desc}"><i class="fa fa-info-circle"></i></a>
+                % if permit.match(current_user.username,'/admin/customer/note/print'): 
                 <a href="/admin/customer/note/print?order_id=${order.order_id}">
                 <i class="fa fa-print"></i> 打印</a>
                 % endif

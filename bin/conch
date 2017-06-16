@@ -1,4 +1,4 @@
-#!/opt/toughee/bin/python
+#!/opt/taurusradius/bin/python
 # Copyright (c) Twisted Matrix Laboratories.
 # See LICENSE for details.
 

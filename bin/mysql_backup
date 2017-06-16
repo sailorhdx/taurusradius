@@ -1,11 +1,11 @@
 #!/bin/bash
 # toughee database backup script
-# crontab -e   01 1 * * *  sh /opt/toughee/bin/mysql_backup
+# crontab -e   01 1 * * *  sh /opt/taurusradius/bin/mysql_backup
 
 USER="root"
 PASSWORD=
 OUTPUT="/backup"
-DATABASES=("mysql" "toughee")
+DATABASES=("mysql" "taurusradius")
 
 test -d $OUTPUT || mkdir -p $OUTPUT
 
@@ -15,6 +15,6 @@ for db in ${DATABASES[@]}; do
     echo "backup database: $db"
     mysqldump --force --opt --user=$USER \
         --password=$PASSWORD --databases $db \
-        --ignore-table=toughee.tr_ticket > $OUTPUT/`date +%Y%m%d`.$db.sql
+        --ignore-table=taurusradius.tr_ticket > $OUTPUT/`date +%Y%m%d`.$db.sql
     xz -f $OUTPUT/`date +%Y%m%d`.$db.sql
 done

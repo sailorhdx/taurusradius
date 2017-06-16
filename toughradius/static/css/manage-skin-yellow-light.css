@@ -154,6 +154,14 @@
 
 /*------------------------*/
 
+.nav-tabs-custom>.nav-tabs>li.active {
+    border-top-color: #f39c12 !important;
+}
+
+.bg-navy {
+    background-color: #f39c12 !important;
+}
+
 form .btn {
   background-color: #f39c12;
   border-color: #e08e0b;

@@ -29,7 +29,8 @@ class CustomerFastOpenHandler(CustomerHandler):
         nodes = [ (n.id, n.node_name) for n in self.get_opr_nodes() ]
         products = [ (n.id, n.product_name) for n in self.get_opr_products() ]
         agencies = [ (n.id, n.agency_name) for n in self.get_opr_agencies() ]
-        agencies.insert(0, ('', ''))
+        if not self.current_user.agency_id:
+            agencies.insert(0, ('', ''))
         return (nodes, products, agencies)
 
     @authenticated
@@ -68,7 +69,8 @@ class CustomerOpenHandler(CustomerHandler):
         nodes = [ (n.id, n.node_name) for n in self.get_opr_nodes() ]
         products = [ (n.id, n.product_name) for n in self.get_opr_products() ]
         agencies = [ (n.id, n.agency_name) for n in self.get_opr_agencies() ]
-        agencies.insert(0, ('', ''))
+        if not self.current_user.agency_id:
+            agencies.insert(0, ('', ''))
         return (nodes, products, agencies)
 
     @authenticated

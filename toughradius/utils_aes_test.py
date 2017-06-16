@@ -141,7 +141,10 @@ if __name__ == '__main__':
     aa = aes.decrypt("L8EARF/vJsEZx6zkmyQeLnfukUqZXYVq701lAALGTL7ehFyWJ9F632kMwECtpR48")
     print aa
     bb = """
-
+\xe5\x88\xa0\xe9\x99\xa4\xe7\xb3\xbb\xe7\xbb\x9f\xe6\x97\xa5\xe5\xbf\x97
+        
+        :param name: \xe6\x97\xa5\xe5\xbf\x97\xe5\x90\x8d\xe7\xa7\xb0 (info,debug,error,exception,event,api)
+        :type name: string        
     """
     print bb
 

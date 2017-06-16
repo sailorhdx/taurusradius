@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#coding=utf-8
+# coding=utf-8
 import datetime
 import decimal
 import traceback
@@ -53,13 +53,21 @@ class RadiusAuth(RadiusBasic):
     def check_free_auth(self, errmsg = ''):
         """ 用户免授权检查：如果用户订购资费支持到期免授权，则下发默认会话时长和资费设定的最大限速。
         """
-        if self.product.free_auth == 0:
+        expire_ipaddr_pool = self.get_param_value('expire_ipaddr_pool')
+        if expire_ipaddr_pool not in ('none', '', None):
+            self.reply['input_rate'] = self.product.free_auth_uprate
+            self.reply['output_rate'] = self.product.free_auth_downrate
+            self.reply['attrs']['Framed-Pool'] = expire_ipaddr_pool
+            self.reply['attrs']['Session-Timeout'] = int(self.get_param_value('radius_max_session_timeout', 86400))
+            return True
+        elif self.product.free_auth == 0:
             return self.failure(u'用户:%s 授权已过期, %s' % (self.request.account_number, errmsg))
         else:
             self.reply['input_rate'] = self.product.free_auth_uprate
             self.reply['output_rate'] = self.product.free_auth_downrate
             self.reply['attrs']['Session-Timeout'] = int(self.get_param_value('radius_max_session_timeout', 86400))
             return True
+            return None
 
     def start_billing(self):
         if self.account.status == UsrPreAuth:
@@ -113,10 +121,7 @@ class RadiusAuth(RadiusBasic):
         output_max_limit = self.product.output_max_limit
         if utils.is_expire(self.account.expire_date):
             return self.check_free_auth()
-        if acct_policy in (PPTimes, PPFlow):
-            if self.get_user_balance() <= 0:
-                return self.check_free_auth(u'用户余额不足')
-        elif acct_policy == BOTimes:
+        if acct_policy == BOTimes:
             if self.get_user_time_length() <= 0:
                 return self.check_free_auth(u'用户剩余时长不足')
         elif acct_policy in (BOFlows, PPMFlows):
@@ -171,18 +176,11 @@ class RadiusAuth(RadiusBasic):
                 _session_timeout = self.account.time_length
                 if _session_timeout < session_timeout:
                     return _session_timeout
-            elif acct_policy == PPTimes:
-                user_balance = self.get_user_balance()
-                fee_price = decimal.Decimal(self.product['fee_price'])
-                _sstime = user_balance / fee_price * decimal.Decimal(3600)
-                _session_timeout = int(_sstime.to_integral_value())
-                if _session_timeout < session_timeout:
-                    return _session_timeout
+                return session_timeout
             else:
-                return 0
+                return session_timeout
 
-        session_timeout = _calc_session_timeout(acct_policy) or session_timeout
-        self.reply['attrs']['Session-Timeout'] = int(session_timeout)
+        self.reply['attrs']['Session-Timeout'] = int(_calc_session_timeout(acct_policy))
         return True
 
     def set_radius_attr(self):

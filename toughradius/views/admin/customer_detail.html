@@ -86,7 +86,7 @@ $(document).ready(function(){
         <div class="pull-left bottom10">
 
             <div class="btn-group">
-              <button type="button" class="btn btn-sm dropdown-toggle" style="width:160px;"
+              <button type="button" class="btn btn-sm bg-navy dropdown-toggle" style="width:160px;"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-info-circle"></i> 用户账号修改 <span class="caret"></span>
               </button>
@@ -100,7 +100,7 @@ $(document).ready(function(){
             </div>
             <!-- 受理按钮组 -->
             <div class="btn-group">
-              <button type="button" class="btn btn-sm dropdown-toggle" style="width:160px;"
+              <button type="button" class="btn btn-sm bg-navy dropdown-toggle" style="width:160px;"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-smile-o"></i> 用户业务受理 <span class="caret"></span>
               </button>
@@ -211,56 +211,54 @@ $(document).ready(function(){
                             <td>${user.product_name|h}</td>
                             <td>用户状态</td>
                             <td>
-                                % if user.status == 0:
-                                    <span class="label label-info">未激活</span>
-                                % elif user.status == 1:
-                                    % if utils.is_expire(user.expire_date):
-                                    <span class="label label-warning">到期</span>
-                                    % else:
-                                    <span class="label label-success">正常</span>
-                                    % endif
-                                % elif user.status == 2:
-                                    <span class="label label-default">停机</span>
-                                % elif user.status == 3:
-                                    <span class="label label-danger">销户</span>
-                                % elif utils.is_expire(user.expire_date) or user.status == 4:
-                                    <span class="label label-warning">到期</span>
+                            % if user.status == 0:
+                                <span class="label label-info">未激活</span>
+                            % elif user.status == 1:
+                                % if utils.is_expire(user.expire_date):
+                                <span class="label label-warning">到期</span>
+                                % else:
+                                <span class="label label-success">正常</span>
                                 % endif
+                            % elif user.status == 2:
+                                <span class="label label-default">停机</span>
+                            % elif user.status == 3:
+                                <span class="label label-danger">销户</span>
+                            % elif utils.is_expire(user.expire_date) or user.status == 4:
+                                <span class="label label-warning">到期</span>
+                            % endif
                             </td>                 
                         </tr>
                         <tr>
                             <td>过期时间</td>
                             <td>${user.expire_date}</td>
-                            <td>余额</td>
-                            <td>${utils.fen2yuan(user.balance)}</td>
                             <td>剩余时长</td>
                             <td>${utils.sec2hour(user.time_length)}小时</td>
+                            <td>剩余流量</td>
+                            <td>${utils.kb2gb(user.flow_length)} G </td>
                         </tr>      
                         <tr>
-                            <td>剩余流量</td>
-                            <td>
-                            ${utils.kb2gb(user.flow_length)} G (流量包 ${utils.kb2gb(get_attr_val('fixd_flows'))} G)
-                            </td>
                             <td>并发数</td>
                             <td>${user.user_concur_number}</td>
                             <td>绑定MAC</td>
                             <td>${{0:u"否", 1:u"是"}[user.bind_mac]}</td>                        
+                            <td>MAC地址</td>
+                            <td>${user.mac_addr}</td>                        
                         </tr>   
                         <tr>
                             <td>绑定VLAN</td>
                             <td>${{0:u"否", 1:u"是"}[user.bind_vlan]}</td>
                             <td>VLANID1/VLANID2</td>
                             <td>${user.vlan_id1}/${user.vlan_id2}</td>
-                            <td>MAC地址</td>
-                            <td>${user.mac_addr}</td>                        
-                        </tr>   
-                        <tr>
                             <td>IP地址</td>
                             <td>${user.ip_address or ''|h}</td>
+                        </tr>   
+                        <tr>
                             <td>最近停机时间</td>
                             <td>${user.last_pause or ''}</td>
                             <td>创建时间</td>
-                            <td>${user.create_time}</td>                        
+                            <td>${user.create_time}</td>     
+                            <td>更新时间</td>
+                            <td>${user.update_time}</td>                        
                         </tr>                                                                      
                 </tbody>
             </table>
@@ -401,7 +399,7 @@ $(document).ready(function(){
             </div>
             <div role="tabpanel" class="tab-pane" id="userlogs" style="height:420px;overflow:auto;margin-top:1px;">
             % for msg in userlogs:
-            % if '[RADIUSD]' not in msg:
+            % if '[RADIUSD]' not in msg:                
                 <div class="msg-box break-all">
                     ${msg.replace('\n','<br>').replace('\t',u'&nbsp&nbsp&nbsp&nbsp')|n}
                 </div>

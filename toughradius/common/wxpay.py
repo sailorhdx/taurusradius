@@ -132,7 +132,6 @@ class WXpay(object):
 
     def unifiedorder(self, product, openid = None, trade_type = None):
         """ 统一下单接口 """
-        ret_dict = {}
         if not isinstance(product, dict):
             raise AssertionError
             if not trade_type in ('JSAPI', 'NATIVE'):
@@ -157,7 +156,7 @@ class WXpay(object):
                 r = requests.post(self.URL_UINFIEDORDER, data=ret_xml.encode('utf-8'))
                 r.encoding = 'UTF-8'
                 data = r.text.encode('utf-8')
-                """ret_dict = {}"""
+                ret_dict = {}
                 x = ElementTree.fromstring(data)
                 if x.find('return_code').text.upper() == 'FAIL':
                     raise ParameterValueError(x.find('return_msg').text)

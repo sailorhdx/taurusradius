@@ -15,10 +15,8 @@ product_add_actions = ((u'预付费包日', '/admin/product/add?product_policy=9
  (u'买断包日', '/admin/product/add?product_policy=10'),
  (u'预付费包月', '/admin/product/add?product_policy=0'),
  (u'后付费包月', '/admin/product/add?product_policy=8'),
- (u'预付费时长', '/admin/product/add?product_policy=1'),
  (u'买断包月', '/admin/product/add?product_policy=2'),
  (u'买断时长', '/admin/product/add?product_policy=3'),
- (u'预付费流量', '/admin/product/add?product_policy=4'),
  (u'买断流量', '/admin/product/add?product_policy=5'))
 product_policys = {PPMonth: u'预付费包月',
  APMonth: u'后付费包月',

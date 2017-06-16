@@ -217,12 +217,14 @@ class BaseHandler(cyclone.web.RequestHandler):
 
     def get_license_ulimit(self, ulimit):
         if not ulimit:
-            if self.license.get('type') in 'stoughee' or '-oem' in self.license.get('type'):
+            if self.license.get('type') in 'taurusxee' or '-oem' in self.license.get('type'):
                 return 100000
-            if self.license.get('type') in 'community':
-                return 10000
-            if self.license.get('type') in 'evaluation':
+            elif self.license.get('type') in 'community':
+                return 5000
+            elif self.license.get('type') in 'evaluation':
                 return 128
+            else:
+                return 1000
         else:
             return int(ulimit)
 

@@ -106,7 +106,6 @@ class CustomerListHandler(CustomerHandler):
                      self.aes.decrypt(j.password),
                      _product_name,
                      j.expire_date,
-                     utils.fen2yuan(j.balance),
                      utils.sec2hour(j.time_length),
                      utils.kb2mb(j.flow_length),
                      j.user_concur_number,

@@ -32,7 +32,7 @@ class UpgradeMetadataDemoHandler(BaseHandler):
         self.render_json(code=0, metadata={})
 
 
-@permit.suproute('/admin/upgrade', u'系统升级管理', MenuSys, order=10.0, is_menu=True)
+@permit.suproute('/admin/upgrade', u'系统升级管理', MenuSys, order=10.0, is_menu=False)
 
 class UpgradeMetadataHandler(BaseHandler):
 
@@ -92,7 +92,7 @@ class UpgradePerformHandler(BaseHandler):
             yield treq.collect(resp, _zipfile.write)
             _zipfile.close()
             backup_path = self.settings.config.database.backup_path
-            backup_file = 'tougheedb_ubackup_%s.json.gz' % utils.gen_backep_id()
+            backup_file = 'taurusxeedb_ubackup_%s.json.gz' % utils.gen_backep_id()
             self.db_backup.dumpdb(os.path.join(backup_path, backup_file))
             tools.upgrade_release(savepath)
             self.render_json(code=0, msg=u'升级完成,请重启所有服务')
@@ -119,7 +119,7 @@ class UpgradeUploadHandler(BaseHandler):
             tf.write(f['body'])
             tf.close()
             backup_path = self.settings.config.database.backup_path
-            backup_file = 'tougheedb_ubackup_%s.json.gz' % utils.gen_backep_id()
+            backup_file = 'taurusxeedb_ubackup_%s.json.gz' % utils.gen_backep_id()
             self.db_backup.dumpdb(os.path.join(backup_path, backup_file))
             tools.upgrade_release(savepath)
             self.write(u'升级完成,请重启所有服务')

@@ -99,22 +99,3 @@ class BasDeleteListHandler(BaseHandler):
         synclogs = self.logtrace.list_trace('routeros') or []
         bas_attrs = self.db.query(models.TrBasAttr).filter_by(bas_id=bas_id)
         return self.render('bas_detail.html', bastype=bas_forms.bastype, synclogs=synclogs, bas=bas, bas_attrs=bas_attrs)
-
-
-@permit.suproute('/admin/bas/rossync', u'同步ROS数据', MenuRes, order=2.0005)
-
-class BasRosSyncHandler(BaseHandler):
-
-    @authenticated
-    def get(self):
-        bas_id = self.get_argument('bas_id')
-        stype = self.get_argument('stype')
-        if stype == 'addrpool':
-            dispatch.pub(evset.ROSSYNC_RESYNC_POOL, bas_id=bas_id, async=True)
-        elif stype == 'profile':
-            dispatch.pub(evset.ROSSYNC_RESYNC_PPPOE_PROFILE, bas_id=bas_id, async=True)
-            dispatch.pub(evset.ROSSYNC_RESYNC_HOTSPOT_PROFILE, bas_id=bas_id, async=True)
-        elif stype == 'user':
-            dispatch.pub(evset.ROSSYNC_RESYNC_PPPOE_USER, bas_id=bas_id, async=True)
-            dispatch.pub(evset.ROSSYNC_RESYNC_HOTSPOT_USER, bas_id=bas_id, async=True)
-        self.render_json(code=0, msg=u'同步请求已经发送，请等待完成。')

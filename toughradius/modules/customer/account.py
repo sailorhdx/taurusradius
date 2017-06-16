@@ -35,9 +35,6 @@ class OpencalcHandler(AccountHandler):
         charge_value = 0
         if charge_code:
             charge_value = self.db.query(models.TrCharges).get(charge_code).charge_value
-        if product.product_policy in (PPTimes, PPFlow):
-            fee_value = utils.fen2yuan(charge_value)
-            return self.render_json(code=0, data=dict(policy=product.product_policy, fee_value=fee_value, expire_date=MAX_EXPIRE_DATE))
         if product.product_policy in (BOTimes, BOFlows):
             fee_value = utils.fen2yuan(product.fee_price + charge_value)
             return self.render_json(code=0, data=dict(policy=product.product_policy, fee_value=fee_value, expire_date=MAX_EXPIRE_DATE))
@@ -79,7 +76,3 @@ class OpencalcHandler(AccountHandler):
             expire_date = start_expire + datetime.timedelta(days=product.fee_days + giftdays)
             expire_date = expire_date.strftime('%Y-%m-%d')
             return self.render_json(code=0, data=dict(policy=product.product_policy, fee_value=fee_value, expire_date=expire_date))
-        if product.product_policy == PPMFlows:
-            fee = decimal.Decimal(months) * decimal.Decimal(product.fee_price)
-            fee_value = utils.fen2yuan(int(fee.to_integral_value()))
-            return self.render_json(code=0, data=dict(policy=product.product_policy, fee_value=fee_value, expire_date=MAX_EXPIRE_DATE))

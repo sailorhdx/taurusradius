@@ -15,10 +15,6 @@ from toughradius.modules.events import settings as evset
 
 class AccountCancel(BaseService):
 
-    def update_routeros_del_event(self, name, node_id):
-        dispatch.pub(evset.ROSSYNC_DEL_PPPOE_USER, name, node_id=node_id, async=True)
-        dispatch.pub(evset.ROSSYNC_DEL_HOTSPOT_USER, name, node_id=node_id, async=True)
-
     @logparams
     def cancel(self, formdata, **kwargs):
         """用户销户，将用户状态设置为销户状态，账号不可用，不删除用户数据，数据保留用做查询统计。
@@ -99,12 +95,9 @@ class AccountCancel(BaseService):
             for online in self.db.query(models.TrOnline).filter_by(account_number=account.account_number):
                 dispatch.pub(UNLOCK_ONLINE_EVENT, online.account_number, online.nas_addr, online.acct_session_id, async=True)
 
-            self.update_routeros_del_event(account_number, None)
             return True
         except Exception as err:
             self.db.rollback()
             self.last_error = u'用户销户失败:%s, %s' % (utils.safeunicode(err.message), err.__class__)
             logger.error(self.last_error, tag='account_cancel_error', username=formdata.get('account_number'))
             return False
-
-        return

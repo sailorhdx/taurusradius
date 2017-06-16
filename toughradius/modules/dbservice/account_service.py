@@ -18,14 +18,6 @@ from toughradius.modules.events import settings as evset
 
 class AccountService(BaseService):
 
-    def update_routeros_del_event(self, name, node_id):
-        dispatch.pub(evset.ROSSYNC_DEL_PPPOE_USER, name, node_id=node_id, async=True)
-        dispatch.pub(evset.ROSSYNC_DEL_HOTSPOT_USER, name, node_id=node_id, async=True)
-
-    def update_routeros_sync_event(self, name, pwd, profile, node_id):
-        dispatch.pub(evset.ROSSYNC_SET_PPPOE_USER, name, pwd, profile, node_id=node_id, async=True)
-        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_USER, name, pwd, profile, node_id=node_id, async=True)
-
     @logparams
     def delete(self, account_number, **kwargs):
         """用户账号删除
@@ -53,15 +45,12 @@ class AccountService(BaseService):
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrOnline.__tablename__, dict(account_number=account.account_number)), async=True)
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrAccount.__tablename__, dict(account_number=account.account_number)), async=True)
             dispatch.pub(DBSYNC_STATUS_ADD, models.warp_sdel_obj(models.TrCustomerOrder.__tablename__, dict(account_number=account.account_number)), async=True)
-            self.update_routeros_del_event(account_number, None)
             return True
         except Exception as err:
             self.db.rollback()
             self.last_error = u'用户删除失败:%s' % utils.safeunicode(err.message)
             logger.error(self.last_error, tag='account_delete_error', username=account_number)
             return False
-
-        return
 
     def password(self, formdata, **kwargs):
         """用户密码修改
@@ -87,7 +76,6 @@ class AccountService(BaseService):
             self.add_oplog(u'修改用户%s密码 ' % account_number)
             self.db.commit()
             dispatch.pub(CACHE_DELETE_EVENT, account_cache_key(account_number), async=True)
-            self.update_routeros_sync_event(account_number, password, account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
@@ -125,7 +113,6 @@ class AccountService(BaseService):
             accept_log.stat_day = accept_log.accept_time[0:10]
             self.db.add(accept_log)
             self.db.commit()
-            self.update_routeros_del_event(account_number, None)
             dispatch.pub(evset.ACCOUNT_PAUSE_EVENT, account.account_number, async=True)
             dispatch.pub(evset.CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
             for online in self.db.query(models.TrOnline).filter_by(account_number=account_number):
@@ -137,8 +124,6 @@ class AccountService(BaseService):
             self.last_error = u'用户停机失败:%s' % utils.safeunicode(err.message)
             logger.error(self.last_error, tag='account_pause_error', username=account_number)
             return False
-
-        return
 
     @logparams
     def resume(self, account_number, **kwargs):
@@ -175,7 +160,6 @@ class AccountService(BaseService):
             accept_log.stat_day = accept_log.accept_time[0:10]
             self.db.add(accept_log)
             self.db.commit()
-            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
@@ -235,7 +219,6 @@ class AccountService(BaseService):
             self.add_oplog(u'修改上网账号信息:%s' % account.account_number)
             self.db.commit()
             dispatch.pub(CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
-            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
@@ -264,10 +247,9 @@ class AccountService(BaseService):
             self.add_oplog(u'释放用户账号（%s）绑定信息' % account_number)
             self.db.commit()
             dispatch.pub(CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
-            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()
-            self.last_error = u'用户解绑失败:%s' % utils.safeunicode(err.message)
+            self.last_error = u'用户解绑失败:%s' % utils.safeunicode(err)
             logger.error(self.last_error, tag='account_release_error', username=account_number)
             return False

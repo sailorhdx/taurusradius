@@ -14,10 +14,6 @@ from toughradius.modules.events import settings as evset
 
 class AccountChange(BaseService):
 
-    def update_routeros_sync_event(self, name, pwd, profile, node_id):
-        dispatch.pub(evset.ROSSYNC_SET_PPPOE_USER, name, pwd, profile, node_id=node_id, async=True)
-        dispatch.pub(evset.ROSSYNC_SET_HOTSPOT_USER, name, pwd, profile, node_id=node_id, async=True)
-
     @logparams
     def change(self, formdata, **kwargs):
         """用户资费变更
@@ -156,7 +152,6 @@ class AccountChange(BaseService):
             self.add_oplog(accept_log.accept_desc)
             self.db.commit()
             dispatch.pub(redis_cache.CACHE_DELETE_EVENT, account_cache_key(account.account_number), async=True)
-            self.update_routeros_sync_event(account_number, self.aes.decrypt(account.password), account.product_id, node_id)
             return True
         except Exception as err:
             self.db.rollback()

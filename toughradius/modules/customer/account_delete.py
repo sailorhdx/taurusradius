@@ -12,7 +12,7 @@ from toughradius.toughlib import utils, dispatch, db_cache
 from toughradius.modules.settings import *
 from toughradius.modules.dbservice.account_service import AccountService
 
-@permit.route('/admin/account/delete', u'用户账号删除', MenuUser, order=2.6)
+@permit.suproute('/admin/account/delete', u'用户账号删除', MenuUser, order=2.6)
 
 class AccountDeleteHandler(account.AccountHandler):
 

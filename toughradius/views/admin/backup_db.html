@@ -29,7 +29,7 @@ var bar_opts =  {
     $(function () {
         $('#file_upload').uploadifive({
             'buttonText': '上传数据文件',
-            'buttonClass': 'btn btn-sm',
+            'buttonClass': 'btn btn-sm bg-navy',
             'width': 120,
             'lightheight': 20,
             'height':34,
@@ -154,7 +154,7 @@ function deletefs(bakfs){
                 </div>           
                 <div class="col-md-6">
                     % if permit.match(current_user.username,'/admin/backup/dump'):
-                    <button id="backup_action" type="button" onclick="dumpdb();" class="btn btn-md">立即备份</button>
+                    <button id="backup_action" type="button" onclick="dumpdb();" class="btn btn-md bg-navy">立即备份</button>
                     % endif
                     % if permit.match(current_user.username,'/admin/backup/upload'):
                     <button id="file_upload" type="button" class="btn btn-md btn-navy">上传备份</button>

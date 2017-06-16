@@ -63,7 +63,7 @@ function doResync(bas_id,stype)
             <i class="fa fa-plus-circle"></i> 创建设备属性</a>
             % endif
 
-            % if sysenv.get("LICENSE_TYPE",'') in ['stoughee','routeros-oem']:
+            % if sysenv.get("LICENSE_TYPE",'') in ['taurusxee','routeros-oem']:
                 % if permit.match(current_user.username,'/admin/rossync/addrpool'):
                      <a id="sync_addrpool" href="javascript:doResync('${bas.id}','addrpool');" class="btn btn-sm bg-navy">
                      <i class="fa fa-refresh"></i> 同步地址池</a>
@@ -90,7 +90,7 @@ function doResync(bas_id,stype)
                 <li role="presentation">
                     <a href="#pattrs" aria-controls="pattrs" role="tab" data-toggle="tab">扩展属性</a>
                 </li>
-                % if sysenv.get("LICENSE_TYPE",'') in ['stoughee','routeros-oem']:
+                % if sysenv.get("LICENSE_TYPE",'') in ['taurusxee','routeros-oem']:
                 <li role="presentation">
                     <a href="#synclogs" aria-controls="synclogs" role="tab" data-toggle="tab">同步日志</a>
                 </li>     
@@ -152,11 +152,11 @@ function doResync(bas_id,stype)
                 <td>${attr.attr_desc}</td>
                 <td>
                 % if permit.match(current_user.username,'/admin/bas/attr/update'):
-                <a class="opt-btn btn-default" href="/admin/bas/attr/update?attr_id=${attr.id}">
+                <a class="btn btn-xs" href="/admin/bas/attr/update?attr_id=${attr.id}">
                 <i class="fa fa-edit"></i> 修改</a>
                 % endif
                 % if permit.match(current_user.username,'/admin/bas/attr/delete'):
-                <a class="opt-btn btn-default" href="javascript:deleteAttr('${attr.id}');">
+                <a class="btn btn-xs" href="javascript:deleteAttr('${attr.id}');">
                 <i class="fa fa-times"></i> 删除</a>
                 % endif
                 </td>
@@ -165,7 +165,7 @@ function doResync(bas_id,stype)
             </tbody>
         </table>       
         </div>
-        % if sysenv.get("LICENSE_TYPE",'') in ['stoughee','routeros-oem']:
+        % if sysenv.get("LICENSE_TYPE",'') in ['taurusxee','routeros-oem']:
         <div role="tabpanel" class="tab-pane" id="synclogs" style="height:420px;overflow:auto;margin-top:1px;">
         % if synclogs:
         % for msg in synclogs:

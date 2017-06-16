@@ -27,7 +27,7 @@ class BasAddListHandler(BaseHandler):
     def post(self):
         form = bas_forms.bas_attr_add_form()
         if not form.validates(source=self.get_params()):
-            return self.render('basattr_form.html', form=form)
+            return self.render('basattr_form.html', form=form, pattrs=radius_attrs)
         attr = models.TrBasAttr()
         attr.id = utils.get_uuid()
         attr.bas_id = form.d.bas_id
@@ -66,7 +66,7 @@ class BasUpdateListHandler(BaseHandler):
         attr.sync_ver = tools.gen_sync_ver()
         self.add_oplog(u'修改BAS属性信息:%s' % attr.attr_name)
         self.db.commit()
-        dispatch.pub(CACHE_DELETE_EVENT, bas_attr_cache_key(bas.id, attr.attr_name), async=True)
+        dispatch.pub(CACHE_DELETE_EVENT, bas_attr_cache_key(form.d.bas_id, attr.attr_name), async=True)
         dispatch.pub(ROSSYNC_RELOAD, form.d.bas_id, async=True)
         self.redirect('/admin/bas/detail?bas_id=%s' % form.d.bas_id)
 

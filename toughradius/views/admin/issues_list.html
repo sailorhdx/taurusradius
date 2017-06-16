@@ -98,11 +98,11 @@
                     <td>${issues.content[:32] or ""}...</td>
                     <td>
                         % if permit.match(current_user.username,'/admin/issues/detail'):
-                        <a href="/admin/issues/detail?issues_id=${issues.id}" class="opt-btn btn-default">
+                        <a href="/admin/issues/detail?issues_id=${issues.id}" class="btn btn-xs">
                         <i class="fa fa-file-o"></i> 工单详情</a>
                         % endif
                         % if permit.match(current_user.username,'/admin/issues/delete'):
-                        <a href="javascript:deleteIssues('${issues.id}')" class="opt-btn btn-default">
+                        <a href="javascript:deleteIssues('${issues.id}')" class="btn btn-xs">
                         <i class="fa fa-times"></i> 删除</a>
                         % endif
                     </td>

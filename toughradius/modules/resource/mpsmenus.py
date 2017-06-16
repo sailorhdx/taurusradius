@@ -73,7 +73,7 @@ if os.environ.get('LICENSE_TYPE') != 'community':
 
                 _midx += 1
 
-            menu_str = json.dumps(menudata, ensure_ascii=False).replace('"', '\"')
+            menu_str = json.dumps(menudata, ensure_ascii=False).replace('"', '\\"')
             self.render('mps_menus.html', menudata=menu_str)
 
         @authenticated

@@ -9,8 +9,8 @@ sys.path.insert(0, os.path.abspath(os.path.pardir))
 from toughradius.toughlib import utils
 from toughradius.modules import models
 from toughradius.toughlib.dbengine import get_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
 from toughradius.toughlib.db_backup import DBBackup
+from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import text as _sql
 from toughradius.modules.settings import *
 from toughradius.common import tools
@@ -183,7 +183,7 @@ def backup(config):
                                                  'tr_billing'], batchsize=batchsize)
         print 'start backup database...'
         backup_path = config.database.backup_path
-        backup_file = 'toughee_upgrade_%s.json.gz' % utils.get_currdate()
+        backup_file = 'taurusxee_upgrade_%s.json.gz' % utils.get_currdate()
         backupfs = os.path.join(backup_path, backup_file)
         db_backup.dumpdb(backupfs)
         print 'backup database %s done' % backupfs
@@ -204,12 +204,12 @@ def upgrade(config):
                                                  'tr_ticket',
                                                  'tr_billing'], batchsize=batchsize)
         backup_path = config.database.backup_path
-        backup_file = 'toughee_upgrade_%s.json.gz' % utils.get_currdate()
+        backup_file = 'taurusxee_upgrade_%s.json.gz' % utils.get_currdate()
         backupfs = os.path.join(backup_path, backup_file)
         if not os.path.exists(backupfs):
             raise RuntimeError('please backup old database first!')
         print 'starting upgrade database...'
-        tables = [v for k, v in metadata.tables.iteritems() if k not in ('tr_ticket', 'tr_billing')]
+        tables = [ v for k, v in metadata.tables.iteritems() if k not in ('tr_ticket', 'tr_billing') ]
         metadata.drop_all(db_engine, tables=tables)
         metadata.create_all(db_engine, tables=tables)
         print 'upgrade database done'

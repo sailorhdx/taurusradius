@@ -10,10 +10,8 @@ boolean = {0: u'否',
  1: u'是'}
 product_policy = {PPMonth: u'预付费包月',
  APMonth: u'后付费包月',
- PPTimes: u'预付费时长',
  BOMonth: u'买断包月',
  BOTimes: u'买断时长',
- PPFlow: u'预付费流量',
  BOFlows: u'买断流量',
  PPDay: u'预付费包日',
  BODay: u'买断包日'}
@@ -59,24 +57,10 @@ def product_add_form(policy = 0, charges = [], pools = []):
         additem(btforms.Hidden('fee_times', value=0, description=u'买断时长(小时)'))
         additem(btforms.Hidden('fee_flows', value=0, description=u'买断流量(G)'))
         additem(btforms.Hidden('fee_days', value=0, description=u'买断授权天数'))
-    elif _policy == PPTimes:
-        form.desc = u'预付费时长：设定每小时单价，使用过程中实时计费，支持用户充值到余额，用多少时间，扣多少费用。(设备必须支持实时记帐)，余额为零时停止服务。'
-        additem(btforms.Textbox('fee_price', rules.is_rmb, description=u'每小时单价(元)', required='required', **input_style))
-        additem(btforms.Hidden('fee_times', value=0, description=u'买断时长(小时)'))
-        additem(btforms.Hidden('fee_flows', value=0, description=u'买断流量(G)'))
-        additem(btforms.Hidden('fee_days', value=0, description=u'买断授权天数'))
-        additem(btforms.Hidden('fee_months', value=0, description=u'买断授权月数'))
     elif _policy == BOTimes:
         form.desc = u'买断时长：一次性将固定的时长打包为套餐，提供用户一次性订购，在使用过程中实时扣除时间，扣完为止。(设备必须支持实时记帐)，剩余时长为零时停止服务'
         additem(btforms.Textbox('fee_price', rules.is_rmb, description=u'买断时长总价(元)', required='required', **input_style))
         additem(btforms.Textbox('fee_times', rules.is_number3, description=u'买断时长(小时)', value=0, **input_style))
-        additem(btforms.Hidden('fee_flows', value=0, description=u'买断流量(G)'))
-        additem(btforms.Hidden('fee_days', value=0, description=u'买断授权天数'))
-        additem(btforms.Hidden('fee_months', value=0, description=u'买断授权月数'))
-    elif _policy == PPFlow:
-        form.desc = u'预付费流量：设定流量单价(G),使用过程中实时计费，支持用户充值到余额，用多少流量，扣多少费用。(设备必须支持实时记帐)，余额为零时停止服务。'
-        additem(btforms.Textbox('fee_price', rules.is_rmb, description=u'每G流量单价(元)', required='required', **input_style))
-        additem(btforms.Hidden('fee_times', value=0, description=u'买断时长(小时)'))
         additem(btforms.Hidden('fee_flows', value=0, description=u'买断流量(G)'))
         additem(btforms.Hidden('fee_days', value=0, description=u'买断授权天数'))
         additem(btforms.Hidden('fee_months', value=0, description=u'买断授权月数'))
@@ -146,24 +130,10 @@ def product_update_form(policy = 0, charges = [], pools = []):
         additem(btforms.Hidden('fee_times', value=0, description=u'买断时长(小时)'))
         additem(btforms.Hidden('fee_flows', value=0, description=u'买断流量(G)'))
         additem(btforms.Hidden('fee_days', value=0, description=u'买断授权天数'))
-    elif _policy == PPTimes:
-        form.desc = u'预付费时长：设定每小时单价，使用过程中实时计费，支持用户充值到余额，用多少时间，扣多少费用。(设备必须支持实时记帐)，余额为零时停止服务。'
-        additem(btforms.Textbox('fee_price', rules.is_rmb, description=u'每小时单价(元)', required='required', **input_style))
-        additem(btforms.Hidden('fee_times', value=0, description=u'买断时长(小时)'))
-        additem(btforms.Hidden('fee_flows', value=0, description=u'买断流量(G)'))
-        additem(btforms.Hidden('fee_days', value=0, description=u'买断授权天数'))
-        additem(btforms.Hidden('fee_months', value=0, description=u'买断授权月数'))
     elif _policy == BOTimes:
         form.desc = u'买断时长：一次性将固定的时长打包为套餐，提供用户一次性订购，在使用过程中实时扣除时间，扣完为止。(设备必须支持实时记帐)，剩余时长为零时停止服务'
         additem(btforms.Textbox('fee_price', rules.is_rmb, description=u'买断时长总价(元)', required='required', **input_style))
         additem(btforms.Textbox('fee_times', rules.is_number3, description=u'买断时长(小时)', value=0, **input_style))
-        additem(btforms.Hidden('fee_flows', value=0, description=u'买断流量(G)'))
-        additem(btforms.Hidden('fee_days', value=0, description=u'买断授权天数'))
-        additem(btforms.Hidden('fee_months', value=0, description=u'买断授权月数'))
-    elif _policy == PPFlow:
-        form.desc = u'预付费流量：设定流量单价(G),使用过程中实时计费，支持用户充值到余额，用多少流量，扣多少费用。(设备必须支持实时记帐)，余额为零时停止服务。'
-        additem(btforms.Textbox('fee_price', rules.is_rmb, description=u'每G流量单价(元)', required='required', **input_style))
-        additem(btforms.Hidden('fee_times', value=0, description=u'买断时长(小时)'))
         additem(btforms.Hidden('fee_flows', value=0, description=u'买断流量(G)'))
         additem(btforms.Hidden('fee_days', value=0, description=u'买断授权天数'))
         additem(btforms.Hidden('fee_months', value=0, description=u'买断授权月数'))

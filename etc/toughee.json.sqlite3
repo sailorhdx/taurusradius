@@ -2,32 +2,47 @@
     "admin": {
         "host": "0.0.0.0", 
         "port": 1816,
-        "userfs": "/var/toughee/userfs"
+        "userfs": "/var/taurusradius/userfs"
     }, 
     "conf_file": "etc/toughee.json", 
     "database": {
-        "backup_path": "/var/toughee/data", 
+        "backup_path": "/var/taurusradius/data", 
         "dbtype": "sqlite", 
-        "dburl": "sqlite:////var/toughee/toughee.sqlite3", 
+        "dburl": "sqlite:////var/taurusradius/toughee.sqlite3", 
         "echo": 0, 
         "pool_recycle": 300, 
         "pool_size": 120
     },     
     "mqproxy": {
-        "acct_bind": "tcp://127.0.0.1:18130", 
-        "acct_connect": "tcp://127.0.0.1:18130", 
-        "auth_bind": "tcp://127.0.0.1:18120", 
-        "auth_connect": "tcp://127.0.0.1:18120", 
+        "acct_message": "ipc:///tmp/taurusradius-acct-message", 
+        "acct_result": "ipc:///tmp/taurusradius-acct-result", 
+        "auth_message": "ipc:///tmp/taurusradius-auth-message", 
+        "auth_result": "ipc:///tmp/taurusradius-auth-result", 
         "task_bind": "tcp://127.0.0.1:18000", 
-        "task_connect": "tcp://127.0.0.1:18000",
-        "dbsync": "tcp://127.0.0.1:19000",
-        "dbsync_remote": "tcp://127.0.0.1:29000"
+        "task_connect": "tcp://127.0.0.1:18000"
     }, 
     "radiusd": {
         "acct_port": 1813, 
         "auth_port": 1812, 
         "host": "0.0.0.0"
-    },    
+    }, 
+    "portal": {
+        "chap": 1, 
+        "debug": 1, 
+        "host": "0.0.0.0", 
+        "listen": 50100, 
+        "ntf_heart": 120, 
+        "port": 1820, 
+        "user_ntf_heart": 120
+    }, 
+    "acsim": {
+        "portal_host": "127.0.0.1",
+        "portal_listen": 50100,
+        "port": 2000,
+        "secret": "secret",
+        "vendor": "huaweiv2",
+        "debug": 1
+    },     
     "redis": {
         "host": "127.0.0.1", 
         "passwd": "", 
@@ -36,6 +51,10 @@
     "ssportal": {
         "host": "0.0.0.0", 
         "port": 1819
+    }, 
+    "mps": {
+        "host": "0.0.0.0", 
+        "port": 1817
     }, 
     "syslog": {
         "enable": 0, 
@@ -55,7 +74,7 @@
         "license": "", 
         "dbsync" : 0,
         "release": "standard", 
-        "upgrade_url": "http://www.toughcloud.net",
+        "upgrade_url": "http://www.taurusradius.net",
         "superrpc": "http://ctlman:ctlroot@127.0.0.1:9001/RPC2", 
         "secret": "0pNxtSi4kFaK2MEZTLYIATnQIdrCPtLq", 
         "tz": "CST-8"

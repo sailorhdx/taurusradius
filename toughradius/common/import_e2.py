@@ -620,10 +620,10 @@ def import_data(idb, odb, rate):
         try:
             print
             print '*' * 120
-            print '* [Toughee] Execute Import Function :::: %s' % _func.__name__
+            print '* [TaurusXee] Execute Import Function :::: %s' % _func.__name__
             print '*' * 120
             _func(imetadata211, ometadata, rate=rate, imetadata20=imetadata20)
             print '-' * 120
             print
         except Exception as e:
-            print '* [Toughee] Execute Import Funtion %s Error %s' % (_func, traceback.format_exc()[0:2048])
+            print '* [TaurusXee] Execute Import Funtion %s Error %s' % (_func, traceback.format_exc()[0:2048])

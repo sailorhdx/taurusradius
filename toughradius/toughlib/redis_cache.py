@@ -115,6 +115,7 @@ class CacheManager(object):
         self.delete(key)
 
     def count(self):
+        # type: () -> object
         return self.redis.dbsize()
 
     def delete(self, key):

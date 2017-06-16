@@ -1,4 +1,4 @@
-#!/opt/toughee_src/bin/pyrun
+#!/opt/taurusradius/bin/pyrun
 #
 # The Python Imaging Library.
 # $Id$

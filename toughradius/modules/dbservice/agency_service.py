@@ -187,7 +187,7 @@ class AgencyService(BaseService):
             if not agency:
                 raise ValueError(u'代理商不存在')
             if self.db.query(models.TrCustomer).filter_by(agency_id=agency_id).count() > 0:
-                return self.render_error(msg=u'代理商下有用户，不允许删除')
+                return ValueError(u'代理商下有用户，不允许删除')
             opr = self.db.query(models.TrOperator).filter_by(operator_name=agency.operator_name).first()
             if opr:
                 self.db.query(models.TrOperatorRule).filter_by(operator_name=opr.operator_name).delete()

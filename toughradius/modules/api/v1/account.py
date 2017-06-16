@@ -5,6 +5,7 @@ import traceback
 from toughradius.toughlib import utils, apiutils, dispatch, logger
 from toughradius.toughlib.permit import permit
 from toughradius.modules.api.apibase import ApiHandler
+from toughradius.modules.api.apibase import authapi
 from toughradius.modules import models
 from toughradius.modules.dbservice.account_service import AccountService
 
@@ -15,6 +16,7 @@ class AccountUpdateApiHandler(ApiHandler):
     def get(self):
         self.post()
 
+    @authapi
     def post(self):
         try:
             formdata = self.parse_form_request()
@@ -48,6 +50,7 @@ class AccountUpdateApiHandler(ApiHandler):
     def get(self):
         self.post()
 
+    @authapi
     def post(self):
         try:
             formdata = self.parse_form_request()
@@ -92,6 +95,7 @@ class AccountDeleteApiHandler(ApiHandler):
     def get(self):
         self.post()
 
+    @authapi
     def post(self):
         try:
             formdata = self.parse_form_request()
@@ -114,6 +118,7 @@ class AccountReleaseApiHandler(ApiHandler):
     def get(self):
         self.post()
 
+    @authapi
     def post(self):
         try:
             formdata = self.parse_form_request()
@@ -136,6 +141,7 @@ class AccountPauseApiHandler(ApiHandler):
     def get(self):
         self.post()
 
+    @authapi
     def post(self):
         try:
             formdata = self.parse_form_request()
@@ -158,6 +164,7 @@ class AccountPauseApiHandler(ApiHandler):
     def get(self):
         self.post()
 
+    @authapi
     def post(self):
         try:
             formdata = self.parse_form_request()

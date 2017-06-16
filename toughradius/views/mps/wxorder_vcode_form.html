@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>用户在线订购</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">        
 <link rel="shortcut icon" href="/static/favicon.ico"/>
 <link href="/static/css/weui.min.css" rel="stylesheet" type="text/css"/>
 <link href="/static/css/mps.css" rel="stylesheet" type="text/css"/>
-<script src="/static/plugins/jQuery/jQuery-2.2.0.min.js"></script>
+<script src="/static/plugins/jQuery/jquery-2.2.3.min.js"></script>
 <script>
 function isMobileMethod(phone){
     var regPhone = /^(13[0-9]|15[012356789]|18[0123456789]|147|145|17[0-9])\d{8}$/;
@@ -15,12 +15,12 @@ function isMobileMethod(phone){
         return true;
     }else{
         return false;
-    }
-}
+    }   
+}  
 
 function smswait(flag) {
     if (flag) {
-        $("#smsvcode").attr("disabled", "disabled");
+        $("#smsvcode").attr("disabled", "disabled");      
     } else {
         $("#smsvcode").removeAttr("disabled");
     }
@@ -64,7 +64,7 @@ function send_vcode(){
 <div class="panel">
     <div class="hd">
         <h1 class="page_title">手机号码验证</h1>
-    </div>
+    </div>   
     <div class="bd">
         <form class="weui_cells weui_cells_form" action="/mps/wxorder/new/${product.id}" method="get">
           ${xsrf_form_html()|n}
@@ -73,14 +73,14 @@ function send_vcode(){
             <div class="weui_cell_bd weui_cell_primary">
                 <input class="weui_input" id="account_number" name="account_number" value="${account_number or ''}" placeholder="请输入手机号码" required="required"/>
             </div>
-        </div>
+        </div>        
         <div class="weui_cell">
             <div class="weui_cell_hd"><label class="weui_label">验证码</label></div>
             <div class="weui_cell_bd weui_cell_primary">
                 <input class="weui_input" name="vcode" required="required"/>
             </div>
         </div>
-
+    
         <div class="weui_btn_area">
            <button id="smsvcode" name="smsvcode"  type="button" class="weui_btn  weui_btn_default" onclick="send_vcode()"><b>发送验证码</b></button>
            <button name="submit"  type="submit" class="weui_btn  weui_btn_primary"><b>下一步</b></button>

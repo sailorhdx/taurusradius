@@ -172,10 +172,10 @@ def load_handlers(handler_path = None, pkg_prefix = None, excludes = []):
         try:
             sub_module = os.path.join(handler_path, hd)
             if os.path.isdir(sub_module):
-                logger.info('load sub module %s' % hd)
+                #logger.info('load sub module %s' % hd)
                 load_handlers(handler_path=sub_module, pkg_prefix='{0}.{1}'.format(pkg_prefix, hd), excludes=excludes)
             _hd = '{0}.{1}'.format(pkg_prefix, hd)
-            logger.info('load_module %s' % _hd)
+            #logger.info('load_module %s' % _hd)
             importlib.import_module(_hd)
         except Exception as err:
             logger.error('%s, skip module %s.%s' % (str(err), pkg_prefix, hd))
@@ -192,9 +192,9 @@ def load_events(event_path = None, pkg_prefix = None, excludes = [], event_param
         try:
             sub_module = os.path.join(event_path, ev)
             if os.path.isdir(sub_module):
-                logger.info('load sub event %s' % ev)
+                #logger.info('load sub event %s' % ev)
                 load_events(event_path=sub_module, pkg_prefix='{0}.{1}'.format(pkg_prefix, ev), excludes=excludes, event_params=event_params)
-            logger.info('load_event %s with params:%s' % (_ev,repr(event_params)))
+            #logger.info('load_event %s with params:%s' % (_ev,repr(event_params)))
             _ev = '{0}.{1}'.format(pkg_prefix, ev)
             robj = importlib.import_module(_ev)
             if hasattr(robj, 'evobj'):

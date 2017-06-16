@@ -17,7 +17,7 @@ from toughradius.modules import models
 from toughradius.common import tools
 from toughradius.modules.dbservice.account_charge import AccountCharge
 from toughradius.modules.settings import order_paycaache_key
-from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, MAX_EXPIRE_DATE
+from toughradius.modules.settings import PPMonth, BOMonth, BOTimes, BOFlows, MAX_EXPIRE_DATE
 
 @permit.route('/ssportal/product/charge')
 
@@ -87,26 +87,8 @@ class SSportalProductRenewHandler(BaseHandler):
             return self.render_error(code=1, msg=u'订单已过期')
         try:
             formdata.order_id = order_id
-            temp_acurl = self.session.get('temp_acurl', '')
-            acip = self.session.get('temp_acip', '')
-            userip = self.session.get('temp_userip', '')
-            nas = self.db.query(models.TrBas).filter_by(ip_addr=acip).first()
-            ac_temp_auth_url = ''
-            if temp_acurl and nas:
-                _user = formdata.account_number
-                _timestemp = str(int(time.time()))
-                _action = 'temp'
-                _userip = base64.b64encode(userip)
-                _acip = base64.b64encode(acip)
-                signstr = _user + _userip + _timestemp + _action + str(nas.bas_secret) + _acip
-                logger.debug('signstr = ' + signstr)
-                _sign = md5(signstr).hexdigest()
-                logger.info('sign = ' + _sign)
-                url_param = 'user={1}&ip={2}&timestemp={3}&action=temp&acip={4}&sign={5}'.format(temp_acurl, _user, _userip, _timestemp, _acip, _sign)
-                ac_temp_auth_url = temp_acurl + '?' + url_param
-            self.render('charge_alipay.html', formdata=formdata, ac_temp_auth_url=ac_temp_auth_url)
+            self.render('charge_alipay.html', formdata=formdata)
         except Exception as err:
-            self.db.rollback()
             logger.exception(err)
             self.render_error(msg=u'订单处理错误，请联系管理员')
 

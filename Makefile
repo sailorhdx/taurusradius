@@ -1,22 +1,22 @@
 install:
-	-groupadd toughee
-	-useradd toughee -g toughee -M -d /var/toughee -s /bin/false
-	-mkdir -p /var/toughee/lib
-	-mkdir -p /var/toughee/data
-	install /opt/toughee/lib/python2.7/site-packages/OpenSSL/libssl.so.1.0.0 /var/toughee/lib/libssl.so.1.0.0
-	install /opt/toughee/lib/python2.7/site-packages/OpenSSL/libcrypto.so.1.0.0 /var/toughee/lib/libcrypto.so.1.0.0
-	install /opt/toughee/lib/python2.7/site-packages/OpenSSL/libssl.so.1.0.0 /var/toughee/lib/libssl.so.10
-	install /opt/toughee/lib/python2.7/site-packages/OpenSSL/libcrypto.so.1.0.0 /var/toughee/lib/libcrypto.so.10
-	install /opt/toughee/lib/libmysqlclient.so.18 /var/toughee/lib/libmysqlclient.so.18
-	install /opt/toughee/lib/libpgm-5.2.so.0 /var/toughee/lib/libpgm-5.2.so.0
-	install /opt/toughee/lib/libzmq.so.3 /var/toughee/lib/libzmq.so.3
-	echo "/var/toughee/lib" >> /etc/ld.so.conf && ldconfig
+	-groupadd taurusradius
+	-useradd taurusradius -g taurusradius -M -d /var/taurusradius -s /bin/false
+	-mkdir -p /var/taurusradius/lib
+	-mkdir -p /var/taurusradius/data
+	install /opt/taurusradius/lib/python2.7/site-packages/OpenSSL/libssl.so.1.0.0 /var/taurusradius/lib/libssl.so.1.0.0
+	install /opt/taurusradius/lib/python2.7/site-packages/OpenSSL/libcrypto.so.1.0.0 /var/taurusradius/lib/libcrypto.so.1.0.0
+	install /opt/taurusradius/lib/python2.7/site-packages/OpenSSL/libssl.so.1.0.0 /var/taurusradius/lib/libssl.so.10
+	install /opt/taurusradius/lib/python2.7/site-packages/OpenSSL/libcrypto.so.1.0.0 /var/taurusradius/lib/libcrypto.so.10
+	install /opt/taurusradius/lib/libmysqlclient.so.18 /var/taurusradius/lib/libmysqlclient.so.18
+	install /opt/taurusradius/lib/libpgm-5.2.so.0 /var/taurusradius/lib/libpgm-5.2.so.0
+	install /opt/taurusradius/lib/libzmq.so.3 /var/taurusradius/lib/libzmq.so.3
+	echo "/var/taurusradius/lib" >> /etc/ld.so.conf && ldconfig
 	install etc/toughee.service /usr/lib/systemd/system/toughee.service
-	install -m 0755 /opt/toughee/bin/toughkey  /usr/local/bin/toughkey
-	install -m 0755 /opt/toughee/radiusctl  /usr/local/bin/radiusctl
-	chown -R toughee /opt/toughee
-	chown -R toughee /var/toughee
-	chmod +x /opt/toughee/radiusctl
+	install -m 0755 /opt/taurusradius/bin/toughkey  /usr/local/bin/toughkey
+	install -m 0755 /opt/taurusradius/radiusctl  /usr/local/bin/radiusctl
+	chown -R taurusradius /opt/taurusradius
+	chown -R taurusradius /var/taurusradius
+	chmod +x /opt/taurusradius/radiusctl
 	systemctl enable toughee && systemctl daemon-reload
 
 upgrade-libs:
@@ -24,15 +24,15 @@ upgrade-libs:
 
 initdb:
 	bin/python radiusctl initdb -f -c etc/toughee.json
-	chown -R toughee /var/toughee
+	chown -R taurusradius /var/taurusradius
 
 updb:
 	bin/python radiusctl updb -c etc/toughee.json
-	chown -R toughee /var/toughee
+	chown -R taurusradius /var/taurusradius
 
 backup:
 	bin/python radiusctl backup -c etc/toughee.json
-	chown -R toughee /var/toughee
+	chown -R taurusradius /var/taurusradius
 
 clean-build:
 	sh release.sh clean

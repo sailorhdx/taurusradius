@@ -17,7 +17,7 @@ from toughradius.modules import models
 from toughradius.common import tools
 from toughradius.modules.dbservice.account_renew import AccountRenew
 from toughradius.modules.settings import order_paycaache_key
-from toughradius.modules.settings import PPMonth, PPTimes, BOMonth, BOTimes, PPFlow, BOFlows, PPMFlows, MAX_EXPIRE_DATE
+from toughradius.modules.settings import PPMonth, BOMonth, BOTimes, BOFlows, MAX_EXPIRE_DATE
 
 @permit.route('/ssportal/product/renew')
 
@@ -45,7 +45,6 @@ class SSportalRenewOrderHandler(alipayment_new.BasicOrderHandler):
         form.account_number.set_value(account_number)
         form.product_id.set_value(product_id)
         form.product_name.set_value(product.product_name)
-        form.months.set_value(product.fee_months)
         self.render('renew_modal_form.html', form=form)
 
     def post(self):
@@ -58,7 +57,7 @@ class SSportalRenewOrderHandler(alipayment_new.BasicOrderHandler):
         if not account:
             return self.render_json(code=1, msg=u'账号不存在')
         try:
-            _feevalue, _expire = self.order_calc(account.product_id, old_expire=account.expire_date)
+            _feevalue, _expire = self.order_calc(account.product_id, old_expire=self.get_expire_date(account.expire_date))
             order_id = utils.gen_order_id()
             formdata = Storage(form.d)
             formdata['order_id'] = order_id
@@ -108,7 +107,6 @@ class SSportalProductRenewHandler(BaseHandler):
             formdata.order_id = order_id
             self.render('renew_alipay.html', formdata=formdata)
         except Exception as err:
-            self.db.rollback()
             logger.exception(err)
             self.render_error(msg=u'订单处理错误，请联系管理员')
 

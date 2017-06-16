@@ -1,7 +1,7 @@
-#!/opt/toughee/bin/python
+#!/opt/taurusradius/bin/python
 # -*- coding: utf-8 -*-
 import os,sys,re,time
-RUNDIR = "/opt/toughee"
+RUNDIR = "/opt/taurusradius"
 if not os.path.exists(RUNDIR):
     RUNDIR = os.path.dirname(__file__)
 sys.path.insert(0,RUNDIR)
@@ -37,7 +37,7 @@ def check_environ(config):
 def setup_logger(config):
     """ 设置 syslog
     """
-    syslog = logger.Logger(config,'toughee')
+    syslog = logger.Logger(config,'taurusxee')
     dispatch.register(syslog)
     log.startLoggingWithObserver(syslog.emit, setStdout=0)
     return syslog
@@ -62,7 +62,7 @@ def print_version(ctx, param, value):
     """
     if not value or ctx.resilient_parsing:
         return
-    click.echo(click.style("Toughee {0}".format(__version__),fg='cyan'))
+    click.echo(click.style("TaurusXee {0}".format(__version__),fg='cyan'))
     ctx.exit()
 
 def print_info(ctx, param, value):
@@ -71,7 +71,7 @@ def print_info(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
     click.echo(click.style("Linux distribution: {0}".format(','.join(pf.linux_distribution())),fg='cyan'))
-    click.echo(click.style("Toughee version: {0}".format(__version__),fg='cyan'))
+    click.echo(click.style("TaurusXee version: {0}".format(__version__),fg='cyan'))
     click.echo(click.style("Env_home: {0}".format(os.environ.get("HOME")),fg='cyan'))
     click.echo(click.style("Env_path: {0}".format(os.environ.get("PATH")),fg='cyan'))
     click.echo(click.style("Server platform: {0},{1}".format(pf.platform(),pf.machine()),fg='cyan'))
@@ -421,7 +421,7 @@ def shell(conf):
 def dbdoc():
     try:
         from toughradius.common import mkdbdoc
-        print "ToughEE 数据字典"
+        print "数据字典"
         print "=====================\n\n"
         for mdl in mkdbdoc.mdls:
             mkdbdoc.print_model(mdl)
@@ -455,7 +455,7 @@ def daemon(conf,signal,nodaemon,debug):
 
 cli.add_command(manage)
 cli.add_command(ssportal)
-#cli.add_command(wlanportal)
+cli.add_command(wlanportal)
 #cli.add_command(acsim)
 #cli.add_command(mpd)
 cli.add_command(task)

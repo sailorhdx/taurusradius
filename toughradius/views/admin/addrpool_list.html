@@ -52,11 +52,11 @@
                                 <td>${pool.next_pool}</td>
                                 <td>
                                     % if permit.match(current_user.username,'/admin/addrpool/update'):
-                                    <a class="opt-btn btn-default" href="/admin/addrpool/update?pool_id=${pool.id}">
+                                    <a class="btn btn-xs" href="/admin/addrpool/update?pool_id=${pool.id}">
                                     <i class="fa fa-edit"></i> 修改</a>
                                     % endif
                                     % if permit.match(current_user.username,'/admin/addrpool/delete'):
-                                    <a class="opt-btn btn-default" href="javascript:deletePool('${pool.id}')">
+                                    <a class="btn btn-xs" href="javascript:deletePool('${pool.id}')">
                                     <i class="fa fa-times"></i> 删除</a>
                                     % endif
                                 </td>

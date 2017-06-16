@@ -30,9 +30,9 @@ class HttpServer(cyclone.web.Application):
 
     def __init__(self, config = None, dbengine = None, **kwargs):
         self.config = config
-        os.environ['LICENSE_TYPE'] = 'stoughee'
+        os.environ['LICENSE_TYPE'] = 'taurusxee'
         settings = dict(cookie_secret='12oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=', login_url='/ssportal/login', template_path=os.path.join(os.path.dirname(toughradius.__file__), 'views'), static_path=os.path.join(os.path.dirname(toughradius.__file__), 'static'), xsrf_cookies=True, config=self.config, debug=self.config.system.debug, xheaders=True)
-        self.tp_lookup = TemplateLookup(directories=[settings['template_path']], default_filters=['decode.utf8', 'h'], input_encoding='utf-8', output_encoding='utf-8', encoding_errors='ignore', module_directory='/var/toughee/free_module_ssportal')
+        self.tp_lookup = TemplateLookup(directories=[settings['template_path']], default_filters=['decode.utf8', 'h'], input_encoding='utf-8', output_encoding='utf-8', encoding_errors='ignore', module_directory='/var/taurusradius/free_module_ssportal')
         self.db_engine = dbengine or get_engine(config)
         self.db = scoped_session(sessionmaker(bind=self.db_engine, autocommit=False, autoflush=False))
         redisconf = redis_conf(config)

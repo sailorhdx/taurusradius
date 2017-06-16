@@ -40,8 +40,6 @@ class SSportalProductHandler(BaseHandler):
          BOFlows,
          BOTimes,
          PPMonth,
-         PPTimes,
-         PPFlow,
          PPDay,
          BODay]
         products = self.db.query(models.TrProduct).filter(models.TrProduct.product_policy.in_(types), models.TrProduct.ispub == 1)
@@ -59,16 +57,12 @@ class BasicOrderHandler(BaseHandler):
         account_number = '%s%s' % (rule.user_prefix, string.rjust(str(rule.user_sn), rule.user_suffix_len, '0'))
         return account_number
 
-    def order_calc(self, product_id, old_expire = None, charge_fee = 100):
+    def order_calc(self, product_id, old_expire = None):
         months = int(self.get_argument('months', 0))
         days = int(self.get_argument('days', 0))
         product = self.db.query(models.TrProduct).get(product_id)
-        self_recharge_minfee = utils.yuan2fen(self.get_param_value('self_recharge_minfee', 100))
         fee_value, expire_date = (None, None)
-        if product.product_policy in (PPTimes, PPFlow):
-            fee_value = charge_fee or self_recharge_minfee
-            expire_date = MAX_EXPIRE_DATE
-        elif product.product_policy in (BOTimes, BOFlows):
+        if product.product_policy in (BOTimes, BOFlows):
             fee_value = utils.fen2yuan(product.fee_price)
             expire_date = MAX_EXPIRE_DATE
         elif product.product_policy == PPMonth:
@@ -124,10 +118,6 @@ class BasicOrderHandler(BaseHandler):
                 fee_value = utils.fen2yuan(product.fee_price)
                 expire_date = start_expire + datetime.timedelta(days=product.fee_days)
                 expire_date = expire_date.strftime('%Y-%m-%d')
-        elif product.product_policy == PPMFlows:
-            fee = decimal.Decimal(months) * decimal.Decimal(product.fee_price)
-            fee_value = utils.fen2yuan(int(fee.to_integral_value()))
-            expire_date = MAX_EXPIRE_DATE
         return (fee_value, expire_date)
 
 
@@ -165,16 +155,14 @@ class SSportalProductOrderHandler(BasicOrderHandler):
             form = order_forms.smsvcode_form(product_id, '')
             self.render('order_smsvcode_form.html', form=form)
             return
-        is_idcard = int(self.get_param_value('ssportal_idcard_required', 0))
-        is_address = int(self.get_param_value('ssportal_address_required', 0))
-        is_month = product.product_policy in (PPMonth, PPMFlows)
         account_number = account_number or self.gen_account_number()
-        form = order_forms.order_form(is_month=is_month, is_idcard=is_idcard, is_address=is_address)
+        form = order_forms.order_form(product.product_policy)
         form.product_id.set_value(product_id)
         form.product_name.set_value(product.product_name)
         form.months.set_value(product.fee_months)
+        form.days.set_value(product.fee_days)
         form.account_number.set_value(account_number)
-        self.render('neworder_form.html', form=form, is_idcard=is_idcard)
+        self.render('neworder_form.html', form=form)
 
     def do_vcard(self, form, product):
         vcard_code = form.d.vcard_code
@@ -210,11 +198,8 @@ class SSportalProductOrderHandler(BasicOrderHandler):
             product_id = self.get_argument('product_id', '')
             product = self.db.query(models.TrProduct).get(product_id)
             if not product:
-                return self.render('neworder_form.html', product=product, msg=u'套餐不存在')
-            is_idcard = int(self.get_param_value('ssportal_idcard_required', 0))
-            is_address = int(self.get_param_value('ssportal_address_required', 0))
-            is_month = product.product_policy in (PPMonth, PPMFlows)
-            form = order_forms.order_form(is_month=is_month, is_idcard=is_idcard, is_address=is_address)
+                return self.render('neworder_form.html', form=form, msg=u'套餐不存在')
+            form = order_forms.order_form(product.product_policy)
             if not form.validates(source=self.get_params()):
                 return self.render('neworder_form.html', form=form, msg=form.errors)
             account_count = self.db.query(models.TrCustomer).filter_by(email=form.d.email).count()
@@ -222,7 +207,7 @@ class SSportalProductOrderHandler(BasicOrderHandler):
                 return self.render('neworder_form.html', form=form, msg=u'电子邮件已经存在')
             if form.d.vcard_code and form.d.vcard_pwd:
                 return self.do_vcard(form, product)
-            _feevalue, _expire = self.order_calc(form.d.product_id, charge_fee=utils.fen2yuan(product.fee_price))
+            _feevalue, _expire = self.order_calc(form.d.product_id)
             order_id = utils.gen_order_id()
             formdata = Storage(form.d)
             formdata.order_id = order_id
@@ -255,53 +240,6 @@ class SSportalProductOrderHandler(BaseHandler):
         formdata = self.paycache.get(order_paycaache_key(order_id))
         product_name = self.db.query(models.TrProduct.product_name).filter_by(id=formdata.product_id).scalar()
         self.redirect(self.alipay.create_direct_pay_by_user(order_id, product_name, product_name, formdata.fee_value, notify_path='/ssportal/alipay/verify/new', return_path='/ssportal/alipay/verify/new'))
-
-
-@permit.suproute('/ssportal/idcard/upload/(\w+)')
-
-class ParamUploadHandler(BaseHandler):
-
-    def post(self, username):
-        try:
-            f = self.request.files['Filedata'][0]
-            filename = os.path.basename(f['filename'])
-            fsname = self.get_argument('fsname')
-            savename = '{0}.{1}.{2}'.format(username, fsname, filename)
-            if fsname not in ('IDCARD1', 'IDCARD2'):
-                self.write(u'文件名错误')
-                return
-            default_dir = '/var/toughee/userfs'
-            if not os.path.exists(default_dir):
-                os.makedirs(default_dir)
-            save_path = os.path.join(self.settings.config.admin.get('userfs', default_dir), savename)
-            tf = open(save_path, 'wb')
-            tf.write(f['body'])
-            tf.close()
-            if not safefile.isimg(save_path):
-                os.remove(save_path)
-                logger.error('error upload file %s' % save_path)
-                self.write(u'上传的文件不是图片类型')
-                return
-            attr = self.db.query(models.TrAccountAttr).filter_by(account_number=username, attr_name='fsname').first()
-            if not attr:
-                attr = models.TrAccountAttr()
-                attr.id = tools.gen_num_id(16)
-                attr.account_number = username
-                attr.attr_type = 0
-                attr.attr_name = fsname
-                attr.attr_value = save_path
-                attr.attr_desc = u'用户身份证图片-%s' % fsname
-                attr.sync_ver = tools.gen_sync_ver()
-                self.db.add(attr)
-            else:
-                attr.attr_value = save_path
-                attr.sync_ver = tools.gen_sync_ver()
-            self.db.commit()
-            logger.info('write {0}'.format(save_path))
-            self.write(u'upload ok')
-        except Exception as err:
-            logger.error(err)
-            self.write(u'上传失败 %s' % utils.safeunicode(err))
 
 
 @permit.route('/ssportal/sms/sendvcode')

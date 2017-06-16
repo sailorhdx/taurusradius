@@ -26,20 +26,20 @@ function doUnlock(nas_addr,session_id){
    <div class="collapse navbar-collapse">
     <ul class="nav navbar-nav nav-pills">
       <li><a href="#">在线状态</a></li>
-    </ul>
+    </ul>      
   </div>
 </nav>
 
- <div class="container-fluid">
+ <div class="container-fluid">       
 
     <div class="panel panel-default">
         <div class="panel-body">
-            % if onlines and onlines.count() > 0:
+            % if onlines and onlines.count() > 0:            
             <div class="row itlist">
                 % for online in onlines:
                     <div class="col-md-6 itbox">IP地址 ${online.framed_ipaddr} 上线时间 ${online.acct_start_time}
-                    % if handler.get_param_value('ssportal_allow_online_unlock','0') == '1':
-                    <a href="javascript:doUnlock('${online.nas_addr}','${online.acct_session_id}');">下线</a>
+                    % if handler.get_param_value('ssportal_allow_online_unlock','0') == '1':  
+                    <a href="javascript:doUnlock('${online.nas_addr}','${online.acct_session_id}');">下线</a> 
                     % endif
                     </div>
                 % endfor
@@ -50,6 +50,6 @@ function doUnlock(nas_addr,session_id){
         </div>
     </div>
 
-
+    
 </div>
 </%def>

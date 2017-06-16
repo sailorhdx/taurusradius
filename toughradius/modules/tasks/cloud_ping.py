@@ -43,7 +43,7 @@ class ToughCloudPingTask(TaseBasic):
         try:
             api_url = 'http://www.toughcloud.net/api/v1/ping'
             api_token = yield tools.get_sys_token()
-            params = dict(token=api_token, app='toughee', ver=__version__, release=os.environ.get('LICENSE_TYPE', 'toughee'), unum=user_total, onum=online_total, dist=pf.linux_distribution())
+            params = dict(token=api_token, app='toughee', ver=__version__, release=os.environ.get('LICENSE_TYPE', 'taurusxee'), unum=user_total, onum=online_total, dist=pf.linux_distribution())
             param_str = urlencode(params)
             resp = yield httpclient.fetch(api_url + '?' + param_str, followRedirect=True)
             logger.info('toughcloud ping resp code: %s' % resp.code)

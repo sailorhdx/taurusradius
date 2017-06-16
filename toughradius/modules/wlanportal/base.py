@@ -100,16 +100,13 @@ class BaseHandler(cyclone.web.RequestHandler):
         self.clear_all_cookies()
 
     def set_remerber_user(self, user, pwd):
-        user_skey = md5('toughee_wlan_user').hexdigest()
-        pwd_skey = md5('toughee_wlan_pwd').hexdigest()
-        self.set_secure_cookie(user_skey, user, expires_days=31)
-        self.set_secure_cookie(pwd_skey, pwd, expires_days=31)
+        self.session['toughee_wlan_user'] = user
+        self.session['toughee_wlan_pwd'] = pwd
+        self.session.save()
 
     def get_remember_user(self):
-        user_skey = md5('toughee_wlan_user').hexdigest()
-        pwd_skey = md5('toughee_wlan_pwd').hexdigest()
-        user = self.get_secure_cookie(user_skey)
-        pwd = self.get_secure_cookie(pwd_skey)
+        user = self.session.get('toughee_wlan_user')
+        pwd = self.session.get('toughee_wlan_pwd')
         return (user, pwd)
 
     def get_current_user(self):
@@ -122,7 +119,7 @@ class BaseHandler(cyclone.web.RequestHandler):
         return param_dict
 
     def get_portal_name(self):
-        return self.get_param_value('wlan_portal_name', u'硬派无线认证')
+        return self.get_param_value('wlan_portal_name', u'无线认证')
 
     def get_login_template(self, tpl_name = None):
         if tpl_name:
